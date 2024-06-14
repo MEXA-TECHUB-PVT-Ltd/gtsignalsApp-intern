@@ -8,6 +8,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import Home from './app/src/screens/Home';
 import Brokers from './app/src/screens/Brokers';
 import Account from './app/src/screens/Account';
+import SignUp from './app/src/screens/SignUp';
 import ForgetPassword from './app/src/screens/ForgetPassword';
 import Images from './app/src/consts/images';
 
@@ -15,6 +16,7 @@ import Images from './app/src/consts/images';
 import Background from './app/src/components/Background';
 import CustomButton from './app/src/components/CustomButton';
 import CustomTextInput from './app/src/components/CustomTextInput';
+import Onboarding from './app/src/screens/Onboarding';
 
 
 const Stack = createStackNavigator();
@@ -135,10 +137,11 @@ const TabNavigator = ({ navigation }) => (
 
 const MainStack = () => (
   <Stack.Navigator>
-    {/* <Stack.Screen name="Background" component={Background} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="CustomButton" component={CustomButton} options={{ headerShown: false }} /> */}
-    <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
-    <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
+    <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+    {/* <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} /> */}
+
+    {/* <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} /> */}
 
   </Stack.Navigator>
 );
