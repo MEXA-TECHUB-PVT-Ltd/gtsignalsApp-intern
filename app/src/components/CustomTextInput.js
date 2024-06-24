@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, TextInput, View, Pressable } from 'react-native';
-import { MaterialIcons } from 'react-native-paper';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const CustomTextInput = ({
-    containerStyle,
-    inputStyle,
     leftIcon,
-    leftIconSize,
-    leftIconColor,
-    rightIcon,
-    rightIconSize,
-    rightIconColor,
-    placeholder,
-    placeholderTextColor,
+    leftIconSize = 24,
+    leftIconColor = '#000',
+    rightIcon = 'visibility',
+    rightIconSize = 24,
+    rightIconColor = '#000',
+    placeholder = '',
+    placeholderTextColor = '#ADADAD',
     value,
     onChangeText,
-    secureTextEntry,
-    keyboardType,
-    autoCapitalize,
+    secureTextEntry = false,
+    keyboardType = 'default',
+    autoCapitalize = 'none',
     maxLength,
-    multiline,
+    multiline = false,
     onRightIconPress,
 }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
+    const textInputRef = useRef(null);
 
     const handleTogglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
@@ -32,17 +32,18 @@ const CustomTextInput = ({
     };
 
     return (
-        <View style={[styles.container, containerStyle]}>
+        <View style={styles.container}>
             {leftIcon && (
                 <MaterialIcons
                     name={leftIcon}
                     size={leftIconSize}
                     color={leftIconColor}
-                    style={styles.leftIcon}
+                    style={styles.leftIconStyle}
                 />
             )}
             <TextInput
-                style={[styles.input, inputStyle]}
+                ref={textInputRef}
+                style={styles.input}
                 placeholder={placeholder}
                 placeholderTextColor={placeholderTextColor}
                 value={value}
@@ -52,14 +53,16 @@ const CustomTextInput = ({
                 autoCapitalize={autoCapitalize}
                 maxLength={maxLength}
                 multiline={multiline}
+                // onFocus={() => console.log('Input Focused')}
+                // onBlur={() => console.log('Input Blurred')}
             />
-            {rightIcon && (
+            {rightIcon && secureTextEntry && (
                 <Pressable onPress={handleTogglePasswordVisibility}>
                     <MaterialIcons
                         name={isPasswordVisible ? 'visibility' : 'visibility-off'}
                         size={rightIconSize}
                         color={rightIconColor}
-                        style={styles.rightIcon}
+                        style={styles.rightIconStyle}
                     />
                 </Pressable>
             )}
@@ -72,19 +75,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 5,
-        padding: 10,
-    },
-    leftIcon: {
-        marginRight: 10,
-    },
-    rightIcon: {
-        marginLeft: 10,
+        borderColor: '#ADADAD',
+        borderRadius: 12,
+        paddingHorizontal: 10,
     },
     input: {
+        height: hp('6%'),
         flex: 1,
-        fontSize: 16,
+    },
+    leftIconStyle: {
+        marginRight: 10,
+    },
+    rightIconStyle: {
+        marginLeft: 10,
     },
 });
 

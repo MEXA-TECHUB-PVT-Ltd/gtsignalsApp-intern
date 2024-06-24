@@ -3,20 +3,12 @@ import { StyleSheet, View, Image } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Images from '../consts/images';
 
-const Background = ({ children }) => {
+const OnboardingBack = ({ children }) => {
     return (
         <View style={styles.container}>
             <Image
-                source={Images.topleftimage}
+                source={Images.Onboardingback}
                 style={styles.topLeftImage}
-            />
-            <Image
-                source={Images.bottomleftimage}
-                style={styles.bottomLeftImage}
-            />
-            <Image
-                source={Images.bottomrightimage}
-                style={styles.bottomRightImage}
             />
             {children}
         </View>
@@ -33,7 +25,7 @@ const styles = StyleSheet.create({
     topLeftImage: {
         position: 'absolute',
         width: wp('100%'),
-        height: hp('43%'),
+        height: hp('86%'),
         resizeMode: 'contain',
     },
     bottomLeftImage: {
@@ -54,4 +46,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Background;
+export default OnboardingBack;
