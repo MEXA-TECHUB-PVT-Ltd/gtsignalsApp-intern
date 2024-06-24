@@ -1,5 +1,3 @@
-import Onboarding from '../screens/Onboarding';
-
 const Images = {
     home: require('../assets/images/home.png'),
     brokers: require('../assets/images/brokers.png'),
@@ -12,6 +10,10 @@ const Images = {
     googleimage: require('../assets/images/googleimage.png'),
     Onboardingback: require('../assets/images/onboardingback.png'),
     Onboardingcards: require('../assets/images/cards.png'),
+    textbg: require('../assets/images/textbg.png'),
+    popupicon: require('../assets/images/popupicon.png'),
+    appleicon: require('../assets/images/appleicon.png'),
+
 
 
 };

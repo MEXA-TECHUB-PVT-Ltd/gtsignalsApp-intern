@@ -9,7 +9,11 @@ import Home from './app/src/screens/Home';
 import Brokers from './app/src/screens/Brokers';
 import Account from './app/src/screens/Account';
 import SignUp from './app/src/screens/SignUp';
+import CreateProfile from './app/src/screens/CreateProfile';
+import SignIn from './app/src/screens/SignIn';
 import ForgetPassword from './app/src/screens/ForgetPassword';
+import OTP from './app/src/screens/OTP';
+import ResetPassword from './app/src/screens/ResetPassword';
 import Images from './app/src/consts/images';
 
 //components
@@ -17,6 +21,8 @@ import Background from './app/src/components/Background';
 import CustomButton from './app/src/components/CustomButton';
 import CustomTextInput from './app/src/components/CustomTextInput';
 import Onboarding from './app/src/screens/Onboarding';
+import Alert from './app/src/components/Alert';
+import Header from './app/src/components/Header';
 
 
 const Stack = createStackNavigator();
@@ -106,7 +112,7 @@ const TabNavigator = ({ navigation }) => (
           backgroundColor: '#fff',
           height: 75,
         },
-        tabBarIcon: ({ focused, color}) => (
+        tabBarIcon: ({ focused, color }) => (
           <View style={{ alignItems: 'center' }}>
             <Image
               source={Images.brokers}
@@ -137,10 +143,20 @@ const TabNavigator = ({ navigation }) => (
 
 const MainStack = () => (
   <Stack.Navigator>
-    <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+    {/* <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} /> */}
+    <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
+
+    {/* <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} /> */}
+
     {/* <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} /> */}
 
     {/* <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} /> */}
+
+    {/* <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
+
     {/* <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} /> */}
 
   </Stack.Navigator>
