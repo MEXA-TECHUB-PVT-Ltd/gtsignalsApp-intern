@@ -13,6 +13,7 @@ const CustomTextInput = ({
     placeholder = '',
     placeholderTextColor = '#ADADAD',
     value,
+    color,
     onChangeText,
     secureTextEntry = false,
     keyboardType = 'default',
@@ -47,6 +48,7 @@ const CustomTextInput = ({
                 placeholder={placeholder}
                 placeholderTextColor={placeholderTextColor}
                 value={value}
+                color={color}
                 onChangeText={onChangeText}
                 secureTextEntry={!isPasswordVisible && secureTextEntry}
                 keyboardType={keyboardType}

@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, Pressable, Image} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { StyleSheet, Text, Pressable, Image, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
@@ -31,71 +30,65 @@ const CustomButton = ({
     flexDirection,
     justifyContent,
     alignItems,
-    opacityOnPress
+    opacityOnPress,
+    endIcon,
+    endIconBgColor,
+    endIconBorderRadius,
+    endIconSize,
+    endIconColor,
+    endIconContainerStyle,
+    
 }) => {
     return (
-        // <View style={styles.container}>
-            <Pressable
-                onPress={onPress}
-                style={({ pressed }) => [
-                    // styles.button_container,
-                    buttonStyle,
-                    {
-                        width: width,
-                        height: height,
-                        backgroundColor: bgColor,
-                        borderColor: borderColor,
-                        borderWidth: borderWidth,
-                        borderRadius: borderRadius,
-                        padding: padding,
-                        paddingLeft: paddingLeft,
-                        paddingRight: paddingRight,
-                        margin: margin,
-                        marginVertical: marginVertical,
-                        flex: flex,
-                        flexDirection: flexDirection,
-                        justifyContent: justifyContent,
-                        alignItems: alignItems,
-                    },
-                    mode && {
-                        backgroundColor: 'transparent',
-                        borderColor: borderColor,
-                        borderWidth: borderWidth || 2,
-                    },
-                    pressed && { opacity: opacityOnPress || 0.5 },
-                ]}>
-            {image ? (
-                <Image source={image} style={[{ width: iconSize, height: iconSize }, imageStyle]} />
-            ) : (
-                icon && (
-                    <MaterialIcons name={icon} size={iconSize} color={iconColor} />
-                )
-            )}
+        <Pressable
+            onPress={onPress}
+            style={({ pressed }) => [
+                buttonStyle,
+                {
+                    width: width,
+                    height: height,
+                    backgroundColor: bgColor,
+                    borderColor: borderColor,
+                    borderWidth: borderWidth,
+                    borderRadius: borderRadius,
+                    padding: padding,
+                    paddingLeft: paddingLeft,
+                    paddingRight: paddingRight,
+                    margin: margin,
+                    marginVertical: marginVertical,
+                    flex: flex,
+                    flexDirection: flexDirection,
+                    justifyContent: justifyContent,
+                    alignItems: alignItems,
+                },
+                mode && {
+                    backgroundColor: 'transparent',
+                    borderColor: borderColor,
+                    borderWidth: borderWidth || 2,
+                },
+                pressed && { opacity: opacityOnPress || 0.5 },
+            ]}>
+            <View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+                {image ? (
+                    <Image source={image} style={[{ width: iconSize, height: iconSize }, imageStyle]} />
+                ) : (
+                    icon && (
+                        <MaterialIcons name={icon} size={iconSize} color={iconColor} />
+                    )
+                )}
                 {children && (
-                    <Text style={[styles.text, textStyle, { color: txtColor }]}>
+                    <Text style={[{ flex: 1, textAlign: 'center' }, textStyle, { color: txtColor }]}>
                         {children}
                     </Text>
                 )}
-            </Pressable>
-
-        // </View>
+                {endIcon && (
+                    <View style={[{ backgroundColor: endIconBgColor, borderRadius: endIconBorderRadius }, endIconContainerStyle]}>
+                        <MaterialIcons name={endIcon} size={endIconSize} color={endIconColor} />
+                    </View>
+                )}
+            </View>
+        </Pressable>
     );
 };
-
-const styles = StyleSheet.create({
-    // container: {
-    //     flexDirection: 'row',
-    //     alignItems: 'center',
-    //     justifyContent: 'center',
-    //     flexDirection: 'row',
-    //     backgroundColor: 'green'
-    // },
-    // button_container: {
-    //     // flex: 1,
-    //     flexDirection: 'row',
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    // },
-});
 
 export default CustomButton;
