@@ -1,10 +1,14 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View, Image } from 'react-native'
 import React from 'react';
 import 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+
+//screens
 import Home from './app/src/screens/Home';
 import Brokers from './app/src/screens/Brokers';
 import Account from './app/src/screens/Account';
@@ -15,6 +19,9 @@ import ForgetPassword from './app/src/screens/ForgetPassword';
 import OTP from './app/src/screens/OTP';
 import ResetPassword from './app/src/screens/ResetPassword';
 import Images from './app/src/consts/images';
+import UploadPhoto from './app/src/screens/UploadPhoto';
+import SignalCard from './app/src/components/SignalCard';
+import BrokersCard from './app/src/components/BrokersCard';
 
 //components
 import Background from './app/src/components/Background';
@@ -23,6 +30,7 @@ import CustomTextInput from './app/src/components/CustomTextInput';
 import Onboarding from './app/src/screens/Onboarding';
 import Alert from './app/src/components/Alert';
 import Header from './app/src/components/Header';
+import Modal from './app/src/components/Modal';
 
 
 const Stack = createStackNavigator();
@@ -143,34 +151,43 @@ const TabNavigator = ({ navigation }) => (
 
 const MainStack = () => (
   <Stack.Navigator>
-    {/* <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
+
+    <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
+    <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} />
+    <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
     <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
+    <Stack.Screen name="UploadPhoto" component={UploadPhoto} options={{ headerShown: false }} />
 
-    {/* <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} /> */}
-
-    {/* <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} /> */}
-
-    {/* <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} /> */}
-
-    {/* <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
-
-    {/* <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} /> */}
+    <Stack.Screen name="Modal" component={Modal} options={{ headerShown: false }} />
+    <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
+    <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} />
+    <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
+    <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} />
+    <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} />
+    <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
 
   </Stack.Navigator>
 );
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <MainStack />
-    </NavigationContainer>
-
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+        <NavigationContainer>
+          <MainStack />
+        </NavigationContainer>
+      </SafeAreaView>
+    </SafeAreaProvider>
   )
 }
 
 export default App;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    // backgroundColor: '#fff',
+  },
+})

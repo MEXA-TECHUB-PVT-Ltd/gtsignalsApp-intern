@@ -13,8 +13,9 @@ const Images = {
     textbg: require('../assets/images/textbg.png'),
     popupicon: require('../assets/images/popupicon.png'),
     appleicon: require('../assets/images/appleicon.png'),
-
-
+    profileicon: require('../assets/images/profileicon.png'),
+    brokersheaderimage: require('../assets/images/brokersheaderimage.png'),
+    brokerschaticon: require('../assets/images/brokerschaticon.png'),
 
 };
 

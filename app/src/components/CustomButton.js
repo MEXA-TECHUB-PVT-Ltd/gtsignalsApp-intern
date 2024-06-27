@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, Pressable, Image, View } from 'react-native';
+import { StyleSheet, Text, Pressable, Image, View, ActivityIndicator } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import IIcon from 'react-native-vector-icons/Ionicons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const CustomButton = ({
@@ -37,11 +38,16 @@ const CustomButton = ({
     endIconSize,
     endIconColor,
     endIconContainerStyle,
-    
+    isLoading,
+    loaderColor,
+    buttonKey,
+    currentLoadingKey,
 }) => {
+    const isCurrentLoading = isLoading && currentLoadingKey === buttonKey;
+
     return (
         <Pressable
-            onPress={onPress}
+            onPress={!isCurrentLoading ? onPress : null}
             style={({ pressed }) => [
                 buttonStyle,
                 {
@@ -69,22 +75,28 @@ const CustomButton = ({
                 pressed && { opacity: opacityOnPress || 0.5 },
             ]}>
             <View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
-                {image ? (
-                    <Image source={image} style={[{ width: iconSize, height: iconSize }, imageStyle]} />
+                {isCurrentLoading ? (
+                    <ActivityIndicator size="small" color={loaderColor || "#E3B12F"} />
                 ) : (
-                    icon && (
-                        <MaterialIcons name={icon} size={iconSize} color={iconColor} />
-                    )
-                )}
-                {children && (
-                    <Text style={[{ flex: 1, textAlign: 'center' }, textStyle, { color: txtColor }]}>
-                        {children}
-                    </Text>
-                )}
-                {endIcon && (
-                    <View style={[{ backgroundColor: endIconBgColor, borderRadius: endIconBorderRadius }, endIconContainerStyle]}>
-                        <MaterialIcons name={endIcon} size={endIconSize} color={endIconColor} />
-                    </View>
+                    <>
+                        {image ? (
+                            <Image source={image} style={[{ width: iconSize, height: iconSize }, imageStyle]} />
+                        ) : (
+                            icon && (
+                                <IIcon name={icon} size={iconSize} color={iconColor} />
+                            )
+                        )}
+                        {children && (
+                            <Text style={[{ flex: 1, textAlign: 'center' }, textStyle, { color: txtColor }]}>
+                                {children}
+                            </Text>
+                        )}
+                        {endIcon && (
+                            <View style={[{ backgroundColor: endIconBgColor, borderRadius: endIconBorderRadius }, endIconContainerStyle]}>
+                                <MaterialIcons name={endIcon} size={endIconSize} color={endIconColor} />
+                            </View>
+                        )}
+                    </>
                 )}
             </View>
         </Pressable>
