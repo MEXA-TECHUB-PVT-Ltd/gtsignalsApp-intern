@@ -129,7 +129,7 @@ const SignIn = ({navigation}) => {
                             <View style={styles.fg_text_view}>
                                 <Text
                                     onPress={() => navigation.navigate('ForgetPassword')}
-                                    style={styles.fg_text}>Forget Password?</Text>
+                                    style={styles.fg_text}>Forgot Password?</Text>
                             </View>
 
                             <View style={styles.create_button_view}>

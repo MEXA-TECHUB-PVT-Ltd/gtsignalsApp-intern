@@ -16,6 +16,8 @@ const Images = {
     profileicon: require('../assets/images/profileicon.png'),
     brokersheaderimage: require('../assets/images/brokersheaderimage.png'),
     brokerschaticon: require('../assets/images/brokerschaticon.png'),
+    emptychaticon: require('../assets/images/emptychaticon.png'),
+
 
 };
 

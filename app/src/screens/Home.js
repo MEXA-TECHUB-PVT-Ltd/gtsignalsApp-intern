@@ -1,29 +1,41 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { StyleSheet, Text, View, ImageBackground, StatusBar } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SlIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Images from '../consts/images';
 import SignalCard from '../components/SignalCard';
+import { ScrollView } from 'react-native-gesture-handler';
+import AlertComponent from '../components/Alert';
 
 const Home = ({ navigation }) => {
+  const buttonType = 'buy';
+
+ 
  
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="transparent" translucent={true} barStyle="light-content" />
-      <ImageBackground source={Images.brokersheaderimage} style={styles.header}>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerText}>GT-Signals</Text>
-          <View style={styles.iconsContainer}>
-            <Ionicons name="search-outline" size={25} color="white" style={styles.icon} />
-            <SlIcons name="bell" size={25} color="white" style={styles.icon} />
+      <View style={styles.header_view}>
+        <ImageBackground source={Images.brokersheaderimage} style={styles.header_image}>
+          <View style={styles.headerContent_view}>
+            <Text style={styles.headerText}>GT-Signals</Text>
+            <View style={styles.iconsContainer}>
+              <Ionicons name="search-outline" size={25} color="white" style={styles.icon} />
+              <SlIcons name="bell" size={25} color="white" style={styles.icon} />
+            </View>
           </View>
-        </View>
-        <View style={styles.cards_view}>
+        </ImageBackground>
+      </View>
+      <View style={styles.main_view}>
+        <ScrollView style={styles.cards_view}>
+          <SignalCard buttonType={buttonType} />
           <SignalCard />
-
-        </View>
-      </ImageBackground>
+          <SignalCard />
+          <SignalCard buttonType={buttonType} />
+          <SignalCard />
+        </ScrollView>
+      </View>
     </View>
   )
 }
@@ -35,15 +47,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
+  header_view: {
     width: wp('100%'),
-    height: hp('20%'),
-    justifyContent: 'flex-end',
+    height: hp('16%'),
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  headerContent: {
-    backgroundColor: 'transparent',
+  header_image: {
+    width: wp('100%'),
+    height: hp('16%'),
+    resizeMode: 'contain',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
     padding: 20,
+    
+  },
+  headerContent_view: {
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -60,10 +81,14 @@ const styles = StyleSheet.create({
   icon: {
     marginLeft: 15,
   },
+  main_view: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    alignItems: 'center', 
+  },
   cards_view: {
-    justifyContent:'center',
-    alignItems: 'center',
-    width: wp('88%'),
-    // marginVertical: 30,
+    // width: wp('88%'),
+    backgroundColor: 'transparent',
+    marginTop: 16,
   },
 });

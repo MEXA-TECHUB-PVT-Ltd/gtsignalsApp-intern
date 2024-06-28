@@ -53,19 +53,19 @@ export default BrokersCard
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
-        top: hp('2%'),
-        left: '50%',
-        transform: [{ translateX: -wp('45%') }],
+        // position: 'absolute',
+        // top: hp('2%'),
+        // left: '50%',
+        // transform: [{ translateX: -wp('45%') }],
+        // zIndex: 1000,
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
         backgroundColor: 'transparent',
 
     },
     card_view: {
-        width: wp('90%'),
-        height: hp('18%'),
+        width: wp('88%'),
+        height: hp('15.5%'),
         resizeMode: 'contain',
         backgroundColor: '#FFFFFF',
         borderRadius: 11,
@@ -73,7 +73,8 @@ const styles = StyleSheet.create({
         borderColor: '#949494',
         overflow: 'hidden',
         padding: 10,
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginBottom: 10,
     },
     card_view1: {
         flexDirection: 'row',
@@ -95,8 +96,8 @@ const styles = StyleSheet.create({
         // marginVertical: 32,
     },
     profile_image_round_view: {
-        width: wp('15%'),
-        height: hp('7.5%'),
+        width: wp('14%'),
+        height: hp('7%'),
         borderRadius: 100,
         borderWidth: 1,
         borderColor: 'gray',
@@ -107,8 +108,8 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     profile_image_round_view_no_border: {
-        width: wp('30%'),
-        height: hp('15%'),
+        width: wp('15%'),
+        height: hp('7.5%'),
         borderRadius: 100,
         borderWidth: 0, // No border when the image is set
         backgroundColor: 'transparent',
@@ -136,15 +137,14 @@ const styles = StyleSheet.create({
         justifyContent:'center',
         alignItems: 'center',
         width: wp('12%'),
-        height: hp('4%'),
+        height: hp('3.5%'),
         resizeMode: 'contain',
     },
     currency_text: {
-        fontSize: 20,
+        fontSize: 19,
         fontWeight: '600',
         color: '#333333',
         lineHeight: 23,
-        paddingRight: 5,
     },
     price_text: {
         fontSize: 19,

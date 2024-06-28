@@ -1,20 +1,29 @@
-import { StyleSheet, Text, View, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, StatusBar,ScrollView } from 'react-native';
 import React, {useEffect} from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-
+import SignalCard from '../components/SignalCard';
+import BrokersCard from '../components/BrokersCard';
 
 const Brokers = () => {
-  useEffect(() => {
-    StatusBar.setBarStyle('dark-content');
-    // StatusBar.setBackgroundColor('white');
-  }, []);
+
   return (
     <View style={styles.container}>
-      {/* <StatusBar barStyle="dark-content" /> */}
-
+      <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>Brokers</Text>
       </View>
+
+      <View style={styles.main_view}>
+        <ScrollView style={styles.cards_view}>
+          <BrokersCard />
+          <BrokersCard />
+          <BrokersCard />
+          <BrokersCard />
+          <BrokersCard />
+          
+        </ScrollView>
+      </View>
+
     </View>
   );
 };
@@ -27,11 +36,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   headerContainer: {
-    height: hp('8%'),
-    marginVertical: 40,
+    height: hp('6.5%'),
+    marginTop: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     
   },
   headerText: {
@@ -39,7 +48,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '500',
     lineHeight: 28,
-    letterSpacing: 3,
+    letterSpacing: 1,
     textAlign: 'center',
+  },
+  main_view: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+  },
+  cards_view: {
+    // width: wp('88%'),
+    backgroundColor: 'transparent',
+    marginTop: 12,
   },
 });
