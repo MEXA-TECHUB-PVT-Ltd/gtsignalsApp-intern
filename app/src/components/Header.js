@@ -4,17 +4,16 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import Images from '../consts/images';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const Header = ({headerText}) => {
+const Header = ({navigation, headerText, onPress}) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerText}>{headerText}</Text>
             </View>
-            <TouchableOpacity style={styles.overlay}>
+            <TouchableOpacity 
+            onPress={onPress}
+            style={styles.overlay}>
                 <Icon name="arrow-back-ios" size={22} color="#333333" />
-                {/* <View style={styles.overlay}>
-                    
-                </View> */}
             </TouchableOpacity>
           
         </View>

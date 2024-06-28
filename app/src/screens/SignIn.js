@@ -1,5 +1,8 @@
-import { StyleSheet, Text, View, StatusBar, Platform } from 'react-native';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, StatusBar, Platform, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 import Background from '../components/Background';
 import AppLogo from '../components/AppLogo';
 import CustomTextInput from '../components/CustomTextInput';
@@ -10,197 +13,278 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-const SignIn = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+const validationSchema = Yup.object().shape({
+    email: Yup.string()
+        .email('Invalid email format')
+        .required('Email is required'),
+    password: Yup.string()
+        .required('Password is required')
+});
 
-    const handleEmailChange = useCallback((text) => {
-        setEmail(text);
-    }, []);
+const SignIn = ({navigation}) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [loadingKey, setLoadingKey] = useState(null);
+    const [focusedInput, setFocusedInput] = useState(false);
 
-    const handlePasswordChange = useCallback((text) => {
-        setPassword(text);
-    }, []);
+    const handleButtonPress = (buttonKey, callback) => {
+        setLoadingKey(buttonKey);
+        setTimeout(() => {
+            const userValidated = true; // Replace with actual validation logic
+            if (userValidated) {
+                callback();
+            } else {
+                setLoadingKey(null);
+            }
+        }, 1000);
+    };
+
+    const handleSignIn = () => {
+        handleButtonPress('signIn', () => {
+            navigation.navigate('Tab');
+            setLoadingKey(null);
+        });
+    };
+
+    const handleGoogle = () => {
+        handleButtonPress('Google', () => {
+            setLoadingKey(null);
+        });
+    };
+
+    const handleFacebook = () => {
+        handleButtonPress('Facebook', () => {
+            setLoadingKey(null);
+        });
+    };
+
+    const handleApple = () => {
+        handleButtonPress('Apple', () => {
+            setLoadingKey(null);
+        });
+    };
 
     return (
-        <Background>
-            <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
-            <View style={styles.backicon_logo_view}>
-                <View style={styles.icon_view}>
-                    <Icon name="arrow-back-ios" size={22} color="#333333" />
+        <ScrollView style={{ flex: 1 }}>
+            <Background>
+                <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
+                <View style={styles.backicon_logo_view}>
+                    <TouchableOpacity
+                        style={styles.icon_view}
+                        onPress={() => navigation.navigate('SignUp')}>
+                        <Icon name="arrow-back-ios" size={22} color="#333333" />
+                    </TouchableOpacity>
+                    <View style={styles.logo_view}>
+                        <AppLogo />
+                    </View>
                 </View>
-                <View style={styles.logo_view}>
-                    <AppLogo />
+                <View style={styles.text_view}>
+                    <Text style={styles.create_account_txt}>Sign In</Text>
                 </View>
-            </View>
-            <View style={styles.text_view}>
-                <Text style={styles.create_account_txt}>Sign In</Text>
-            </View>
-            <View style={styles.inputs_view1}>
-                <CustomTextInput
-                    leftIcon="mail-outline"
-                    leftIconSize={24}
-                    leftIconColor="#ADADAD"
-                    placeholder="abc@email.com"
-                    placeholderTextColor="#ADADAD"
-                    value={email}
-                    color={"black"}
-                    onChangeText={handleEmailChange}
-                    autoCapitalize="none"
-                    keyboardType='email'
-                />
-            </View>
-            <View style={styles.inputs_view2}>
-                <CustomTextInput
-                    leftIcon="lock-outline"
-                    leftIconSize={24}
-                    leftIconColor="#ADADAD"
-                    placeholder="Your password"
-                    placeholderTextColor="#ADADAD"
-                    color={"black"}
-                    value={password}
-                    onChangeText={handlePasswordChange}
-                    rightIcon="email"
-                    rightIconSize={24}
-                    rightIconColor="#ADADAD"
-                    secureTextEntry={true}
-                    autoCapitalize="none"
-                />
-            </View>
-            <View style={styles.fg_text_view}>
-                <Text style={styles.fg_text}>Forget Password?</Text>
-            </View>
-            <View style={styles.create_button_view}>
-                <CustomButton
-                    bgColor="#E3B12F"
-                    borderRadius={100}
-                    alignItems='center'
-                    txtColor="#FFFFFF"
-                    textStyle={{ fontSize: 19, fontWeight: '500', lineHeight: 22 }}
-                    onPress={() => console.log('code sent')}
-                    padding={10}
-                    marginVertical={10}
-                >
-                    Sign In
-                </CustomButton>
-            </View>
-            <View style={styles.divider_view}>
-                <CustomDivider width='28%' />
-                <Text style={styles.continue_with_txt}>or continue with</Text>
-                <CustomDivider width='28%' />
-            </View>
 
-            <View style={styles.social_buttons_view}>
-                {Platform.OS === 'android' && (
-                    <>
-                        <CustomButton
-                            bgColor="#FFFFFF"
-                            borderColor="#E3B12F"
-                            borderWidth={1}
-                            borderRadius={100}
-                            txtColor="#333333"
-                            textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
-                            onPress={() => console.log('Google button pressed')}
-                            image={Images.googleimage}
-                            imageStyle={{ width: 20, height: 20 }}
-                            padding={10}
-                            paddingLeft={20}
-                            paddingRight={20}
-                            width={wp('40%')}
-                            flexDirection={'row'}
-                            alignItems={'center'}
-                            justifyContent={'space-around'}
-                        >
-                            Google
-                        </CustomButton>
-                        <CustomButton
-                            bgColor="#FFFFFF"
-                            borderColor="#E3B12F"
-                            borderWidth={1}
-                            borderRadius={100}
-                            txtColor="#333333"
-                            textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
-                            onPress={() => console.log('Facebook button pressed')}
-                            image={Images.facebookimage}
-                            imageStyle={{ width: 20, height: 20 }}
-                            padding={6}
-                            paddingLeft={20}
-                            paddingRight={20}
-                            width={wp('40%')}
-                            flexDirection={"row"}
-                            alignItems={'center'}
-                            justifyContent={'space-around'}
-                        >
-                            Facebook
-                        </CustomButton>
-                    </>
-                )}
-                {Platform.OS === 'ios' && (
-                    <>
-                        <CustomButton
-                            bgColor="#FFFFFF"
-                            borderColor="#E3B12F"
-                            borderWidth={1}
-                            borderRadius={100}
-                            txtColor="transparent"
-                            textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
-                            onPress={() => console.log('Google button pressed')}
-                            image={Images.googleimage}
-                            imageStyle={{ width: 20, height: 20 }}
-                            padding={10}
-                            // paddingLeft={20}
-                            // paddingRight={20}
-                            width={wp('11.8%')}
-                            flexDirection={'row'}
-                            alignItems={'center'}
-                            justifyContent={'space-around'}
-                        />
-                        <CustomButton
-                            bgColor="#FFFFFF"
-                            borderColor="#E3B12F"
-                            borderWidth={1}
-                            borderRadius={100}
-                            txtColor="transparent"
-                            textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
-                            onPress={() => console.log('Facebook button pressed')}
-                            image={Images.facebookimage}
-                            imageStyle={{ width: 20, height: 20 }}
-                            padding={6}
-                            // paddingLeft={20}
-                            // paddingRight={20}
-                            width={wp('11.8%')}
-                            flexDirection={"row"}
-                            alignItems={'center'}
-                            justifyContent={'space-around'}
-                        />
-                        <CustomButton
-                            bgColor="#FFFFFF"
-                            borderColor="#E3B12F"
-                            borderWidth={1}
-                            borderRadius={100}
-                            txtColor="transparent"
-                            textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
-                            onPress={() => console.log('Apple button pressed')}
-                            image={Images.appleicon} // Replace with your Apple button image
-                            imageStyle={{ width: 20, height: 20 }}
-                            padding={10}
-                            // paddingLeft={20}
-                            // paddingRight={20}
-                            width={wp('11.8%')}
-                            flexDirection={'row'}
-                            alignItems={'center'}
-                            justifyContent={'space-around'}
-                        />
-                    </>
-                )}
-            </View>
-            <View style={styles.text_bottom_view}>
-                <Text style={styles.already_account_txt}>Don't have an account? </Text>
-                <TouchableOpacity>
-                    <Text style={styles.sign_in_txt}>Create Account</Text>
-                </TouchableOpacity>
-            </View>
-        </Background>
+                <Formik
+                    initialValues={{ email: '', password: '' }}
+                    validationSchema={validationSchema}
+                    onSubmit={(values) => handleSignIn(values)}
+                >
+                    {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                        <>
+                            <View style={styles.inputs_view}>
+                                <CustomTextInput
+                                    leftIcon="mail-outline"
+                                    leftIconSize={24}
+                                    leftIconColor="#ADADAD"
+                                    placeholder="abc@email.com"
+                                    placeholderTextColor="#ADADAD"
+                                    value={values.email}
+                                    onChangeText={handleChange('email')}
+                                    onBlur={handleBlur('email')}
+                                    error={touched.email && errors.email}
+                                    autoCapitalize="none"
+                                    keyboardType='email-address'
+                                    focusedInput={focusedInput}
+                                    setFocusedInput={setFocusedInput}
+                                />
+                                {touched.email && errors.email && <Text style={styles.error_text}>{errors.email}</Text>}
+                            </View>
+
+                            <View style={styles.inputs_view}>
+                                <CustomTextInput
+                                    leftIcon="lock-outline"
+                                    leftIconSize={24}
+                                    leftIconColor="#ADADAD"
+                                    placeholder="Your password"
+                                    placeholderTextColor="#ADADAD"
+                                    value={values.password}
+                                    onChangeText={handleChange('password')}
+                                    onBlur={handleBlur('password')}
+                                    error={touched.password && errors.password}
+                                    secureTextEntry={true}
+                                    autoCapitalize="none"
+                                    focusedInput={focusedInput}
+                                    setFocusedInput={setFocusedInput}
+                                />
+                                {touched.password && errors.password && <Text style={styles.error_text}>{errors.password}</Text>}
+                            </View>
+
+                            <View style={styles.fg_text_view}>
+                                <Text
+                                    onPress={() => navigation.navigate('ForgetPassword')}
+                                    style={styles.fg_text}>Forget Password?</Text>
+                            </View>
+
+                            <View style={styles.create_button_view}>
+                                <CustomButton
+                                    buttonKey="signIn"
+                                    isLoading={!!loadingKey}
+                                    currentLoadingKey={loadingKey}
+                                    loaderColor="#FFF"
+                                    bgColor="#E3B12F"
+                                    borderRadius={100}
+                                    alignItems='center'
+                                    txtColor="#FFFFFF"
+                                    textStyle={{ fontSize: 19, fontWeight: '500', lineHeight: 22 }}
+                                    onPress={handleSubmit}
+                                    padding={10}
+                                    marginVertical={10}
+                                >
+                                    Sign In
+                                </CustomButton>
+                            </View>
+
+                            <View style={styles.divider_view}>
+                                <CustomDivider width='28%' />
+                                <Text style={styles.continue_with_txt}>or continue with</Text>
+                                <CustomDivider width='28%' />
+                            </View>
+
+                            <View style={styles.social_buttons_view}>
+                                {Platform.OS === 'android' && (
+                                    <>
+                                        <CustomButton
+                                            buttonKey="Google"
+                                            isLoading={!!loadingKey}
+                                            currentLoadingKey={loadingKey}
+                                            bgColor="#FFFFFF"
+                                            borderColor="#E3B12F"
+                                            borderWidth={1}
+                                            borderRadius={100}
+                                            txtColor="#333333"
+                                            textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
+                                            onPress={handleGoogle}
+                                            image={Images.googleimage}
+                                            imageStyle={{ width: 20, height: 20 }}
+                                            padding={10}
+                                            paddingLeft={20}
+                                            paddingRight={20}
+                                            width={wp('40%')}
+                                            flexDirection={'row'}
+                                            alignItems={'center'}
+                                            justifyContent={'space-around'}
+                                        >
+                                            Google
+                                        </CustomButton>
+                                        <CustomButton
+                                            buttonKey="Facebook"
+                                            isLoading={!!loadingKey}
+                                            currentLoadingKey={loadingKey}
+                                            bgColor="#FFFFFF"
+                                            borderColor="#E3B12F"
+                                            borderWidth={1}
+                                            borderRadius={100}
+                                            txtColor="#333333"
+                                            textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
+                                            onPress={handleFacebook}
+                                            image={Images.facebookimage}
+                                            imageStyle={{ width: 20, height: 20 }}
+                                            padding={6}
+                                            paddingLeft={20}
+                                            paddingRight={20}
+                                            width={wp('40%')}
+                                            flexDirection={"row"}
+                                            alignItems={'center'}
+                                            justifyContent={'space-around'}
+                                        >
+                                            Facebook
+                                        </CustomButton>
+                                    </>
+                                )}
+                                {Platform.OS === 'ios' && (
+                                    <>
+                                        <CustomButton
+                                            buttonKey="Google"
+                                            isLoading={!!loadingKey}
+                                            currentLoadingKey={loadingKey}
+                                            bgColor="#FFFFFF"
+                                            borderColor="#E3B12F"
+                                            borderWidth={1}
+                                            borderRadius={100}
+                                            txtColor="transparent"
+                                            textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
+                                            onPress={handleGoogle}
+                                            image={Images.googleimage}
+                                            imageStyle={{ width: 20, height: 20 }}
+                                            padding={10}
+                                            width={wp('11.8%')}
+                                            flexDirection={'row'}
+                                            alignItems={'center'}
+                                            justifyContent={'space-around'}
+                                        />
+                                        <CustomButton
+                                            buttonKey="Facebook"
+                                            isLoading={!!loadingKey}
+                                            currentLoadingKey={loadingKey}
+                                            bgColor="#FFFFFF"
+                                            borderColor="#E3B12F"
+                                            borderWidth={1}
+                                            borderRadius={100}
+                                            txtColor="transparent"
+                                            textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
+                                            onPress={handleFacebook}
+                                            image={Images.facebookimage}
+                                            imageStyle={{ width: 20, height: 20 }}
+                                            padding={6}
+                                            width={wp('11.8%')}
+                                            flexDirection={"row"}
+                                            alignItems={'center'}
+                                            justifyContent={'space-around'}
+                                        />
+                                        <CustomButton
+                                            buttonKey="Apple"
+                                            isLoading={!!loadingKey}
+                                            currentLoadingKey={loadingKey}
+                                            bgColor="#FFFFFF"
+                                            borderColor="#E3B12F"
+                                            borderWidth={1}
+                                            borderRadius={100}
+                                            txtColor="transparent"
+                                            textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
+                                            onPress={handleApple}
+                                            image={Images.appleicon}
+                                            imageStyle={{ width: 20, height: 20 }}
+                                            padding={10}
+                                            width={wp('11.8%')}
+                                            flexDirection={'row'}
+                                            alignItems={'center'}
+                                            justifyContent={'space-around'}
+                                        />
+                                    </>
+                                )}
+                            </View>
+
+                            <View style={styles.text_bottom_view}>
+                                <TouchableOpacity
+                                    style={styles.text_bottom_view}
+                                    onPress={() => navigation.navigate('SignUp')}
+                                >
+                                    <Text style={styles.already_account_txt}>Don't have an account? </Text>
+                                    <Text style={styles.sign_in_txt}>Create Account</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    )}
+                </Formik>
+            </Background>
+        </ScrollView>
     );
 };
 
@@ -233,18 +317,15 @@ const styles = StyleSheet.create({
         lineHeight: 27,
         color: '#333333',
     },
-    inputs_view1: {
-        marginVertical: 10,
-    },
-    inputs_view2: {
-        marginVertical: 10,
-    },
-    inputs_view3: {
+    inputs_view: {
         marginVertical: 10,
     },
     fg_text_view: {
+        alignSelf: 'flex-end',
+        width: wp('32%'),
+        backgroundColor: 'transparent',
         flexDirection: "row",
-        justifyContent: 'flex-end',
+        // justifyContent: 'flex-end',
     },
     fg_text: {
         fontSize: hp('2%'),
@@ -258,7 +339,8 @@ const styles = StyleSheet.create({
     divider_view: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginVertical: 6,
     },
     continue_with_txt: {
         fontSize: 17,
@@ -285,5 +367,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#000',
         fontWeight: 'bold'
+    },
+    error_text: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 5,
     },
 });

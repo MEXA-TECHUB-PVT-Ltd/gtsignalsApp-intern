@@ -44,10 +44,11 @@ const styles = StyleSheet.create({
         borderRadius: 11,
         justifyContent: 'flex-start',
         elevation: 10,
+        paddingVertical: 5,
 
     },
     image_view: {
-        top: -8,
+        top: -3,
         left: 6,
         width: wp('6.8%'),
         height: hp('3.3%'),
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     successText: {
-        fontSize: hp('3%'),
+        fontSize: hp('2%'),
         fontWeight: '600',
         color: '#00CB14',
     },
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
         fontSize: hp('2%'),
         fontWeight: '400',
         color: '#333333',
-        marginBottom: 5,
+        // marginBottom: 5,
         letterSpacing: 0.5,
     },
 });

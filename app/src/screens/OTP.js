@@ -5,15 +5,38 @@ import CustomButton from '../components/CustomButton';
 import Background from '../components/Background';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Alert from '../components/Alert';
+import { ScrollView } from 'react-native-gesture-handler';
 
-const OTP = () => {
+const OTP = ({ navigation }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [loadingKey, setLoadingKey] = useState(null);
     const [otp, setOtp] = useState(['', '', '', '']);
     const [isResendEnabled, setIsResendEnabled] = useState(false);
     const [timer, setTimer] = useState(60);
     const [borderColors, setBorderColors] = useState(['#cccccc', '#cccccc', '#cccccc', '#cccccc']);
     const inputRefs = useRef([]);
-
     const [isAlertVisible, setAlertVisible] = useState(false);
+
+    const handleButtonPress = (buttonKey, callback) => {
+        setLoadingKey(buttonKey);
+        // Simulate an API call for button action
+        setTimeout(() => {
+            // Assuming user validation
+            const userValidated = true; // Replace with actual validation logic
+            if (userValidated) {
+                callback();
+            } else {
+                setLoadingKey(null);
+            }
+        }, 1000);
+    };
+
+    const handleConfirm = () => {
+        handleButtonPress('Confirm', () => {
+            navigation.navigate('ResetPassword');
+            setLoadingKey(null);
+        });
+    };
 
     const handleResendCode = () => {
         if (isResendEnabled) {
@@ -22,17 +45,10 @@ const OTP = () => {
             setTimer(60);
             setAlertVisible(true);
             setTimeout(() => setAlertVisible(false), 2000);
-            startTimer();
         }
     };
 
     useEffect(() => {
-        startTimer();
-        return () => clearInterval(countdown);
-    }, []);
-
-    const startTimer = () => {
-        clearInterval(countdown);
         const countdown = setInterval(() => {
             setTimer((prevTimer) => {
                 if (prevTimer <= 1) {
@@ -43,7 +59,9 @@ const OTP = () => {
                 return prevTimer - 1;
             });
         }, 1000);
-    };
+
+        return () => clearInterval(countdown);
+    }, [isResendEnabled]);
 
     const handleOtpChange = (text, index) => {
         const newOtp = [...otp];
@@ -85,12 +103,15 @@ const OTP = () => {
     };
 
     return (
+        <ScrollView style={{flex:1}}>
         <Background>
             <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
             <View style={styles.container}>
-                <View style={styles.header}>
+                <TouchableOpacity 
+                onPress={() => navigation.navigate('ForgetPassword')}
+                style={styles.header}>
                     <Icon name="arrow-back-ios" size={22} color="#333333" />
-                </View>
+                </TouchableOpacity>
                 <View style={styles.title}>
                     <Text style={styles.forget_password_txt}>You've got mail</Text>
                 </View>
@@ -126,11 +147,15 @@ const OTP = () => {
                 </View>
                 <View style={styles.buttonContainer}>
                     <CustomButton
+                        buttonKey="Confirm"
+                        isLoading={!!loadingKey}
+                        currentLoadingKey={loadingKey}
+                        loaderColor="#FFF"
                         bgColor="#E3B12F"
                         borderRadius={100}
                         txtColor="#FFFFFF"
                         textStyle={{ fontSize: 19, fontWeight: '500', lineHeight: 22 }}
-                        onPress={() => console.log('OTP confirmed', otp.join(''))}
+                        onPress={handleConfirm}
                         padding={10}
                         flex={1}
                         flexDirection={'row'}
@@ -142,6 +167,8 @@ const OTP = () => {
                 <Alert successMessage="code resent successfully" visible={isAlertVisible} />
             </View>
         </Background>
+        </ScrollView>
+
     );
 };
 
@@ -188,7 +215,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 6,
         backgroundColor: 'transparent',
-        justifyContent:'center',
+        justifyContent: 'center',
         alignItems: 'center',
         fontSize: 18,
         fontWeight: 'bold',
@@ -207,7 +234,7 @@ const styles = StyleSheet.create({
         color: '#E3B12F',
     },
     resend_text_disabled: {
-        color: '#ADADAD',
+        color: '#E3B12F',
     },
     in_text: {
         fontSize: hp('2%'),
@@ -227,5 +254,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
+        marginVertical: 142,
     },
 });
