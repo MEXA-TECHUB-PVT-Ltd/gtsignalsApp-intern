@@ -45,6 +45,7 @@ const SignalCard = ({ buttonType, onCopyPress }) => {
                             flexDirection={'row'}
                             alignItems={'center'}
                             justifyContent={'space-between'}
+                            disableFeedback={true}
                         >
                             {isBuy ? "BUY" : "SELL"}
                         </CustomButton>
@@ -74,6 +75,7 @@ const SignalCard = ({ buttonType, onCopyPress }) => {
                         flexDirection={'row'}
                         alignItems={'center'}
                         justifyContent={'space-between'}
+                        disableFeedback={true}
                     >
                         Copy
                     </CustomButton>

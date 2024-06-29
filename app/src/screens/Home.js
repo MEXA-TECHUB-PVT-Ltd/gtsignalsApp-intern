@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, ImageBackground, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, StatusBar, TouchableOpacity } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SlIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -11,8 +11,6 @@ import AlertComponent from '../components/Alert';
 const Home = ({ navigation }) => {
   const buttonType = 'buy';
 
- 
- 
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="transparent" translucent={true} barStyle="light-content" />
@@ -21,8 +19,16 @@ const Home = ({ navigation }) => {
           <View style={styles.headerContent_view}>
             <Text style={styles.headerText}>GT-Signals</Text>
             <View style={styles.iconsContainer}>
-              <Ionicons name="search-outline" size={25} color="white" style={styles.icon} />
-              <SlIcons name="bell" size={25} color="white" style={styles.icon} />
+              <TouchableOpacity
+              onPress={() => navigation.navigate('SearchSignal')}
+              >
+                <Ionicons name="search-outline" size={25} color="white" style={styles.icon} />
+              </TouchableOpacity>
+              <TouchableOpacity
+              onPress={() => navigation.navigate('Notifications')}
+              >
+                <SlIcons name="bell" size={21} color="white" style={styles.icon} />
+              </TouchableOpacity>
             </View>
           </View>
         </ImageBackground>
@@ -77,6 +83,7 @@ const styles = StyleSheet.create({
   },
   iconsContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   icon: {
     marginLeft: 15,

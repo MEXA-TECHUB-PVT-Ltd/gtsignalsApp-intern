@@ -16,7 +16,7 @@ const Header = ({ navigation, headerText, onPress, rightIcon }) => {
             </View>
             {rightIcon && (
                 <TouchableOpacity
-                //  onPress={/* Right Icon onPress function */} 
+                    onPress={rightIcon.onPress}
                  style={styles.overlayRight}>
                     <IIcon name={rightIcon.name} size={rightIcon.size || 22} color={rightIcon.color || '#333333'} />
                 </TouchableOpacity>

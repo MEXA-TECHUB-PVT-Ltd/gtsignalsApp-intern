@@ -22,7 +22,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const SignIn = ({navigation}) => {
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
     const [loadingKey, setLoadingKey] = useState(null);
     const [focusedInput, setFocusedInput] = useState(false);
 
