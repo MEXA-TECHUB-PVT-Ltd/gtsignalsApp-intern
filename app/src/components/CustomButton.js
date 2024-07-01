@@ -42,6 +42,7 @@ const CustomButton = ({
     loaderColor,
     buttonKey,
     currentLoadingKey,
+    disableFeedback,
 }) => {
     const isCurrentLoading = isLoading && currentLoadingKey === buttonKey;
 
@@ -72,7 +73,8 @@ const CustomButton = ({
                     borderColor: borderColor,
                     borderWidth: borderWidth || 2,
                 },
-                pressed && { opacity: opacityOnPress || 0.5 },
+                pressed && !disableFeedback && { opacity: opacityOnPress || 0.5 },
+                // pressed && { opacity: opacityOnPress || 0.5 },
             ]}>
             <View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
                 {isCurrentLoading ? (

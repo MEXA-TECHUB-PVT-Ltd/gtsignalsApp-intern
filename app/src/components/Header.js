@@ -1,21 +1,26 @@
 import React from 'react';
-import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import Images from '../consts/images';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import IIcon from 'react-native-vector-icons/Ionicons';
 
-const Header = ({navigation, headerText, onPress}) => {
+
+const Header = ({ navigation, headerText, onPress, rightIcon }) => {
     return (
         <View style={styles.container}>
+            <TouchableOpacity onPress={onPress} style={styles.overlayLeft}>
+                <Icon name="arrow-back-ios" size={22} color="#333333" />
+            </TouchableOpacity>
             <View style={styles.header}>
                 <Text style={styles.headerText}>{headerText}</Text>
             </View>
-            <TouchableOpacity 
-            onPress={onPress}
-            style={styles.overlay}>
-                <Icon name="arrow-back-ios" size={22} color="#333333" />
-            </TouchableOpacity>
-          
+            {rightIcon && (
+                <TouchableOpacity
+                    onPress={rightIcon.onPress}
+                 style={styles.overlayRight}>
+                    <IIcon name={rightIcon.name} size={rightIcon.size || 22} color={rightIcon.color || '#333333'} />
+                </TouchableOpacity>
+            )}
         </View>
     );
 };
@@ -39,16 +44,17 @@ const styles = StyleSheet.create({
         lineHeight: 28,
         letterSpacing: 1,
     },
-    overlay: {
+    overlayLeft: {
         position: 'absolute',
         left: 1,
         zIndex: 2,
+        paddingLeft: 20,
     },
-    image: {
-        width: wp('4%'),
-        height: hp('1.9%'),
-        resizeMode: 'contain',
-
+    overlayRight: {
+        position: 'absolute',
+        right: 1, // Adjust position as needed
+        zIndex: 2,
+        paddingRight: 20,
     },
 });
 
