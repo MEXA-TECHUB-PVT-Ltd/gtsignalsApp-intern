@@ -43,7 +43,6 @@ const EditProfile = ({ navigation, route }) => {
 
     const handleAddImage = () => {
         setModalVisible(true);
-        navigation.navigate('UploadPhoto', { fromScreen: 'EditProfile' });
     };
 
     const requestCameraPermission = async () => {

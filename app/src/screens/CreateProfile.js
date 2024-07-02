@@ -44,7 +44,6 @@ const CreateProfile = ({ navigation, route }) => {
 
     const handleAddImage = () => {
         setModalVisible(true);
-        navigation.navigate('UploadPhoto', { fromScreen: 'CreateProfile' });
     };
 
 

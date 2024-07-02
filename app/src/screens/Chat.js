@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, TextInput, Text, StatusBar, Keyboard } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, TextInput, Text, StatusBar } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AppLogo from '../components/AppLogo';
+import EmojiPicker from 'rn-emoji-keyboard'; // Import EmojiPicker
 
 const Chat = ({ navigation }) => {
     const [messages, setMessages] = useState([]);
@@ -94,8 +95,13 @@ const Chat = ({ navigation }) => {
         }
     }, [keywordResponses, messages]);
 
-      const toggleKeyboard = () => {
+    const toggleKeyboard = () => {
         setShowEmojiKeyboard(!showEmojiKeyboard);
+    };
+
+    const handleEmojiSelected = (emojiObject) => {
+        const emoji = emojiObject.emoji;
+        setInputText(prevText => prevText + emoji);
     };
 
     const renderMessage = (props) => {
@@ -162,8 +168,11 @@ const Chat = ({ navigation }) => {
                     placeholder="Type a message"
                     placeholderTextColor="#929292"
                     value={inputText}
+                    multiline={true}
                     onChangeText={setInputText}
-                    keyboardType={showEmojiKeyboard ? 'default' : 'visible-password'} // Use 'visible-password' for emoji keyboard
+                    // keyboardType={showEmojiKeyboard ? 'default' : 'visible-password'} // Use 'visible-password' for emoji keyboard
+                    // keyboardType={showEmojiKeyboard ? 'default' : 'visible-password'} // Use 'visible-password' for emoji keyboard
+                    // onFocus={() => setShowEmojiKeyboard(false)} // Close emoji keyboard when focusing on text input
                 />
             </View>
             <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
@@ -199,6 +208,17 @@ const Chat = ({ navigation }) => {
                     _id: 1,
                 }}
             />
+
+            {showEmojiKeyboard && (
+                <EmojiPicker
+                    onEmojiSelected={handleEmojiSelected}
+                    open={showEmojiKeyboard}
+                    onClose={() => setShowEmojiKeyboard(false)}
+                    categoryPosition="top"
+                    allowMultipleSelections
+                    
+                />
+            )}
         </View>
     );
 };
@@ -208,7 +228,7 @@ export default Chat;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         padding: 24,
         paddingBottom: 10,
     },
@@ -228,7 +248,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        // marginLeft: -22,
     },
     lets_talk_view: {
         justifyContent: 'center',
@@ -258,7 +277,6 @@ const styles = StyleSheet.create({
         borderColor: '#cccccc',
         marginRight: 10,
         alignItems: 'center',
-        // paddingHorizontal: 10,
     },
     iconButton: {
         backgroundColor: 'transparent',
