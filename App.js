@@ -25,6 +25,8 @@ import BrokersCard from './app/src/components/BrokersCard';
 import SignalDetails from './app/src/screens/SignalDetails';
 import Notifications from './app/src/screens/Notifications';
 import SearchSignal from './app/src/screens/SearchSignal';
+import Chat from './app/src/screens/Chat';
+import EditProfile from './app/src/screens/EditProfile';
 
 //components
 import Background from './app/src/components/Background';
@@ -156,24 +158,27 @@ const TabNavigator = ({ navigation }) => (
 const MainStack = () => (
   <Stack.Navigator>
 
-    {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} />
+    <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
 
     {/* <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} /> */}
-    
-    {/* <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
-    <Stack.Screen name="UploadPhoto" component={UploadPhoto} options={{ headerShown: false }} />
 
-    <Stack.Screen name="Modal" component={Modal} options={{ headerShown: false }} />
-    <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
-    <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
-    <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} />
-    <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="Modal" component={Modal} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
+    <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} />
+    <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
     <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
     <Stack.Screen name="SignalDetails" component={SignalDetails} options={{ headerShown: false }} />
     <Stack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }} />
     <Stack.Screen name="SearchSignal" component={SearchSignal} options={{ headerShown: false }} />
+    <Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }} />
+    <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false }} />
+    <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
+
+    <Stack.Screen name="UploadPhoto" component={UploadPhoto} options={{ headerShown: false }} />
+
     <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} />
     <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
   </Stack.Navigator>
