@@ -172,7 +172,7 @@ const SignIn = ({navigation}) => {
                                             textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
                                             onPress={handleGoogle}
                                             image={Images.googleimage}
-                                            imageStyle={{ width: 20, height: 20 }}
+                                            imageStyle={{ width: 20, height: 20, marginRight: 10, }}
                                             padding={10}
                                             paddingLeft={20}
                                             paddingRight={20}
@@ -195,7 +195,7 @@ const SignIn = ({navigation}) => {
                                             textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
                                             onPress={handleFacebook}
                                             image={Images.facebookimage}
-                                            imageStyle={{ width: 20, height: 20 }}
+                                            imageStyle={{ width: 20, height: 20, marginRight: 10  }}
                                             padding={6}
                                             paddingLeft={20}
                                             paddingRight={20}

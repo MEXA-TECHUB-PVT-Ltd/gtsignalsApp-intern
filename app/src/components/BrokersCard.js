@@ -5,8 +5,15 @@ import FAIcon from 'react-native-vector-icons/FontAwesome6';
 import CustomButton from './CustomButton';
 import CustomDivider from './CustomDivider';
 import Images from '../consts/images';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 
-const BrokersCard = ({ navigation }) => {
+const BrokersCard = () => {
+    const navigation = useNavigation();
+
+    const handleChatPress = () => {
+        navigation.navigate('Chat');
+    };
 
     return (
         <View style={styles.container}>
@@ -24,12 +31,14 @@ const BrokersCard = ({ navigation }) => {
                         <Text style={styles.currency_text}>John Doe</Text>
                        
                     </View>
-                    <View style={styles.right_view}>
+                    <TouchableOpacity
+                    onPress={handleChatPress} 
+                    style={styles.right_view}>
                         <Image
                             source={Images.brokerschaticon}
                             style={styles.right_icon}
                         />
-                    </View>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.card_view3}>
                     <CustomDivider width='100%' height='5%' color='#949494' />

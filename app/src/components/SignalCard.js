@@ -68,6 +68,7 @@ const SignalCard = ({ buttonType, onCopyPress }) => {
                         icon="copy-outline"
                         iconSize={16}
                         iconColor={"#FFFFFF"}
+                        marginRight={100}
                         paddingLeft={8}
                         paddingRight={5}
                         width={wp('21.5%')}

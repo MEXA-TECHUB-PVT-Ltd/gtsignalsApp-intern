@@ -14,7 +14,9 @@ const Brokers = () => {
       </View>
 
       <View style={styles.main_view}>
-        <ScrollView style={styles.cards_view}>
+        <ScrollView 
+        showsVerticalScrollIndicator={false}
+        style={styles.cards_view}>
           <BrokersCard />
           <BrokersCard />
           <BrokersCard />

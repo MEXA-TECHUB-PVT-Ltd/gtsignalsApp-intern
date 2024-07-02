@@ -79,7 +79,7 @@ const Onboarding = ({navigation}) => {
                         endIconColor="#E3B12F"
                         endIconBgColor="#FFFFFF"
                         endIconBorderRadius={50}    
-                        endIconContainerStyle={{justifyContent: 'center', alignItems: 'center', width: wp('10%'), height: hp('5%'), position: 'absolute', right: -6 }}
+                        endIconContainerStyle={{justifyContent: 'center', alignItems: 'center', width: wp('10%'), height: hp('5%'), position: 'absolute', right: -104 }}
                     >
                         Get Started
                     </CustomButton>

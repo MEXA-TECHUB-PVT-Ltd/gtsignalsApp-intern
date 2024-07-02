@@ -23,6 +23,7 @@ const CustomButton = ({
     imageStyle,
     iconSize,
     iconColor,
+    marginRight,
     padding,
     paddingLeft,
     paddingRight,
@@ -38,6 +39,9 @@ const CustomButton = ({
     endIconSize,
     endIconColor,
     endIconContainerStyle,
+    centerIcon,
+    centerIconSize,
+    centerIconColor,
     isLoading,
     loaderColor,
     buttonKey,
@@ -74,7 +78,6 @@ const CustomButton = ({
                     borderWidth: borderWidth || 2,
                 },
                 pressed && !disableFeedback && { opacity: opacityOnPress || 0.5 },
-                // pressed && { opacity: opacityOnPress || 0.5 },
             ]}>
             <View style={[{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
                 {isCurrentLoading ? (
@@ -85,16 +88,21 @@ const CustomButton = ({
                             <Image source={image} style={[{ width: iconSize, height: iconSize }, imageStyle]} />
                         ) : (
                             icon && (
-                                <IIcon name={icon} size={iconSize} color={iconColor} />
+                                <IIcon name={icon} size={iconSize} color={iconColor} marginRight={5} />
                             )
                         )}
                         {children && (
-                            <Text style={[{ flex: 1, textAlign: 'center' }, textStyle, { color: txtColor }]}>
-                                {children}
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                {centerIcon && (
+                                        <MaterialIcons name={centerIcon} size={centerIconSize} color={centerIconColor} style={{ marginRight: 5, transform: [{ scaleX: -1 }] }} />
+                                )}
+                                <Text style={[{ textAlign: 'center' }, textStyle, { color: txtColor }]}>
+                                    {children}
+                                </Text>
+                            </View>
                         )}
                         {endIcon && (
-                            <View style={[{ backgroundColor: endIconBgColor, borderRadius: endIconBorderRadius }, endIconContainerStyle]}>
+                            <View style={[{ backgroundColor: endIconBgColor, borderRadius: endIconBorderRadius, }, endIconContainerStyle]}>
                                 <MaterialIcons name={endIcon} size={endIconSize} color={endIconColor} />
                             </View>
                         )}

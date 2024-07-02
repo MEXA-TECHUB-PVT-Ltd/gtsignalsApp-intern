@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
-import Background from '../components/Background';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, ScrollView, Alert, StatusBar } from 'react-native';
 import Header from '../components/Header';
 import CustomButton from '../components/CustomButton';
 import CustomDivider from '../components/CustomDivider';
@@ -9,18 +8,18 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import CustomTextInput from '../components/CustomTextInput';
 import Images from '../consts/images';
 import ImagePicker from 'react-native-image-crop-picker';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { useFocusEffect } from '@react-navigation/native';
 import AlertComponent from '../components/Alert';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
-    fullName: Yup.string().required('name is required'),
+    fullName: Yup.string().required('Name is required'),
+    email: Yup.string().email('Invalid email formate').required('Email is required'),
 });
 
-const CreateProfile = ({ navigation, route }) => {
+const EditProfile = ({ navigation, route }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
@@ -35,7 +34,7 @@ const CreateProfile = ({ navigation, route }) => {
     );
 
     const handleBackPress = () => {
-        navigation.navigate('SignUp');
+        navigation.navigate('Account');
     };
 
     const handleClose = () => {
@@ -44,9 +43,8 @@ const CreateProfile = ({ navigation, route }) => {
 
     const handleAddImage = () => {
         setModalVisible(true);
-        navigation.navigate('UploadPhoto', { fromScreen: 'CreateProfile' });
+        navigation.navigate('UploadPhoto', { fromScreen: 'EditProfile' });
     };
-
 
     const requestCameraPermission = async () => {
         const result = await request(PERMISSIONS.ANDROID.CAMERA);
@@ -66,7 +64,6 @@ const CreateProfile = ({ navigation, route }) => {
                 height: hp('90%'),
                 cropping: true,
                 cropperCircleOverlay: true,
-                
             }).then(image => {
                 setModalVisible(false);
                 navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true });
@@ -78,27 +75,6 @@ const CreateProfile = ({ navigation, route }) => {
             Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
         }
     };
-
-    // const handleChoosePhoto = () => {
-    //     // Launch image library to select a photo
-    //     launchImageLibrary({
-    //         mediaType: 'photo', // Only select images, not videos
-    //         maxHeight: 800,
-    //         maxWidth: 800,
-    //         quality: 1,
-    //     }, (response) => {
-    //         if (response.didCancel) {
-    //             console.log('User cancelled image picker');
-    //         } else if (response.error) {
-    //             console.log('ImagePicker Error: ', response.error);
-    //         } else {
-    //             // Set selected image URI to state
-    //             setProfileImage(response.uri);
-    //             setModalVisible(true);
-    //             // navigation.navigate('UploadPhoto', { imageUri: response.uri });
-    //         }
-    //     });
-    // };
 
     const handleChoosePhoto = async () => {
         const isPhotoLibraryPermitted = await requestPhotoLibraryPermission();
@@ -124,35 +100,40 @@ const CreateProfile = ({ navigation, route }) => {
         <CustomDivider
             height={1}
             color="#e6e6e6"
-            marginVertical={10} />
+            marginVertical={10}
+        />
     );
 
     return (
-        <ScrollView style={{ flex: 1}}>
-            <Background>
+        <View style={styles.main_container}>
+            <StatusBar backgroundColor="white" barStyle="dark-content" />
+            <View style={styles.header_view}>
+                <Header
+                    headerText={"Edit Profile"}
+                    onPress={handleBackPress}
+                />
+            </View>
+            
+            <ScrollView style={{ flex: 1 }}>
                 <Formik
-                    initialValues={{ fullName: '' }}
+                    initialValues={{ fullName: '', email: '' }}
                     validationSchema={validationSchema}
                     onSubmit={(values, actions) => {
                         actions.validateForm().then(() => {
-                            actions.setSubmitting(false);
+                            if (!values.fullName || !values.email) {
+                                actions.setSubmitting(false);
+                                return;
+                            }
                             setAlertVisible(true);
                             setTimeout(() => {
                                 setAlertVisible(false);
-                                navigation.navigate('SignIn');
+                                navigation.navigate('Account');
                             }, 1600);
                         });
                     }}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>
-                            <View style={styles.header_view}>
-                                <Header
-                                    headerText={"Create Profile"}
-                                    onPress={handleBackPress}
-                                />
-                            </View>
-                          
                             <View style={styles.profile_image_view}>
                                 <View style={profileImage ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
                                     <Image
@@ -170,28 +151,54 @@ const CreateProfile = ({ navigation, route }) => {
                                     justifyContent="center"
                                     alignItems='center'
                                     txtColor="#FFFFFF"
-                                    textStyle={{ fontSize: 15, fontWeight: '500', lineHeight: 18 }}
+                                    textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 18 }}
                                     onPress={handleAddImage}
                                     marginVertical={10}
                                 >
-                                    Add Image
+                                    Change Image
                                 </CustomButton>
                             </View>
-                            <View style={styles.input_view}>
-                                <CustomTextInput
-                                    placeholder="Full name"
-                                    placeholderTextColor="#ADADAD"
-                                    autoCapitalize="none"
-                                    keyboardType='email-address'
-                                    onChangeText={handleChange('fullName')}
-                                    onBlur={handleBlur('fullName')}
-                                    value={values.fullName}
-                                    focusedInput={focusedInput}
-                                    setFocusedInput={setFocusedInput}
-                                />
-                                {touched.fullName && errors.fullName &&
-                                    <Text style={{ color: 'red' }}>{errors.fullName}</Text>
-                                }
+                            <View style={styles.input_container}>
+                                <View style={styles.input_label_view}>
+                                    <Text style={styles.input_label}>Full Name</Text>
+                                </View>
+                                <View style={styles.input_view}>
+                                    <CustomTextInput
+                                        placeholder="Full name"
+                                        placeholderTextColor="#ADADAD"
+                                        autoCapitalize="none"
+                                        keyboardType='default'
+                                        onChangeText={handleChange('fullName')}
+                                        onBlur={handleBlur('fullName')}
+                                        value={values.fullName}
+                                        focusedInput={focusedInput}
+                                        setFocusedInput={setFocusedInput}
+                                    />
+                                    {touched.fullName && errors.fullName &&
+                                        <Text style={styles.errorText}>{errors.fullName}</Text>
+                                    }
+                                </View>
+                            </View>
+                            <View style={styles.input_container}>
+                                <View style={styles.input_label_view}>
+                                    <Text style={styles.input_label}>Email Address</Text>
+                                </View>
+                                <View style={styles.input_view_email}>
+                                    <CustomTextInput
+                                        placeholder="abc@email.com"
+                                        placeholderTextColor="#ADADAD"
+                                        autoCapitalize="none"
+                                        keyboardType='email-address'
+                                        onChangeText={handleChange('email')}
+                                        onBlur={handleBlur('email')}
+                                        value={values.email}
+                                        focusedInput={focusedInput}
+                                        setFocusedInput={setFocusedInput}
+                                    />
+                                    {touched.email && errors.email &&
+                                        <Text style={styles.errorText}>{errors.email}</Text>
+                                    }
+                                </View>
                             </View>
                             <View style={styles.create_profile_button_view}>
                                 <CustomButton
@@ -204,12 +211,10 @@ const CreateProfile = ({ navigation, route }) => {
                                     padding={10}
                                     marginVertical={10}
                                 >
-                                    Create Profile
+                                    Edit
                                 </CustomButton>
                             </View>
-                            <AlertComponent
-                                successMessage="Profile created successfully"
-                                visible={isAlertVisible} />
+                           
                         </View>
                     )}
                 </Formik>
@@ -234,29 +239,34 @@ const CreateProfile = ({ navigation, route }) => {
                     secondLeftIconStyle={{ marginRight: 10 }}
                     secondText={"Choose a Photo"}
                     secondTextStyle={{ fontSize: 22, fontWeight: '400', color: '#333333', lineHeight: 30, }}
-                
-                >
-                </Modal>
-                
-            </Background>
-        </ScrollView>
+                />
+            </ScrollView>
+            <AlertComponent
+                successMessage="Profile edited successfully"
+                visible={isAlertVisible}
+            />
+        </View>
     );
 };
 
-export default CreateProfile;
+export default EditProfile;
 
 const styles = StyleSheet.create({
+    main_container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
     container: {
-        height: hp('96.7%'),
+        // flex: 1,
         backgroundColor: 'transparent',
+        padding: 20,
     },
     header_view: {
-        marginVertical: hp('3%'),
+        marginVertical: hp('5%'),
     },
     profile_image_view: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginVertical: 32,
     },
     profile_image_round_view: {
         width: wp('30%'),
@@ -273,7 +283,7 @@ const styles = StyleSheet.create({
         width: wp('30%'),
         height: hp('15%'),
         borderRadius: 100,
-        borderWidth: 0, // No border when the image is set
+        borderWidth: 0,
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
@@ -283,7 +293,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
-        
     },
     profile_icon: {
         width: '50%',
@@ -293,12 +302,30 @@ const styles = StyleSheet.create({
     add_button_view: {
         justifyContent: 'center',
         alignItems: 'center',
+        marginVertical: 5,
+    },
+    input_container: {
+        marginBottom: 10,
+    },
+    input_label_view: {
+        marginBottom: 8,
+    },
+    input_label: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#333333',
     },
     input_view: {
         height: hp('9%'),
-        marginVertical: 40,
+    },
+    input_view_email: {
+        backgroundColor: 'transparent',
+        height: hp('9%'),
     },
     create_profile_button_view: {
-        marginVertical: 140,
+        marginVertical: 80,
+    },
+    errorText: {
+        color: 'red',
     },
 });
