@@ -7,12 +7,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 const UploadPhoto = ({ route, navigation }) => {
-  const { imageUri, fromCamera, fromScreen } = route.params;
-
-  const navigateToDestination = () => {
-    const destinationScreen = fromScreen === 'EditProfile' ? 'EditProfile' : 'CreateProfile';
-    navigation.navigate(destinationScreen, { imageUri });
-  };
+  const { imageUri, fromCamera, fromEdit, fromCreate } = route.params;
 
   const requestCameraPermission = async () => {
     const result = await request(PERMISSIONS.ANDROID.CAMERA);
@@ -77,8 +72,7 @@ const UploadPhoto = ({ route, navigation }) => {
           alignItems='center'
           txtColor="#FFFFFF"
           textStyle={{ fontSize: 14, fontWeight: '500', lineHeight: 18 }}
-          onPress={navigateToDestination}
-          // onPress={() => navigation.navigate('CreateProfile', { imageUri })}
+          onPress={() => navigation.navigate('CreateProfile', { imageUri })}
           marginVertical={10}
         >
           Add Photo
