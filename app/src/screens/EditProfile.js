@@ -65,7 +65,7 @@ const EditProfile = ({ navigation, route }) => {
                 cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true });
+                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromEdit: true, });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -85,7 +85,7 @@ const EditProfile = ({ navigation, route }) => {
                 cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false });
+                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromEdit: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -254,6 +254,7 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         backgroundColor: 'white',
+        marginTop: 20,
     },
     container: {
         // flex: 1,
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     header_view: {
-        marginVertical: hp('5%'),
+        marginVertical: hp('2%'),
     },
     profile_image_view: {
         justifyContent: 'center',

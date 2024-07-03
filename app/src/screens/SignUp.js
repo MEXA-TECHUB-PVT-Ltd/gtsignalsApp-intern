@@ -191,10 +191,10 @@ const SignUp = ({navigation}) => {
                 borderWidth={1}
                 borderRadius={100}
                 txtColor="#333333"
-                textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
+                textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20, paddingLeft: 5 }}
                 onPress={handleGoogle}
                 image={Images.googleimage}
-                imageStyle={{ width: 20, height: 20 }}
+                imageStyle={{ width: 20, height: 20, }}
                 padding={10}
                 paddingLeft={20}
                 paddingRight={20}
@@ -214,10 +214,10 @@ const SignUp = ({navigation}) => {
                 borderWidth={1}
                 borderRadius={100}
                 txtColor="#333333"
-                textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
+                textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22, marginLeft: 5, }}
                 onPress={handleFacebook}
                 image={Images.facebookimage}
-                imageStyle={{ width: 20, height: 20 }}
+                imageStyle={{ width: 20, height: 20, }}
                 padding={6}
                 paddingLeft={20}
                 paddingRight={20}

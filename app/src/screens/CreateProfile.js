@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, StatusBar, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Background from '../components/Background';
 import Header from '../components/Header';
 import CustomButton from '../components/CustomButton';
@@ -17,7 +17,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
-    fullName: Yup.string().required('name is required'),
+    fullName: Yup.string().required('Name is required'),
 });
 
 const CreateProfile = ({ navigation, route }) => {
@@ -46,7 +46,6 @@ const CreateProfile = ({ navigation, route }) => {
         setModalVisible(true);
     };
 
-
     const requestCameraPermission = async () => {
         const result = await request(PERMISSIONS.ANDROID.CAMERA);
         return result === RESULTS.GRANTED;
@@ -65,10 +64,9 @@ const CreateProfile = ({ navigation, route }) => {
                 height: hp('90%'),
                 cropping: true,
                 cropperCircleOverlay: true,
-                
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true });
+                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromCreate: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -77,27 +75,6 @@ const CreateProfile = ({ navigation, route }) => {
             Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
         }
     };
-
-    // const handleChoosePhoto = () => {
-    //     // Launch image library to select a photo
-    //     launchImageLibrary({
-    //         mediaType: 'photo', // Only select images, not videos
-    //         maxHeight: 800,
-    //         maxWidth: 800,
-    //         quality: 1,
-    //     }, (response) => {
-    //         if (response.didCancel) {
-    //             console.log('User cancelled image picker');
-    //         } else if (response.error) {
-    //             console.log('ImagePicker Error: ', response.error);
-    //         } else {
-    //             // Set selected image URI to state
-    //             setProfileImage(response.uri);
-    //             setModalVisible(true);
-    //             // navigation.navigate('UploadPhoto', { imageUri: response.uri });
-    //         }
-    //     });
-    // };
 
     const handleChoosePhoto = async () => {
         const isPhotoLibraryPermitted = await requestPhotoLibraryPermission();
@@ -109,7 +86,7 @@ const CreateProfile = ({ navigation, route }) => {
                 cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false });
+                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromCreate: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -123,12 +100,14 @@ const CreateProfile = ({ navigation, route }) => {
         <CustomDivider
             height={1}
             color="#e6e6e6"
-            marginVertical={10} />
+            marginVertical={10}
+        />
     );
 
     return (
-        <ScrollView style={{ flex: 1}}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <Background>
+                <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
                 <Formik
                     initialValues={{ fullName: '' }}
                     validationSchema={validationSchema}
@@ -151,7 +130,7 @@ const CreateProfile = ({ navigation, route }) => {
                                     onPress={handleBackPress}
                                 />
                             </View>
-                          
+
                             <View style={styles.profile_image_view}>
                                 <View style={profileImage ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
                                     <Image
@@ -233,12 +212,9 @@ const CreateProfile = ({ navigation, route }) => {
                     secondLeftIconStyle={{ marginRight: 10 }}
                     secondText={"Choose a Photo"}
                     secondTextStyle={{ fontSize: 22, fontWeight: '400', color: '#333333', lineHeight: 30, }}
-                
-                >
-                </Modal>
-                
+                />
             </Background>
-        </ScrollView>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -246,11 +222,11 @@ export default CreateProfile;
 
 const styles = StyleSheet.create({
     container: {
-        height: hp('96.7%'),
+        flex: 1,
         backgroundColor: 'transparent',
     },
     header_view: {
-        marginVertical: hp('3%'),
+        marginVertical: hp('2%'),
     },
     profile_image_view: {
         justifyContent: 'center',
@@ -272,7 +248,7 @@ const styles = StyleSheet.create({
         width: wp('30%'),
         height: hp('15%'),
         borderRadius: 100,
-        borderWidth: 0, // No border when the image is set
+        borderWidth: 0,
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
@@ -282,7 +258,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
-        
     },
     profile_icon: {
         width: '50%',
@@ -295,9 +270,9 @@ const styles = StyleSheet.create({
     },
     input_view: {
         height: hp('9%'),
-        marginVertical: 40,
+        marginVertical: hp('6%'),
     },
     create_profile_button_view: {
-        marginVertical: 140,
+        marginVertical: hp('14%'),
     },
 });

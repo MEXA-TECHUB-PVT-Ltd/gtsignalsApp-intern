@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, StatusBar, Image, TouchableOpacity } from 'react-native';
-import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, StatusBar, Modal, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Images from '../consts/images';
 import ADIcon from 'react-native-vector-icons/AntDesign';
@@ -10,9 +10,42 @@ import CustomButton from '../components/CustomButton';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const Account = ({navigation}) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [deletemodalVisible, setDeleteModalVisible] = useState(false);
+
 
   const handleEditPress = () => {
     navigation.navigate('EditProfile');
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleLogoutPress = () => {
+    setModalVisible(true);
+  };
+
+  const handleYesLogout = () => {
+    setModalVisible(false);
+    navigation.navigate('SignIn');
+  };
+
+  const handleLogoutCancel = () => {
+    setModalVisible(false);
+  };
+
+  const handleDeleteAccountPress = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalVisible(false);
+  };
+
+  const handleYesDelete = () => {
+    setDeleteModalVisible(false);
+    navigation.navigate('SignUp');
   };
 
   return (
@@ -50,7 +83,9 @@ const Account = ({navigation}) => {
       <View style={styles.divider_view}>
         <CustomDivider />
       </View>
-      <TouchableOpacity style={styles.links_view}>
+      <TouchableOpacity 
+      onPress={() => navigation.navigate('PremiumPlans')}
+      style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='workspace-premium' size={20} color="#E3B12F" />
@@ -98,7 +133,9 @@ const Account = ({navigation}) => {
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.links_view}>
+        <TouchableOpacity 
+        onPress={() => navigation.navigate('ChangePassword')}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='lock' size={20} color="#E3B12F" />
@@ -114,7 +151,9 @@ const Account = ({navigation}) => {
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.links_view}>
+        <TouchableOpacity 
+        onPress={() => navigation.navigate('InviteFriends')}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='mail' size={20} color="#E3B12F" />
@@ -130,7 +169,9 @@ const Account = ({navigation}) => {
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.links_view}>
+        <TouchableOpacity 
+        onPress={() => navigation.navigate('PrivacyPolicy')}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <ADIcon name='exclamationcircle' size={20} color="#E3B12F" />
@@ -146,7 +187,9 @@ const Account = ({navigation}) => {
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.links_view}>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('TermsAndConditions')}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='insert-drive-file' size={20} color="#E3B12F" />
@@ -162,7 +205,9 @@ const Account = ({navigation}) => {
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.links_view}>
+        <TouchableOpacity 
+        onPress={handleDeleteAccountPress}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='delete' size={20} color="#E3B12F" />
@@ -198,14 +243,111 @@ const Account = ({navigation}) => {
             alignItems='center'
             txtColor="#FFFFFF"
             textStyle={{ fontSize: 19, fontWeight: '400', lineHeight: 20 }}
-            // onPress={handleSubmit}
+            onPress={handleLogoutPress}
             padding={10}
             marginVertical={10}
           >
             Logout
           </CustomButton>
       </View>
+      
       </ScrollView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalWrapper}>
+            <View style={styles.first_view}>
+              <Text style={styles.createAccount_text}>Logout</Text>
+            </View>
+            <View style={styles.second_view}>
+              <Text style={styles.descriptive_text}>Are you sure you want to logout?</Text>
+            </View>
+            <View style={styles.third_view}>
+              <CustomButton
+                bgColor="#f9efd5"
+                borderRadius={100}
+                txtColor="#E3B12F"
+                textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 19 }}
+                onPress={handleLogoutCancel}
+                padding={6}
+                width={wp('32%')}
+                flexDirection={'row'}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                Cancel
+              </CustomButton>
+              <CustomButton
+                bgColor="#E3B12F"
+                borderRadius={100}
+                txtColor="#FFFEFA"
+                textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 19 }}
+                onPress={handleYesLogout}
+                padding={6}
+                width={wp('32%')}
+                flexDirection={"row"}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                Yes, Logout
+              </CustomButton>
+            </View>
+            
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={deletemodalVisible}
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalWrapper}>
+            <View style={styles.first_view}>
+              <Text style={styles.createAccount_text}>Delete Account</Text>
+            </View>
+            <View style={styles.second_view}>
+              <Text style={styles.descriptive_text}>Are you sure you want to delete your account?</Text>
+            </View>
+            <View style={styles.third_view}>
+              <CustomButton
+                bgColor="#f9efd5"
+                borderRadius={100}
+                txtColor="#E3B12F"
+                textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 19 }}
+                onPress={handleDeleteCancel}
+                padding={6}
+                width={wp('32%')}
+                flexDirection={'row'}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                Cancel
+              </CustomButton>
+              <CustomButton
+                bgColor="#E3B12F"
+                borderRadius={100}
+                txtColor="#FFFEFA"
+                textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 19 }}
+                onPress={handleYesDelete}
+                padding={6}
+                width={wp('32%')}
+                flexDirection={"row"}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                Yes, Delete
+              </CustomButton>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -378,5 +520,61 @@ const styles = StyleSheet.create({
   },
   create_button_view: {
     marginVertical: 14,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalWrapper: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    width: wp('100%'),
+    minHeight: hp('22%'),
+    maxHeight: hp('95%'),
+  },
+  first_view: {
+    marginVertical: 5,
+  },
+  second_view: {
+    marginVertical: 15,
+  },
+  third_view: {
+    width: wp('70%'),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
+    marginVertical: 15,
+
+  },
+  fourth_view: {
+    marginVertical: 5,
+
+  },
+  createAccount_text: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#E3B12F',
+    textAlign: 'center',
+    lineHeight: 31,
+  },
+  descriptive_text: {
+    fontSize: 14,
+    fontWeight: '300',
+    color: '#676767',
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 36,
+    backgroundColor: 'transparent'
   },
 });
