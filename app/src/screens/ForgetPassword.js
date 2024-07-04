@@ -42,12 +42,10 @@ const ForgetPassword = ({ navigation }) => {
         });
     };
 
-    // const handleSendCode = (values) => {
-    //     navigation.navigate('OTP');
-    // };
-
     return (
-        <ScrollView style={{flex: 1,}}>
+        <ScrollView 
+        showsVerticalScrollIndicator={false}
+        style={{flex: 1,}}>
         <Background>
             <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
             <View style={styles.container}>
@@ -58,7 +56,7 @@ const ForgetPassword = ({ navigation }) => {
                     <Icon name="arrow-back-ios" size={22} color="#333333" />
                 </TouchableOpacity>
                 <View style={styles.title}>
-                    <Text style={styles.forget_password_txt}>Forget Password</Text>
+                    <Text style={styles.forget_password_txt}>Forgot Password</Text>
                 </View>
                 <View style={styles.description_view}>
                     <Text style={styles.description_txt}>Please enter your account email address. We will send an OTP code for verification.</Text>

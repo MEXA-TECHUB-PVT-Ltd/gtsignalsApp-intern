@@ -82,7 +82,9 @@ const SignUp = ({navigation}) => {
 
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView 
+    showsVerticalScrollIndicator={false}
+    style={{ flex: 1 }}>
       <Background>
         <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
         <View style={styles.backicon_logo_view}>
@@ -191,10 +193,10 @@ const SignUp = ({navigation}) => {
                 borderWidth={1}
                 borderRadius={100}
                 txtColor="#333333"
-                textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20, paddingLeft: 5 }}
+                textStyle={{ fontSize: 15, fontWeight: '400', lineHeight: 20 }}
                 onPress={handleGoogle}
                 image={Images.googleimage}
-                imageStyle={{ width: 20, height: 20, }}
+                imageStyle={{ width: 20, height: 20, marginRight: 10, }}
                 padding={10}
                 paddingLeft={20}
                 paddingRight={20}
@@ -214,10 +216,10 @@ const SignUp = ({navigation}) => {
                 borderWidth={1}
                 borderRadius={100}
                 txtColor="#333333"
-                textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22, marginLeft: 5, }}
+                textStyle={{ fontSize: 12, fontWeight: '500', lineHeight: 22 }}
                 onPress={handleFacebook}
                 image={Images.facebookimage}
-                imageStyle={{ width: 20, height: 20, }}
+                imageStyle={{ width: 20, height: 20, marginRight: 10 }}
                 padding={6}
                 paddingLeft={20}
                 paddingRight={20}

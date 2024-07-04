@@ -64,7 +64,9 @@ const SignIn = ({navigation}) => {
     };
 
     return (
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView 
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}>
             <Background>
                 <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
                 <View style={styles.backicon_logo_view}>
@@ -322,10 +324,10 @@ const styles = StyleSheet.create({
     },
     fg_text_view: {
         alignSelf: 'flex-end',
-        width: wp('32%'),
+        width: wp('44%'),
         backgroundColor: 'transparent',
         flexDirection: "row",
-        // justifyContent: 'flex-end',
+        justifyContent: 'flex-end',
     },
     fg_text: {
         fontSize: hp('2%'),

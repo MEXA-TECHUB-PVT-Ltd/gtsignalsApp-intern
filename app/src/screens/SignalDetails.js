@@ -12,8 +12,8 @@ const SignalDetails = ({ navigation }) => {
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
     const [isFavorite, setIsFavorite] = useState(false);
-    const [isUserSignedIn, setIsUserSignedIn] = useState(false);
-    const [isAccountCreated, setIsAccountCreated] = useState(false);
+    const [isUserSignedIn, setIsUserSignedIn] = useState(true);
+    const [isAccountCreated, setIsAccountCreated] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     
     const showAlert = (message) => {
@@ -68,7 +68,7 @@ const SignalDetails = ({ navigation }) => {
                 <Header
                     navigation={navigation}
                     headerText="Signal Details"
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={() => navigation.goBack()}
                     rightIcon={{
                         name: isFavorite ? 'heart' : 'heart-outline',
                         size: 22,
@@ -283,11 +283,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
-        marginTop: 20,
+        marginTop: StatusBar.currentHeight|| 0,
     },
     header_view: {
         backgroundColor: 'transparent',
-        height: hp('10%'),
+        marginVertical: hp('2%'),
         justifyContent: 'flex-end',
         paddingBottom: 10,
     },

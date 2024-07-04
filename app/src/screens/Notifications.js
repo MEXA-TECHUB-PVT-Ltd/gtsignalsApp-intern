@@ -87,7 +87,9 @@ const Notifications = ({ navigation }) => {
         <Header headerText={"Notifications"} onPress={handleBackPress} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView 
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollViewContent}>
         {notifications.length === 0 ? (
           <View style={styles.noNotificationsView}>
             <Image source={Images.emptychaticon} style={styles.image} />

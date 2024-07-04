@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
-        marginTop: 20,
+        marginTop: StatusBar.currentHeight || 0,
     },
     main_view: {
         flex: 1,

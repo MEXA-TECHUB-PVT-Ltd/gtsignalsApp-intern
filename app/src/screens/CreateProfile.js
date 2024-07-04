@@ -25,6 +25,21 @@ const CreateProfile = ({ navigation, route }) => {
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
+    const [loadingKey, setLoadingKey] = useState(null);
+
+    const handleButtonPress = (buttonKey, callback) => {
+        setLoadingKey(buttonKey);
+        // Simulate an API call for button action
+        setTimeout(() => {
+            // Assuming user validation
+            const userValidated = true; // Replace with actual validation logic
+            if (userValidated) {
+                callback();
+            } else {
+                setLoadingKey(null);
+            }
+        }, 2000);
+    };
 
     useFocusEffect(
         React.useCallback(() => {
@@ -44,6 +59,7 @@ const CreateProfile = ({ navigation, route }) => {
 
     const handleAddImage = () => {
         setModalVisible(true);
+        setLoadingKey(null);
     };
 
     const requestCameraPermission = async () => {
@@ -141,6 +157,9 @@ const CreateProfile = ({ navigation, route }) => {
                             </View>
                             <View style={styles.add_button_view}>
                                 <CustomButton
+                                    buttonKey="AddImage"
+                                    isLoading={!!loadingKey}
+                                    currentLoadingKey={loadingKey}
                                     width={wp('30%')}
                                     height={hp('4.5%')}
                                     bgColor="#E3B12F"
@@ -224,9 +243,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'transparent',
+        // marginTop: hp('3%'),
     },
     header_view: {
-        marginVertical: hp('2%'),
+        backgroundColor: 'transparent',
+        marginVertical: hp('2.2%'),
     },
     profile_image_view: {
         justifyContent: 'center',

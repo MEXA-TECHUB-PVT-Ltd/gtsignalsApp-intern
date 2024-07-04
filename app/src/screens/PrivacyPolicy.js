@@ -17,7 +17,9 @@ const PrivacyPolicy = ({navigation}) => {
           onPress={handleBackPress}
         headerText="Privacy Policy" />
       </View>
-      <ScrollView style={styles.scroll_view}>
+      <ScrollView 
+      showsVerticalScrollIndicator={false}
+      style={styles.scroll_view}>
        
         <View style={styles.description_texts_view}>
           <Text

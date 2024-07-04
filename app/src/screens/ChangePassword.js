@@ -154,16 +154,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: StatusBar.currentHeight,
-        marginTop: hp('2.9%'),
+        marginTop: StatusBar.currentHeight || 0,
     },
     main_view: {
         flex: 1,
         backgroundColor: 'transparent',
         paddingHorizontal: wp('2%'),
-        paddingVertical: hp('3%'),
+        // paddingVertical: hp('3%'),
     },
     header_view: {
+        marginVertical: hp('3%'),
+        backgroundColor: 'transparent',
         paddingHorizontal: wp('2%')
     },
     input_view: {

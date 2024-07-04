@@ -16,7 +16,7 @@ import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
-    email: Yup.string().email('Invalid email formate').required('Email is required'),
+    email: Yup.string().email('Invalid email formate'),
 });
 
 const EditProfile = ({ navigation, route }) => {
@@ -113,13 +113,15 @@ const EditProfile = ({ navigation, route }) => {
                 />
             </View>
             
-            <ScrollView style={{ flex: 1 }}>
+            <ScrollView 
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}>
                 <Formik
                     initialValues={{ fullName: '', email: '' }}
                     validationSchema={validationSchema}
                     onSubmit={(values, actions) => {
                         actions.validateForm().then(() => {
-                            if (!values.fullName || !values.email) {
+                            if (!values.fullName) {
                                 actions.setSubmitting(false);
                                 return;
                             }
@@ -254,7 +256,7 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         backgroundColor: 'white',
-        marginTop: 20,
+        marginTop: StatusBar.currentHeight || 0,
     },
     container: {
         // flex: 1,

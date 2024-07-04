@@ -46,6 +46,7 @@ const SearchSignal = ({ navigation }) => {
                 <>
                     <Text style={styles.searchResultsText}>Search Results</Text>
                     <FlatList
+                        showsVerticalScrollIndicator={false}
                         data={filteredData}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item }) => <SignalCard style={styles.resultItem}>{item.title}</SignalCard>}

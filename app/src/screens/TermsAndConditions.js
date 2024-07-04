@@ -17,7 +17,9 @@ const TermsAndConditions = ({ navigation }) => {
           onPress={handleBackPress}
           headerText="Terms & Conditions" />
       </View>
-      <ScrollView style={styles.scroll_view}>
+      <ScrollView 
+      showsVerticalScrollIndicator={false}
+      style={styles.scroll_view}>
 
         <View style={styles.description_texts_view}>
           <Text
