@@ -101,7 +101,9 @@ const Account = ({navigation}) => {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.links_view}>
+      <TouchableOpacity 
+        onPress={() => navigation.navigate('Chat')}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='chatbubble-ellipses-sharp' size={20} color="#E3B12F" />
@@ -117,7 +119,9 @@ const Account = ({navigation}) => {
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.links_view}>
+        <TouchableOpacity 
+        onPress={() => navigation.navigate('WishList')}
+        style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='heart-sharp' size={20} color="#E3B12F" />
@@ -358,10 +362,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding: 20,
+    paddingHorizontal: 20,
+  },
+  scroll_view: {
+
   },
   headerContainer: {
-    height: hp('8%'),
+    height: hp('10%'),
     marginVertical: 10,
     justifyContent: 'center',
     alignItems: 'center',

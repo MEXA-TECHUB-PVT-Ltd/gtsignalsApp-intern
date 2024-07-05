@@ -103,7 +103,9 @@ const OTP = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={{flex:1}}>
+        <ScrollView 
+        showsVerticalScrollIndicator={false}
+        style={{flex:1}}>
         <Background>
             <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
             <View style={styles.container}>
@@ -177,11 +179,13 @@ export default OTP;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'transparent',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: hp('4%'),
+        backgroundColor: 'transparent',
+        marginVertical: hp('3%'),
     },
     title: {
         justifyContent: 'flex-start',

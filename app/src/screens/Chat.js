@@ -5,14 +5,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AppLogo from '../components/AppLogo';
-import EmojiPicker from 'rn-emoji-keyboard'; // Import EmojiPicker
+import EmojiPicker from 'rn-emoji-keyboard';
 
 const Chat = ({ navigation }) => {
     const [messages, setMessages] = useState([]);
     const [showEmojiKeyboard, setShowEmojiKeyboard] = useState(false);
     const [inputText, setInputText] = useState('');
 
-    // Define keyword responses
     const keywordResponses = {
         a: "Welcome to GT_Signals app. Hope you would like it.",
         bitcoin: "The current price of Bitcoin is $35,000.",
@@ -33,6 +32,7 @@ const Chat = ({ navigation }) => {
     };
 
     useEffect(() => {
+        //you can set any custom message here to be shown auto when screen renders first tiem
         // Initialize with an empty array to start with no messages
         setMessages([]);
     }, []);
@@ -170,9 +170,6 @@ const Chat = ({ navigation }) => {
                     value={inputText}
                     multiline={true}
                     onChangeText={setInputText}
-                    // keyboardType={showEmojiKeyboard ? 'default' : 'visible-password'} // Use 'visible-password' for emoji keyboard
-                    // keyboardType={showEmojiKeyboard ? 'default' : 'visible-password'} // Use 'visible-password' for emoji keyboard
-                    // onFocus={() => setShowEmojiKeyboard(false)} // Close emoji keyboard when focusing on text input
                 />
             </View>
             <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
@@ -184,15 +181,15 @@ const Chat = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
-            <View style={styles.backicon_logo_view}>
+            <View style={styles.backicon_view}>
                 <TouchableOpacity
                     style={styles.icon_view}
-                    onPress={() => navigation.navigate('Brokers')}>
+                    onPress={() => navigation.goBack()}>
                     <Icon name="arrow-back-ios" size={22} color="#333333" />
                 </TouchableOpacity>
-                <View style={styles.logo_view}>
-                    <AppLogo />
-                </View>
+            </View>
+            <View style={styles.logo_view}>
+                <AppLogo />
             </View>
             <View style={styles.lets_talk_view}>
                 <Text style={styles.lets_talk_text}>Let's Talk!</Text>
@@ -232,27 +229,25 @@ const styles = StyleSheet.create({
         padding: 24,
         paddingBottom: 10,
     },
-    backicon_logo_view: {
-        flexDirection: 'row',
+    backicon_view: {
         backgroundColor: 'transparent',
-        marginVertical: 30,
+        marginTop: hp('2%'),
+        marginHorizontal: 10,
     },
     icon_view: {
-        position: 'absolute',
-        zIndex: 1,
         alignSelf: 'flex-start',
         backgroundColor: 'transparent',
     },
     logo_view: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'transparent',
     },
     lets_talk_view: {
+        marginVertical: hp('2%'),
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 10,
+
     },
     lets_talk_text: {
         fontSize: 25,

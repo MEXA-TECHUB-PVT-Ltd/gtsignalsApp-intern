@@ -34,7 +34,9 @@ const Home = ({ navigation }) => {
         </ImageBackground>
       </View>
       <View style={styles.main_view}>
-        <ScrollView style={styles.cards_view}>
+        <ScrollView
+        showsVerticalScrollIndicator={false} 
+        style={styles.scroll_view}>
           <SignalCard buttonType={buttonType} />
           <SignalCard />
           <SignalCard />
@@ -51,7 +53,7 @@ export default Home
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
   },
   header_view: {
     width: wp('100%'),
@@ -93,9 +95,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center', 
   },
-  cards_view: {
+  scroll_view: {
     // width: wp('88%'),
-    backgroundColor: 'transparent',
+    backgroundColor: 'white',
     marginTop: 16,
   },
 });

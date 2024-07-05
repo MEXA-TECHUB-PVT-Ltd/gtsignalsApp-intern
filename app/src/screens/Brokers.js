@@ -16,7 +16,7 @@ const Brokers = () => {
       <View style={styles.main_view}>
         <ScrollView 
         showsVerticalScrollIndicator={false}
-        style={styles.cards_view}>
+        style={styles.scroll_view}>
           <BrokersCard />
           <BrokersCard />
           <BrokersCard />
@@ -35,7 +35,7 @@ export default Brokers;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
   },
   headerContainer: {
     height: hp('6.5%'),
@@ -58,9 +58,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
   },
-  cards_view: {
+  scroll_view: {
     // width: wp('88%'),
-    backgroundColor: 'transparent',
+    backgroundColor: '#FFFFFF',
     marginTop: 12,
   },
 });

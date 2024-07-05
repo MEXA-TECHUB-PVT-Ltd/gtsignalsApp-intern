@@ -33,6 +33,7 @@ import TermsAndConditions from './app/src/screens/TermsAndConditions';
 import InviteFriends from './app/src/screens/InviteFriends';
 import ChangePassword from './app/src/screens/ChangePassword';
 import PremiumPlans from './app/src/screens/PremiumPlans';
+import WishList from './app/src/screens/WishList';
 
 //components
 import Background from './app/src/components/Background';
@@ -164,14 +165,11 @@ const TabNavigator = ({ navigation }) => (
 const MainStack = () => (
   <Stack.Navigator>
    
-
-    {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} />
-    <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
-
-    {/* <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} /> */}
-
+    {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} /> */}
+    {/* <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
+    <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
     {/* <Stack.Screen name="Modal" component={Modal} options={{ headerShown: false }} /> */}
-    
+  
     {/* <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} /> */}
     {/* <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
    
@@ -194,6 +192,7 @@ const MainStack = () => (
     <Stack.Screen name="InviteFriends" component={InviteFriends} options={{ headerShown: false }} />
     <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerShown: false }} />
     <Stack.Screen name="PremiumPlans" component={PremiumPlans} options={{ headerShown: false }} />
+    <Stack.Screen name="WishList" component={WishList} options={{ headerShown: false }} />
 
   </Stack.Navigator>
 );
