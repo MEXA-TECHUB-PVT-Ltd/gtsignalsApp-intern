@@ -72,7 +72,12 @@ const UploadPhoto = ({ route, navigation }) => {
           alignItems='center'
           txtColor="#FFFFFF"
           textStyle={{ fontSize: 14, fontWeight: '500', lineHeight: 18 }}
-          onPress={() => navigation.navigate('CreateProfile', { imageUri })}
+          onPress={() => (
+            fromCreate
+              ? navigation.navigate('CreateProfile', { imageUri })
+              : navigation.navigate('EditProfile', { imageUri })
+          )}
+          // onPress={() => navigation.navigate('CreateProfile', { imageUri })}
           marginVertical={10}
         >
           Add Photo
