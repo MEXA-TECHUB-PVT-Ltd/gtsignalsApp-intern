@@ -188,12 +188,12 @@ const Chat = ({ navigation }) => {
                     <Icon name="arrow-back-ios" size={22} color="#333333" />
                 </TouchableOpacity>
             </View>
-            <View style={styles.logo_view}>
+            {/* <View style={styles.logo_view}>
                 <AppLogo />
             </View>
             <View style={styles.lets_talk_view}>
                 <Text style={styles.lets_talk_text}>Let's Talk!</Text>
-            </View>
+            </View> */}
 
             <GiftedChat
                 messages={messages}

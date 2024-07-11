@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, StatusBar, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -8,9 +9,13 @@ import AppLogo from '../components/AppLogo';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import CustomDivider from '../components/CustomDivider';
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import Alert from '../components/Alert';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
+
+import { useDispatch, useSelector } from 'react-redux';
+// import { signup, resetStatus } from '../redux/adminSlice';
+import {userRegister, resetStatus} from '../redux/userSlice';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -28,15 +33,18 @@ const validationSchema = Yup.object().shape({
 });
 
 const SignUp = ({navigation}) => {
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
+
   const [loadingKey, setLoadingKey] = useState(null);
   const [focusedInput, setFocusedInput] = useState(false);
+  const dispatch = useDispatch();
 
   const handleButtonPress = (buttonKey, callback) => {
     setLoadingKey(buttonKey);
-    // Simulate an API call for button action
     setTimeout(() => {
-      // Assuming user validation
-      const userValidated = true; // Replace with actual validation logic
+      const userValidated = true;
       if (userValidated) {
         callback();
       } else {
@@ -45,18 +53,33 @@ const SignUp = ({navigation}) => {
     }, 1000);
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = (values) => {
+    console.log(values)
     handleButtonPress('SignUp', () => {
-      navigation.navigate('CreateProfile');
-      setLoadingKey(null);
-      // resetForm();
+      dispatch(userRegister(values))
+        .unwrap()
+        .then((response) => {
+          console.log(response);
+          setAlertMessage(response.msg);
+          setAlertType('success');
+          setAlertVisible(true);
+          setTimeout(() => {
+            setAlertVisible(false);
+            navigation.navigate('CreateProfile');
+            setLoadingKey(null);
+            dispatch(resetStatus());
+          }, 2000);
+        })
+        .catch((error) => {
+          console.log(error);
+          setLoadingKey(null);
+          setAlertMessage(error.msg);
+          setAlertType('error');
+          setAlertVisible(true);
+          setTimeout(() => setAlertVisible(false), 2000);
+        });
     });
   };
-
-  // const handleSignUp = (values, { resetForm }) => {
-  //   navigation.navigate('CreateProfile');
-  //   resetForm();
-  // };
 
   const handleGoogle = () => {
     handleButtonPress('Google', () => {
@@ -84,9 +107,11 @@ const SignUp = ({navigation}) => {
   return (
     <ScrollView 
     showsVerticalScrollIndicator={false}
-    style={{ flex: 1 }}>
+    style={styles.scroll_view}>
+      <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
       <Background>
-        <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
+        <View style={styles.container}>
+        <Alert successMessage={alertMessage} visible={alertVisible} type={alertType} />
         <View style={styles.backicon_logo_view}>
           <TouchableOpacity
             style={styles.icon_view}
@@ -302,6 +327,7 @@ const SignUp = ({navigation}) => {
             <Text style={styles.sign_in_txt}>Sign In</Text>
           </TouchableOpacity>
         </View>
+        </View>
       </Background>
     </ScrollView>
   );
@@ -310,10 +336,17 @@ const SignUp = ({navigation}) => {
 export default SignUp;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: StatusBar.currentHeight,
+  },
+  scroll_view: {
+    flex: 1,
+  },
   backicon_logo_view: {
     flexDirection: 'row',
     backgroundColor: 'transparent',
-    marginVertical: 30,
+    marginBottom: 32,
   },
   icon_view: {
     alignSelf: 'flex-start',

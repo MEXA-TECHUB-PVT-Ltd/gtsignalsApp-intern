@@ -4,6 +4,8 @@ import React from 'react';
 import 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { Provider } from 'react-redux';
+import store from './app/src/redux/store';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -164,15 +166,15 @@ const TabNavigator = ({ navigation }) => (
 
 const MainStack = () => (
   <Stack.Navigator>
-   
+
     {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} /> */}
     {/* <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
     <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
     {/* <Stack.Screen name="Modal" component={Modal} options={{ headerShown: false }} /> */}
-  
+
     {/* <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} /> */}
     {/* <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
-   
+
     <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
     <Stack.Screen name="SignalDetails" component={SignalDetails} options={{ headerShown: false }} />
     <Stack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }} />
@@ -199,13 +201,15 @@ const MainStack = () => (
 
 const App = () => {
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeArea}>
-        <NavigationContainer>
-          <MainStack />
-        </NavigationContainer>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.safeArea}>
+          <NavigationContainer>
+            <MainStack />
+          </NavigationContainer>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </Provider>
   )
 }
 

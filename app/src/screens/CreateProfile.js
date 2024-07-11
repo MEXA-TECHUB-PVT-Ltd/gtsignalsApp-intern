@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, StatusBar, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, Image, Alert, ScrollView, StatusBar, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Background from '../components/Background';
 import Header from '../components/Header';
 import CustomButton from '../components/CustomButton';
@@ -16,6 +16,9 @@ import AlertComponent from '../components/Alert';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile } from '../redux/userSlice';
+
 const validationSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
 });
@@ -26,6 +29,9 @@ const CreateProfile = ({ navigation, route }) => {
     const [focusedInput, setFocusedInput] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
     const [loadingKey, setLoadingKey] = useState(null);
+
+    const dispatch = useDispatch();
+    const { updateStatus, error } = useSelector(state => state.user);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
@@ -120,6 +126,25 @@ const CreateProfile = ({ navigation, route }) => {
         />
     );
 
+    const handleSubmit = async (values, actions) => {
+        const userData = { name: values.fullName, image: profileImage };
+        try {
+            const result = await dispatch(updateProfile(userData));
+            if (updateProfile.fulfilled.match(result)) {
+                setAlertVisible(true);
+                setTimeout(() => {
+                    setAlertVisible(false);
+                    navigation.navigate('SignIn');
+                }, 1600);
+            } else {
+                Alert.alert('Error', result.error.message || 'Something went wrong');
+            }
+        } catch (err) {
+            console.error('Error updating profile:', err);
+            Alert.alert('Error', 'Something went wrong');
+        }
+    };
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <Background>
@@ -127,16 +152,32 @@ const CreateProfile = ({ navigation, route }) => {
                 <Formik
                     initialValues={{ fullName: '' }}
                     validationSchema={validationSchema}
-                    onSubmit={(values, actions) => {
-                        actions.validateForm().then(() => {
-                            actions.setSubmitting(false);
-                            setAlertVisible(true);
-                            setTimeout(() => {
-                                setAlertVisible(false);
-                                navigation.navigate('SignIn');
-                            }, 1600);
-                        });
-                    }}
+                    onSubmit={handleSubmit}
+                    // onSubmit={(values, actions) => {
+                    //     const userData = { name: values.fullName, image: profileImage };
+                    //     dispatch(updateProfile(userData)).then((result) => {
+                    //         if (updateProfile.fulfilled.match(result)) {
+                    //             setAlertVisible(true);
+                    //             setTimeout(() => {
+                    //                 setAlertVisible(false);
+                    //                 // navigation.navigate('SignIn');
+                    //             }, 1600);
+                    //         } else {
+                    //             Alert.alert('Error', result.error.msg || 'Something went wrong');
+                    //         }
+                    //     });
+                    // }}
+
+                    // onSubmit={(values, actions) => {
+                    //     actions.validateForm().then(() => {
+                    //         actions.setSubmitting(false);
+                    //         setAlertVisible(true);
+                    //         setTimeout(() => {
+                    //             setAlertVisible(false);
+                    //             navigation.navigate('SignIn');
+                    //         }, 1600);
+                    //     });
+                    // }}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>

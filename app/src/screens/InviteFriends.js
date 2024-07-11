@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, StatusBar } from 'react-native'
+import { StyleSheet, Text, View, Image, StatusBar, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Images from '../consts/images';
@@ -41,6 +41,11 @@ const InviteFriends = ({ navigation }) => {
 
     const handleShare = () => {
         setModalVisible(true);
+    };
+
+    const handleIconPress = (label) => {
+        console.log(`${label} icon pressed`);
+        // You can add logic here to open relevant app or link
     };
 
     return (
@@ -116,28 +121,28 @@ const InviteFriends = ({ navigation }) => {
                     <View style={styles.modalWrapper}>
                         <View style={styles.row_view}>
                             {firstRowOptions.map((option, index) => (
-                                <View key={option.label} style={styles.icon_text_view}>
-                                    <View style={styles.icon_backgrounnd}>
+                                <TouchableOpacity key={option.label} style={styles.icon_text_view} onPress={() => handleIconPress(option.label)}>
+                                    <View style={styles.icon_background}>
                                         <Image
                                             source={option.icon}
                                             style={styles.image}
                                         />
                                     </View>
                                     <Text style={styles.text}>{option.label}</Text>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                         <View style={styles.row_view}>
                             {secondRowOptions.map((option, index) => (
-                                <View key={index} style={styles.icon_text_view}>
-                                    <View style={styles.icon_backgrounnd}>
+                                <TouchableOpacity key={option.label} style={styles.icon_text_view} onPress={() => handleIconPress(option.label)}>
+                                    <View style={styles.icon_background}>
                                         <Image
                                             source={option.icon}
                                             style={styles.image}
                                         />
                                     </View>
                                     <Text style={styles.text}>{option.label}</Text>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     </View>
@@ -217,7 +222,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    icon_backgrounnd: {
+    icon_background: {
         width: wp('12%'),
         height: wp('12%'),
         backgroundColor: '#f5f5f5',
@@ -228,7 +233,6 @@ const styles = StyleSheet.create({
     image: {
         width: wp('7%'),
         height: wp('7%'),
-        // borderRadius: 50,
         resizeMode: 'contain',
     },
     text: {
@@ -257,4 +261,4 @@ const styles = StyleSheet.create({
         minHeight: hp('22%'),
         maxHeight: hp('95%'),
     },
-})
+});

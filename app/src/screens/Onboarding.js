@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent'
     },
     bta_text: {
-        fontFamily: 'Roboto-Italic',
+        fontFamily: 'PlaywriteGBS-ExtraLight',
         fontSize: hp('5%'),
         fontWeight: '700',
         lineHeight: 38,
