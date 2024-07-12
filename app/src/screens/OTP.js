@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '../components/CustomButton';
 import Background from '../components/Background';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Alert from '../components/Alert';
-import { ScrollView } from 'react-native-gesture-handler';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
 
-const OTP = ({ navigation }) => {
+const OTP = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [loadingKey, setLoadingKey] = useState(null);
     const [otp, setOtp] = useState(['', '', '', '']);
@@ -15,14 +16,19 @@ const OTP = ({ navigation }) => {
     const [timer, setTimer] = useState(60);
     const [borderColors, setBorderColors] = useState(['#cccccc', '#cccccc', '#cccccc', '#cccccc']);
     const inputRefs = useRef([]);
-    const [isAlertVisible, setAlertVisible] = useState(false);
+    const [isAlertVisible, setisAlertVisible] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('success');
+    const [alertVisible, setAlertVisible] = useState(false);
+
+    // const { otp: serverOtp } = route.params || {}; // Extract OTP from navigation params
+    const { otp: serverOtp, email: email } = route.params || {};
+    // console.log(email);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
-        // Simulate an API call for button action
         setTimeout(() => {
-            // Assuming user validation
-            const userValidated = true; // Replace with actual validation logic
+            const userValidated = true;
             if (userValidated) {
                 callback();
             } else {
@@ -31,11 +37,20 @@ const OTP = ({ navigation }) => {
         }, 1000);
     };
 
-    const handleConfirm = () => {
-        handleButtonPress('Confirm', () => {
-            navigation.navigate('ResetPassword');
-            setLoadingKey(null);
-        });
+    const handleConfirm = (values) => {
+        if (otp.join('') === serverOtp) {
+            handleButtonPress('Confirm', () => {
+                // navigation.navigate('ResetPassword');
+                navigation.navigate('ResetPassword', { email: route.params.email });
+                // console.log(email);
+                setLoadingKey(null);
+            });
+        } else {
+            setAlertMessage('Invalid OTP');
+            setAlertType('error');
+            setAlertVisible(true);
+            setTimeout(() => setAlertVisible(false), 1000);
+        }
     };
 
     const handleResendCode = () => {
@@ -43,8 +58,8 @@ const OTP = ({ navigation }) => {
             console.log('Code resent');
             setIsResendEnabled(false);
             setTimer(60);
-            setAlertVisible(true);
-            setTimeout(() => setAlertVisible(false), 2000);
+            setisAlertVisible(true);
+            setTimeout(() => setisAlertVisible(false), 2000);
         }
     };
 
@@ -63,10 +78,11 @@ const OTP = ({ navigation }) => {
         return () => clearInterval(countdown);
     }, [isResendEnabled]);
 
-    const handleOtpChange = (text, index) => {
+    const handleOtpChange = (text, index, setFieldValue) => {
         const newOtp = [...otp];
         newOtp[index] = text;
         setOtp(newOtp);
+        setFieldValue(`otp[${index}]`, text);
 
         if (text && index < 3) {
             inputRefs.current[index + 1].focus();
@@ -90,87 +106,108 @@ const OTP = ({ navigation }) => {
         setBorderColors(newBorderColors);
     };
 
-    const handleKeyPress = ({ nativeEvent }, index) => {
+    const handleKeyPress = ({ nativeEvent }, index, setFieldValue) => {
         if (nativeEvent.key === 'Backspace' && !otp[index]) {
             if (index > 0) {
                 inputRefs.current[index - 1].focus();
                 const newOtp = [...otp];
                 newOtp[index - 1] = '';
                 setOtp(newOtp);
+                setFieldValue(`otp[${index - 1}]`, '');
                 changeBorderColor(index - 1, '#ADADAD');
             }
         }
     };
 
-    return (
-        <ScrollView 
-        showsVerticalScrollIndicator={false}
-        style={{flex:1}}>
-        <Background>
-            <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
-            <View style={styles.container}>
-                <TouchableOpacity 
-                onPress={() => navigation.navigate('ForgetPassword')}
-                style={styles.header}>
-                    <Icon name="arrow-back-ios" size={22} color="#333333" />
-                </TouchableOpacity>
-                <View style={styles.title}>
-                    <Text style={styles.forget_password_txt}>You've got mail</Text>
-                </View>
-                <View style={styles.description}>
-                    <Text style={styles.description_txt}>
-                        We have sent the OTP verification code to your email address. Check your email and enter the code below.
-                    </Text>
-                </View>
-                <View style={styles.inputContainer}>
-                    {otp.map((digit, index) => (
-                        <TextInput
-                            key={index}
-                            ref={(ref) => (inputRefs.current[index] = ref)}
-                            style={[styles.otpInput, { borderColor: borderColors[index] }]}
-                            value={digit}
-                            onChangeText={(text) => handleOtpChange(text, index)}
-                            onFocus={() => handleFocus(index)}
-                            onBlur={() => handleBlur(index)}
-                            onKeyPress={(e) => handleKeyPress(e, index)}
-                            maxLength={1}
-                            keyboardType="numeric"
-                            textAlign='center'
-                            color="#000"
-                        />
-                    ))}
-                </View>
-                <View style={styles.resend_text_view}>
-                    <TouchableOpacity onPress={handleResendCode} disabled={!isResendEnabled}>
-                        <Text style={[styles.resend_text, !isResendEnabled && styles.resend_text_disabled]}>Resend Code</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.in_text}> in </Text>
-                    <Text style={styles.timer_text}>{timer} s</Text>
-                </View>
-                <View style={styles.buttonContainer}>
-                    <CustomButton
-                        buttonKey="Confirm"
-                        isLoading={!!loadingKey}
-                        currentLoadingKey={loadingKey}
-                        loaderColor="#FFF"
-                        bgColor="#E3B12F"
-                        borderRadius={100}
-                        txtColor="#FFFFFF"
-                        textStyle={{ fontSize: 19, fontWeight: '500', lineHeight: 22 }}
-                        onPress={handleConfirm}
-                        padding={10}
-                        flex={1}
-                        flexDirection={'row'}
-                        justifyContent={'center'}
-                    >
-                        Confirm
-                    </CustomButton>
-                </View>
-                <Alert successMessage="code resent successfully" visible={isAlertVisible} />
-            </View>
-        </Background>
-        </ScrollView>
+    const validationSchema = Yup.object().shape({
+        otp: Yup.array()
+            .of(Yup.string().length(1, 'Must be exactly 1 digit').required('Required'))
+            .min(4, 'Enter 4 digit OTP')
+            .max(4, 'Enter 4 digit OTP')
+    });
 
+    return (
+        <Formik
+            initialValues={{ otp: ['', '', '', ''] }}
+            validationSchema={validationSchema}
+            onSubmit={handleConfirm}
+        >
+            {({ handleSubmit, setFieldValue, errors, touched }) => (
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={{ flex: 1 }}>
+                        <Background>
+                            <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
+                            <View style={styles.container}>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('ForgetPassword')}
+                                    style={styles.header}>
+                                    <Icon name="arrow-back-ios" size={22} color="#333333" />
+                                </TouchableOpacity>
+                                <View style={styles.title}>
+                                    <Text style={styles.forget_password_txt}>You've got mail</Text>
+                                </View>
+                                <View style={styles.description}>
+                                    <Text style={styles.description_txt}>
+                                        We have sent the OTP verification code to your email address. Check your email and enter the code below.
+                                    </Text>
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    {otp.map((digit, index) => (
+                                        <TextInput
+                                            key={index}
+                                            ref={(ref) => (inputRefs.current[index] = ref)}
+                                            style={[
+                                                styles.otpInput,
+                                                { borderColor: borderColors[index] },
+                                                touched.otp && errors.otp && errors.otp[index] && { borderColor: 'red' },
+                                            ]}
+                                            value={digit}
+                                            onChangeText={(text) => handleOtpChange(text, index, setFieldValue)}
+                                            onFocus={() => handleFocus(index)}
+                                            onBlur={() => handleBlur(index)}
+                                            onKeyPress={(e) => handleKeyPress(e, index, setFieldValue)}
+                                            maxLength={1}
+                                            keyboardType="numeric"
+                                            textAlign='center'
+                                            color="#000"
+                                        />
+                                    ))}
+                                </View>
+                                {errors.otp && touched.otp && <Text style={styles.errorText}>Enter 4 digit OTP</Text>}
+                                <View style={styles.resend_text_view}>
+                                    <TouchableOpacity onPress={handleResendCode} disabled={!isResendEnabled}>
+                                        <Text style={[styles.resend_text, !isResendEnabled && styles.resend_text_disabled]}>Resend Code</Text>
+                                    </TouchableOpacity>
+                                    <Text style={styles.in_text}> in </Text>
+                                    <Text style={styles.timer_text}>{timer} s</Text>
+                                </View>
+                                <View style={styles.buttonContainer}>
+                                    <CustomButton
+                                        buttonKey="Confirm"
+                                        isLoading={!!loadingKey}
+                                        currentLoadingKey={loadingKey}
+                                        loaderColor="#FFF"
+                                        bgColor="#E3B12F"
+                                        borderRadius={100}
+                                        txtColor="#FFFFFF"
+                                        textStyle={{ fontSize: 19, fontWeight: '500', lineHeight: 22 }}
+                                        onPress={handleSubmit}
+                                        padding={10}
+                                        flex={1}
+                                        flexDirection={'row'}
+                                        justifyContent={'center'}
+                                    >
+                                        Confirm
+                                    </CustomButton>
+                                </View>
+                                <Alert successMessage={alertMessage} visible={alertVisible} type={alertType} />
+                                <Alert successMessage="code resent successfully" visible={isAlertVisible} />
+                            </View>
+                        </Background>
+                    </View>
+                </TouchableWithoutFeedback>
+            )}
+        </Formik>
     );
 };
 
@@ -210,7 +247,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        marginTop: hp('10%'),
+        marginTop: hp('8%'),
     },
     otpInput: {
         width: wp('12%'),
@@ -258,6 +295,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
-        marginVertical: 142,
+    },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginTop: hp('2%'),
     },
 });

@@ -8,7 +8,6 @@ import CustomButton from '../components/CustomButton';
 import Background from '../components/Background';
 import AlertComponent from '../components/Alert';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import AppLogo from '../components/AppLogo';
 import { ScrollView } from 'react-native-gesture-handler';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,17 +23,15 @@ const ForgetPassword = ({ navigation }) => {
     const [loadingKey, setLoadingKey] = useState(null);
     const [focusedInput, setFocusedInput] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState('success'); // Default to 'success' or 'error'
+    const [alertType, setAlertType] = useState('success');
     const [alertVisible, setAlertVisible] = useState(false);
     const dispatch = useDispatch();
     const forgetPasswordStatus = useSelector(state => state.user.forgetPasswordStatus);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
-        // Simulate an API call for button action
         setTimeout(() => {
-            // Assuming user validation
-            const userValidated = true; // Replace with actual validation logic
+            const userValidated = true;
             if (userValidated) {
                 callback();
             } else {
@@ -43,45 +40,35 @@ const ForgetPassword = ({ navigation }) => {
         }, 1000);
     };
 
-    const handleSendCode = async (values) => {
-        try {
-            setLoadingKey('Send Code');
-            const actionResult = await dispatch(userForgetPassword(values.email)); // Dispatch userForgetPassword action with email
-            if (userForgetPassword.fulfilled.match(actionResult)) {
-                // Handle success
-                setAlertMessage('Code sent successfully');
+    const handleSendCode = (values) => {
+        handleButtonPress('sendCode', async () => {
+            try {
+                setLoadingKey('Send Code');
+                const actionResult = await dispatch(userForgetPassword(values.email)).unwrap();
+                console.log(actionResult);
+                // Extract the OTP from the response
+                const otp = actionResult.otp;
+                setAlertMessage(actionResult.msg);
                 setAlertType('success');
                 setAlertVisible(true);
                 setTimeout(() => {
                     setAlertVisible(false);
-                    navigation.navigate('OTP'); // Navigate to OTP screen
-                    dispatch(resetStatus()); // Reset forgetPasswordStatus
+                    // navigation.navigate('OTP', { otp });
+                    navigation.navigate('OTP', { otp, email: values.email });
+                    dispatch(resetStatus());
                     setLoadingKey(null);
                 }, 2000);
-            } else if (userForgetPassword.rejected.match(actionResult)) {
-                // Handle failure
-                setAlertMessage(actionResult.error.message || 'Failed to send code');
+
+            } catch (error) {
+                console.log(error);
+                setAlertMessage(error.msg);
                 setAlertType('error');
                 setAlertVisible(true);
                 setLoadingKey(null);
                 setTimeout(() => setAlertVisible(false), 2000);
             }
-        } catch (error) {
-            console.error('Error sending code:', error);
-            setAlertMessage('Something went wrong. Please try again.');
-            setAlertType('error');
-            setAlertVisible(true);
-            setLoadingKey(null);
-            setTimeout(() => setAlertVisible(false), 2000);
-        }
+        });
     };
-
-    // const handleSendCode = (values) => {
-    //     handleButtonPress('Send Code', () => {
-    //         navigation.navigate('OTP');
-    //         setLoadingKey(null);
-    //     });
-    // };
 
     return (
         <ScrollView

@@ -1,32 +1,26 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import React from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import FAIcon from 'react-native-vector-icons/FontAwesome6';
 import CustomButton from './CustomButton';
 import CustomDivider from './CustomDivider';
-import Images from '../consts/images';
-import Alert from './Alert';
 import { useNavigation } from '@react-navigation/native';
 
-const SignalCard = ({ buttonType, onCopyPress }) => {
+const SignalCard = ({ signal }) => {
     const navigation = useNavigation();
-    const isBuy = buttonType === 'buy';
+    const { signal_id, title, price, date, time, action, stop_loss, profit_loss, take_profit } = signal;
 
-    const handle_copy_press = () => {
-        navigation.navigate('SignalDetails');
-    };
-    const handle_buy_press = () => {
-        navigation.navigate('SignalDetails');
+    const isBuy = action === 'BUY';
+
+    const handleDetailsPress = () => {
+        navigation.navigate('SignalDetails', { signal });
     };
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity 
-            onPress={() => navigation.navigate('SignalDetails')}
-            style={styles.card_view}>
+            <TouchableOpacity onPress={handleDetailsPress} style={styles.card_view}>
                 <View style={styles.card_view1}>
                     <View style={styles.left_view}>
-                        <Text style={styles.currency_text}>NZD/USD</Text>
+                        <Text style={styles.currency_text}>{title}</Text>
                         <CustomButton
                             bgColor="#FFFFFF"
                             borderColor={isBuy ? "#02C121" : "#FF0000"}
@@ -34,7 +28,7 @@ const SignalCard = ({ buttonType, onCopyPress }) => {
                             borderRadius={6}
                             txtColor={isBuy ? "#02C121" : "#FF0000"}
                             textStyle={{ fontSize: 13, fontWeight: '400', lineHeight: 15 }}
-                            onPress={handle_buy_press}
+                            onPress={() => { }}
                             icon={isBuy ? "trending-up" : "trending-down"}
                             iconSize={18}
                             iconColor={isBuy ? "#02C121" : "#FF0000"}
@@ -47,39 +41,39 @@ const SignalCard = ({ buttonType, onCopyPress }) => {
                             justifyContent={'space-between'}
                             disableFeedback={true}
                         >
-                            {isBuy ? "BUY" : "SELL"}
+                            {action}
                         </CustomButton>
                     </View>
                     <View style={styles.right_view}>
-                        <Text style={styles.price_text}>$113.22</Text>
+                        <Text style={styles.price_text}>${price}</Text>
                     </View>
                 </View>
                 <View style={styles.card_view2}>
                     <View style={styles.left_view}>
-                        <Text style={styles.date_text}>27-oct-2023, 08:20 AM</Text>
+                        <Text style={styles.date_text}>{date}, {time}</Text>
                     </View>
                     <View style={styles.right_view}>
-                    <CustomButton
-                        bgColor="#E3B12F"
-                        borderRadius={6}
-                        txtColor="#FFFFFF"
-                        textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 15 }}
-                        onPress={handle_copy_press}
-                        icon="copy-outline"
-                        iconSize={16}
-                        iconColor={"#FFFFFF"}
-                        marginRight={100}
-                        paddingLeft={8}
-                        paddingRight={5}
-                        width={wp('21.5%')}
-                        height={hp('3.8%')}
-                        flexDirection={'row'}
-                        alignItems={'center'}
-                        justifyContent={'space-between'}
-                        disableFeedback={true}
-                    >
-                        Copy
-                    </CustomButton>
+                        <CustomButton
+                            bgColor="#E3B12F"
+                            borderRadius={6}
+                            txtColor="#FFFFFF"
+                            textStyle={{ fontSize: 13, fontWeight: '500', lineHeight: 15 }}
+                            onPress={() => { }}
+                            icon="copy-outline"
+                            iconSize={16}
+                            iconColor={"#FFFFFF"}
+                            marginRight={100}
+                            paddingLeft={8}
+                            paddingRight={5}
+                            width={wp('21.5%')}
+                            height={hp('3.8%')}
+                            flexDirection={'row'}
+                            alignItems={'center'}
+                            justifyContent={'space-between'}
+                            disableFeedback={true}
+                        >
+                            Copy
+                        </CustomButton>
                     </View>
                 </View>
                 <View style={styles.card_view3}>
@@ -88,32 +82,37 @@ const SignalCard = ({ buttonType, onCopyPress }) => {
                 <View style={styles.card_view4}>
                     <View style={styles.left_view}>
                         <Text style={styles.profit_loss_text}>Profit </Text>
-                        <Text style={styles.net_numbers_profit}>0.59038</Text>
+                        <Text style={styles.net_numbers_profit}>{profit_loss}</Text>
                     </View>
                     <View style={styles.right_view}>
                         <Text style={styles.profit_loss_text}>Stop loss </Text>
-                        <Text style={styles.net_numbers_loss}>0.59038</Text>
+                        <Text style={styles.net_numbers_loss}>{stop_loss}</Text>
                     </View>
                 </View>
+
+                {/* <View style={styles.card_view4}>
+                    <View style={styles.right_view}>
+                        {take_profit.map(tp => (
+                            <View key={tp.take_profit_id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={styles.profit_loss_text}>Take Profit </Text>
+                                <Text style={styles.net_numbers_profit}>{tp.take_profit}</Text>
+                            </View>
+                        ))}
+                    </View>
+                </View> */}
             </TouchableOpacity>
         </View>
-    )
-}
+    );
+};
 
-export default SignalCard
+export default SignalCard;
 
 const styles = StyleSheet.create({
     container: {
-        // position: 'absolute',
-        // top: hp('2%'),
-        // left: '50%',
-        // transform: [{ translateX: -wp('45%') }],
-        // zIndex: 1000,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'transparent',
         marginBottom: 14,
-
     },
     card_view: {
         width: wp('87%'),
@@ -132,14 +131,12 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         justifyContent: 'space-between',
         alignItems: 'center',
-        
     },
     left_view: {
         flexDirection: 'row',
         backgroundColor: 'transparent',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        
     },
     right_view: {
         flexDirection: 'row',
@@ -182,6 +179,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         justifyContent: 'space-between',
     },
+
     profit_loss_text: {
         fontSize: 13,
         fontWeight: '400',
@@ -203,4 +201,4 @@ const styles = StyleSheet.create({
         color: '#FF4921',
         paddingRight: 5,
     },
-})
+});

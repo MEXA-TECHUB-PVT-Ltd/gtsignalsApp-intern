@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, ImageBackground, StatusBar, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SlIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -8,8 +8,38 @@ import SignalCard from '../components/SignalCard';
 import { ScrollView } from 'react-native-gesture-handler';
 import AlertComponent from '../components/Alert';
 
+import { useSelector, useDispatch } from 'react-redux';
+import { getAllSignals, resetSignalStatus } from '../redux/signalSlice';
+
 const Home = ({ navigation }) => {
   const buttonType = 'buy';
+  const dispatch = useDispatch();
+  const { signals, getAllSignalsStatus, error } = useSelector(state => state.signal);
+
+  useEffect(() => {
+    dispatch(getAllSignals());
+  }, [dispatch]);
+
+  if (getAllSignalsStatus === 'loading') {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (getAllSignalsStatus === 'failed') {
+    return (
+      <View style={styles.errorContainer}>
+        <AlertComponent message={error} />
+      </View>
+    );
+  }
+
+  // Check if signals is undefined or null
+  if (!signals) {
+    return null; // or a loading indicator or message
+  }
 
   return (
     <View style={styles.container}>
@@ -34,15 +64,26 @@ const Home = ({ navigation }) => {
         </ImageBackground>
       </View>
       <View style={styles.main_view}>
+
         <ScrollView
         showsVerticalScrollIndicator={false} 
         style={styles.scroll_view}>
-          <SignalCard buttonType={buttonType} />
-          <SignalCard />
-          <SignalCard />
-          <SignalCard buttonType={buttonType} />
-          <SignalCard />
+          {signals.map(signal => (
+            <SignalCard key={signal.signal_id} signal={signal} />
+          ))}
         </ScrollView>
+
+        {/* <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={styles.scroll_view}>
+          <SignalCard buttonType={buttonType} />
+          <SignalCard />
+          <SignalCard />
+          <SignalCard buttonType={buttonType} />
+          <SignalCard />
+        </ScrollView> */}
+
+        
       </View>
     </View>
   )

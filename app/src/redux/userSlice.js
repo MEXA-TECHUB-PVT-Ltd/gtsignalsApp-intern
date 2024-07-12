@@ -5,6 +5,7 @@ const userRegisterUrl = 'https://gtcaptain-be.mtechub.com/user/usersignup';
 const userSigninUrl = 'https://gtcaptain-be.mtechub.com/user/usersignin';
 const updateProfileUrl = 'https://gtcaptain-be.mtechub.com/user/updateuser/userprofile/3';
 const userForgetPasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/forgetpassword';
+const resetPasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/resetpassword';
 
 // Async Thunks for API Calls
 export const userRegister = createAsyncThunk('users/userRegister', async (userData, { rejectWithValue }) => {
@@ -65,11 +66,47 @@ export const userForgetPassword = createAsyncThunk('users/forgetPassword', async
     }
 });
 
+export const resetPassword = createAsyncThunk('users/resetPassword', async ({email,password}, { rejectWithValue }) => {
+    try {
+        const response = await axios.post(resetPasswordUrl, { email, password }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        console.log('Response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error);
+        if (error.response) {
+            console.error('Response Status:', error.response.status);
+            console.error('Response Data:', error.response.data);
+            console.error('Response Headers:', error.response.headers);
+        } else if (error.request) {
+            console.error('Request Error:', error.request);
+        } else {
+            console.error('Other Error:', error.message);
+        }
+        return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+    // try {
+    //     const response = await axios.post(resetPasswordUrl, { email, password } , {
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //     });
+    //     console.log('Response:', response);
+    //     return response.data;
+    // } catch (error) {
+    //     return rejectWithValue(error.response.data);
+    // }
+});
+
 // Initial State
 const initialState = {
     signupStatus: 'idle',
     signinStatus: 'idle',
     forgetPasswordStatus: 'idle',
+    resetPasswordStatus: 'idle',
     updateProfileStatus: 'idle',
     user: null,
     error: null,
@@ -84,6 +121,7 @@ const userSlice = createSlice({
             state.signupStatus = 'idle';
             state.signinStatus = 'idle';
             state.forgetPasswordStatus = 'idle';
+            state.resetPasswordStatus = 'idle';
             state.error = null;
         },
     },
@@ -130,6 +168,16 @@ const userSlice = createSlice({
             })
             .addCase(updateProfile.rejected, (state, action) => {
                 state.updateProfileStatus = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(resetPassword.pending, (state) => {
+                state.resetPasswordStatus = 'loading';
+            })
+            .addCase(resetPassword.fulfilled, (state) => {
+                state.resetPasswordStatus = 'succeeded';
+            })
+            .addCase(resetPassword.rejected, (state, action) => {
+                state.resetPasswordStatus = 'failed';
                 state.error = action.error.message;
             })
     },
