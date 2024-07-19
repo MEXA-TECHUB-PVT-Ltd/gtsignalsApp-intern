@@ -55,7 +55,7 @@ const ResetPassword = ({ navigation, route }) => {
                 setLoadingKey('Reset Password');
                 const actionResult = await dispatch(resetPassword({
                     email: email,
-                    password: values.newPassword
+                    password: values.password
                 })).unwrap();
 
                 console.log(actionResult);
@@ -64,10 +64,10 @@ const ResetPassword = ({ navigation, route }) => {
                 setAlertVisible(true);
                 setTimeout(() => {
                     setAlertVisible(false);
-                    // navigation.navigate('SignIn');
+                    navigation.navigate('SignIn');
                     dispatch(resetStatus());
                     setLoadingKey(null);
-                }, 2000);
+                }, 1600);
 
             } catch (error) {
                 console.error(error);
@@ -75,21 +75,10 @@ const ResetPassword = ({ navigation, route }) => {
                 setAlertType('error');
                 setAlertVisible(true);
                 setLoadingKey(null);
-                setTimeout(() => setAlertVisible(false), 2000);
+                setTimeout(() => setAlertVisible(false), 1600);
             }
         });
     };
-
-    // const handleReset = () => {
-    //     handleButtonPress('Reset', () => {
-    //         setLoadingKey(null);
-    //         setAlertVisible(true);
-    //         setTimeout(() => {
-    //             setAlertVisible(false);
-    //             navigation.navigate('SignIn');
-    //         }, 2000);
-    //     });
-    // };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -177,7 +166,6 @@ const ResetPassword = ({ navigation, route }) => {
                     <AlertComponent successMessage={alertMessage} visible={alertVisible} type={alertType} />
 
                 </View>
-
             </Background>
         </TouchableWithoutFeedback>
     );

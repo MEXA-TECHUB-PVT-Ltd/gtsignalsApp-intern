@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
 
 import { useDispatch, useSelector } from 'react-redux';
-// import { signup, resetStatus } from '../redux/adminSlice';
 import {userRegister, resetStatus} from '../redux/userSlice';
 
 const validationSchema = Yup.object().shape({
@@ -50,16 +49,17 @@ const SignUp = ({navigation}) => {
       } else {
         setLoadingKey(null);
       }
-    }, 1000);
+    }, 500);
   };
 
   const handleSignUp = (values) => {
-    console.log(values)
+    // console.log(values)
     handleButtonPress('SignUp', () => {
       dispatch(userRegister(values))
         .unwrap()
         .then((response) => {
-          console.log(response);
+          console.log(response.msg);
+          // const id = response.data[0].id;
           setAlertMessage(response.msg);
           setAlertType('success');
           setAlertVisible(true);
@@ -68,15 +68,15 @@ const SignUp = ({navigation}) => {
             navigation.navigate('CreateProfile');
             setLoadingKey(null);
             dispatch(resetStatus());
-          }, 2000);
+          }, 1000);
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.msg);
           setLoadingKey(null);
           setAlertMessage(error.msg);
           setAlertType('error');
           setAlertVisible(true);
-          setTimeout(() => setAlertVisible(false), 2000);
+          setTimeout(() => setAlertVisible(false), 1000);
         });
     });
   };

@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import IIcon from 'react-native-vector-icons/Ionicons';
 import SignalCard from '../components/SignalCard';
 
-const SearchSignal = ({ navigation }) => {
+const SearchSignal = ({ signal, navigation }) => {
     const [searchText, setSearchText] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const dummyData = [

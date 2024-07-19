@@ -12,39 +12,42 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { useFocusEffect } from '@react-navigation/native';
-import AlertComponent from '../components/Alert';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import CustomAlert from '../components/Alert';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { updateProfile } from '../redux/userSlice';
+import { updateProfile, resetStatus } from '../redux/userSlice';
 
 const validationSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
 });
 
 const CreateProfile = ({ navigation, route }) => {
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [loadingKey, setLoadingKey] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [isAlertVisible, setAlertVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
-    const [loadingKey, setLoadingKey] = useState(null);
 
     const dispatch = useDispatch();
-    const { updateStatus, error } = useSelector(state => state.user);
+    const user = useSelector((state) => state.user.user);
+    console.log('user object in store: ',user);
+    const userId = user.data[0].id;
+    console.log('user id from user object in store: ', userId)
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
-        // Simulate an API call for button action
         setTimeout(() => {
-            // Assuming user validation
-            const userValidated = true; // Replace with actual validation logic
+            const userValidated = true;
             if (userValidated) {
                 callback();
             } else {
                 setLoadingKey(null);
             }
-        }, 2000);
+        }, 300);
     };
 
     useFocusEffect(
@@ -126,23 +129,36 @@ const CreateProfile = ({ navigation, route }) => {
         />
     );
 
-    const handleSubmit = async (values, actions) => {
-        const userData = { name: values.fullName, image: profileImage };
-        try {
-            const result = await dispatch(updateProfile(userData));
-            if (updateProfile.fulfilled.match(result)) {
+    const handleSubmit = (values) => {
+        const userData = { id: userId, name: values.fullName, image: profileImage };
+        handleButtonPress('UpdateProfile', () => {
+        dispatch(updateProfile(userData))
+            .unwrap()
+            .then((response) => {
+                // console.log(response);
+                setAlertMessage(response.msg);
+                setAlertType('success');
                 setAlertVisible(true);
                 setTimeout(() => {
                     setAlertVisible(false);
                     navigation.navigate('SignIn');
+                    setLoadingKey(null);
+                    dispatch(resetStatus());
                 }, 1600);
-            } else {
-                Alert.alert('Error', result.error.message || 'Something went wrong');
-            }
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            Alert.alert('Error', 'Something went wrong');
-        }
+            })
+            .catch((error) => {
+                console.log(error);
+                // console.log(error.msg)
+                setLoadingKey(null);
+                setAlertMessage(error.msg);
+                setAlertType('error');
+                setAlertVisible(true);
+                setTimeout(() => {
+                    setAlertVisible(false);
+                    setLoadingKey(null);
+                }, 1600);
+            });
+        });
     };
 
     return (
@@ -153,31 +169,6 @@ const CreateProfile = ({ navigation, route }) => {
                     initialValues={{ fullName: '' }}
                     validationSchema={validationSchema}
                     onSubmit={handleSubmit}
-                    // onSubmit={(values, actions) => {
-                    //     const userData = { name: values.fullName, image: profileImage };
-                    //     dispatch(updateProfile(userData)).then((result) => {
-                    //         if (updateProfile.fulfilled.match(result)) {
-                    //             setAlertVisible(true);
-                    //             setTimeout(() => {
-                    //                 setAlertVisible(false);
-                    //                 // navigation.navigate('SignIn');
-                    //             }, 1600);
-                    //         } else {
-                    //             Alert.alert('Error', result.error.msg || 'Something went wrong');
-                    //         }
-                    //     });
-                    // }}
-
-                    // onSubmit={(values, actions) => {
-                    //     actions.validateForm().then(() => {
-                    //         actions.setSubmitting(false);
-                    //         setAlertVisible(true);
-                    //         setTimeout(() => {
-                    //             setAlertVisible(false);
-                    //             navigation.navigate('SignIn');
-                    //         }, 1600);
-                    //     });
-                    // }}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>
@@ -233,6 +224,10 @@ const CreateProfile = ({ navigation, route }) => {
                             </View>
                             <View style={styles.create_profile_button_view}>
                                 <CustomButton
+                                    buttonKey="UpdateProfile"
+                                    isLoading={!!loadingKey}
+                                    currentLoadingKey={loadingKey}
+                                    loaderColor="#FFF"
                                     bgColor="#E3B12F"
                                     borderRadius={100}
                                     alignItems='center'
@@ -245,9 +240,7 @@ const CreateProfile = ({ navigation, route }) => {
                                     Create Profile
                                 </CustomButton>
                             </View>
-                            <AlertComponent
-                                successMessage="Profile created successfully"
-                                visible={isAlertVisible} />
+                            <CustomAlert successMessage={alertMessage} visible={alertVisible} type={alertType} />
                         </View>
                     )}
                 </Formik>

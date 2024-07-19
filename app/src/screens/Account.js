@@ -9,9 +9,31 @@ import CustomDivider from '../components/CustomDivider';
 import CustomButton from '../components/CustomButton';
 import { ScrollView } from 'react-native-gesture-handler';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile, resetStatus } from '../redux/userSlice';
+
+
 const Account = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [deletemodalVisible, setDeleteModalVisible] = useState(false);
+
+  // const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.user);
+  // console.log('user object in store: ', user);
+
+  // const userId = user.data.id;
+  // console.log('user id from user object in store: ', userId);
+  const userImage = user.data.image;
+  // const userImage = '';
+  // console.log('user image from user object in store: ', userImage);
+  const userName = user.data.name;
+  // const userName = '';
+  // console.log('user name from user object in store: ', userName);
+  const userEmail = user.data.email;
+  // console.log('user email from user object in store: ', userEmail);
+
+  // const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(userImage || null);
 
 
   const handleEditPress = () => {
@@ -62,16 +84,26 @@ const Account = ({navigation}) => {
       <View style={styles.card_view1}>
         <View style={styles.left_view}>
           <View style={styles.profile_image_view}>
-            <View style={styles.profile_image_round_view}>
+              <View style={userImage ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
+                <Image
+                  source={userImage ? { uri: userImage } : Images.profileicon}
+                  style={userImage ? styles.profile_image : styles.profile_icon}
+                />
+              </View>
+            {/* <View style={styles.profile_image_round_view}>
               <Image
                 source={Images.profileicon}
                 style={styles.profile_icon}
               />
-            </View>
+            </View> */}
           </View>
           <View style={styles.name_email_view}>
-            <Text style={styles.profile_name_text}>Andrew Ainsley</Text>
-            <Text style={styles.profile_email_text}>andrew-ainsley@gmail.com</Text>
+            {/* <Text style={styles.profile_name_text}>Andrew Ainsley</Text> */}
+              <Text style={styles.profile_name_text}>{userName? userName : 'set name please'}</Text>
+
+            {/* <Text style={styles.profile_email_text}>andrew-ainsley@gmail.com</Text> */}
+              <Text style={styles.profile_email_text}>{userEmail}</Text>
+
           </View>
         </View>
         <TouchableOpacity
@@ -416,20 +448,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profile_image_round_view_no_border: {
-    width: wp('20%'),
-    height: hp('10.5%'),
+    width: wp('17%'),
+    height: hp('8.5%'),
     borderRadius: 100,
     borderWidth: 0,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    marginRight: 10,
+
   },
   profile_image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-
   },
   profile_icon: {
     width: '46%',

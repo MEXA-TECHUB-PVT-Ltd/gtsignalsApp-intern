@@ -89,17 +89,6 @@ const SignalCard = ({ signal }) => {
                         <Text style={styles.net_numbers_loss}>{stop_loss}</Text>
                     </View>
                 </View>
-
-                {/* <View style={styles.card_view4}>
-                    <View style={styles.right_view}>
-                        {take_profit.map(tp => (
-                            <View key={tp.take_profit_id} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={styles.profit_loss_text}>Take Profit </Text>
-                                <Text style={styles.net_numbers_profit}>{tp.take_profit}</Text>
-                            </View>
-                        ))}
-                    </View>
-                </View> */}
             </TouchableOpacity>
         </View>
     );

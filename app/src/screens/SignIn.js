@@ -15,7 +15,7 @@ import Images from '../consts/images';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { useDispatch } from 'react-redux';
-import { userSignin } from '../redux/userSlice';
+import { userSignin, resetStatus } from '../redux/userSlice';
 
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
@@ -54,13 +54,13 @@ const SignIn = ({ navigation }) => {
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
         setTimeout(() => {
-            const userValidated = true; // Replace with actual validation logic
+            const userValidated = true;
             if (userValidated) {
                 callback();
             } else {
                 setLoadingKey(null);
             }
-        }, 1000);
+        }, 500);
     };
 
     const signInWithGoogle = async () => {
@@ -89,12 +89,12 @@ const SignIn = ({ navigation }) => {
     //     });
     // };
 
-    const handleSignIn = (values) => {
+    const handleSignIn = ({ email, password }) => {
         handleButtonPress('signIn', () => {
-            dispatch(userSignin(values))
+            dispatch(userSignin({ email, password }))
                 .unwrap()
                 .then((response) => {
-                    console.log(response);
+                    // console.log(response);
                     setAlertMessage(response.msg);
                     setAlertType('success');
                     setAlertVisible(true);
@@ -102,15 +102,15 @@ const SignIn = ({ navigation }) => {
                         setAlertVisible(false);
                         navigation.navigate('Tab');
                         setLoadingKey(null);
-                    }, 2000);
+                    }, 1000);
                 })
                 .catch((error) => {
-                    console.log(error);
+                    // console.log(error);
                     setLoadingKey(null);
                     setAlertMessage(error.msg);
                     setAlertType('error');
                     setAlertVisible(true);
-                    setTimeout(() => setAlertVisible(false), 2000);
+                    setTimeout(() => setAlertVisible(false), 1000);
                 });
         });
     };

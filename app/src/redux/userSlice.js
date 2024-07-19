@@ -3,11 +3,12 @@ import axios from 'axios';
 
 const userRegisterUrl = 'https://gtcaptain-be.mtechub.com/user/usersignup';
 const userSigninUrl = 'https://gtcaptain-be.mtechub.com/user/usersignin';
-const updateProfileUrl = 'https://gtcaptain-be.mtechub.com/user/updateuser/userprofile/3';
+const updateProfileUrl = 'https://gtcaptain-be.mtechub.com/user/updateuser/userprofile';
 const userForgetPasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/forgetpassword';
 const resetPasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/resetpassword';
+const changePasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/updatepassword';
 
-// Async Thunks for API Calls
+
 export const userRegister = createAsyncThunk('users/userRegister', async (userData, { rejectWithValue }) => {
     const data = {
         email: userData.email,
@@ -27,31 +28,47 @@ export const userRegister = createAsyncThunk('users/userRegister', async (userDa
     }
 });
 
-export const userSignin = createAsyncThunk('users/userSignin', async (credentials, { rejectWithValue }) => {
-    try {
-        const response = await axios.post(userSigninUrl, credentials, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
+export const userSignin = createAsyncThunk('users/userSignin', async ({ email, password }, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(userSigninUrl, { email, password }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            // console.log('Backend Response in userSlice File:', response.data);
+            return response.data;
+        } catch (error) {
+            // console.error('Backend Error in userSlice File:', error.response.data);
+            return rejectWithValue(error.response.data);
+        }
     }
-});
+);
 
-export const updateProfile = createAsyncThunk('users/updateProfile', async (profileData, { rejectWithValue }) => {
-    try {
-        const response = await axios.put(updateProfileUrl, profileData, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
+export const updateProfile = createAsyncThunk(
+    'users/updateProfile',
+    async ({ id, name, image, email }, { rejectWithValue }) => {
+        try {
+            const data = email ? { name, image, email } : { name, image };
+
+            const response = await axios.put(`${updateProfileUrl}/${id}`, data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            // console.log('Response:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error:', error);
+            if (error.response) {
+                console.error('Response Data:', error.response.data);
+                return rejectWithValue(error.response.data);
+            } else {
+                return rejectWithValue(error.message);
+            }
+        }
     }
-});
+);
 
 export const userForgetPassword = createAsyncThunk('users/forgetPassword', async (email, { rejectWithValue }) => {
     try {
@@ -66,12 +83,13 @@ export const userForgetPassword = createAsyncThunk('users/forgetPassword', async
     }
 });
 
-export const resetPassword = createAsyncThunk('users/resetPassword', async ({email,password}, { rejectWithValue }) => {
+export const resetPassword = createAsyncThunk('users/resetPassword', async ({ email, password }, { rejectWithValue }) => {
     try {
-        const response = await axios.post(resetPasswordUrl, { email, password }, {
+        const response = await axios.put(resetPasswordUrl, { email, password }, {
             headers: {
                 'Content-Type': 'application/json',
             },
+            timeout: 60000,
         });
         console.log('Response:', response.data);
         return response.data;
@@ -88,31 +106,32 @@ export const resetPassword = createAsyncThunk('users/resetPassword', async ({ema
         }
         return rejectWithValue(error.response ? error.response.data : error.message);
     }
-    // try {
-    //     const response = await axios.post(resetPasswordUrl, { email, password } , {
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //     });
-    //     console.log('Response:', response);
-    //     return response.data;
-    // } catch (error) {
-    //     return rejectWithValue(error.response.data);
-    // }
 });
 
-// Initial State
+export const changePassword = createAsyncThunk('users/changePassword', async ({ userId, email, newPassword }, { rejectWithValue }) => {
+    try {
+        const response = await axios.put(changePasswordUrl, { userId, email, password: newPassword }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+});
+
 const initialState = {
     signupStatus: 'idle',
     signinStatus: 'idle',
     forgetPasswordStatus: 'idle',
     resetPasswordStatus: 'idle',
     updateProfileStatus: 'idle',
+    changePasswordStatus: 'idle',
     user: null,
     error: null,
 };
 
-// Slice
 const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -122,6 +141,8 @@ const userSlice = createSlice({
             state.signinStatus = 'idle';
             state.forgetPasswordStatus = 'idle';
             state.resetPasswordStatus = 'idle';
+            state.updateProfileStatus = 'idle';
+            state.changePasswordStatus = 'idle';
             state.error = null;
         },
     },
@@ -132,6 +153,7 @@ const userSlice = createSlice({
             })
             .addCase(userRegister.fulfilled, (state, action) => {
                 state.signupStatus = 'succeeded';
+                console.log('User registered:', action.payload);
                 state.user = action.payload;
             })
             .addCase(userRegister.rejected, (state, action) => {
@@ -143,6 +165,7 @@ const userSlice = createSlice({
             })
             .addCase(userSignin.fulfilled, (state, action) => {
                 state.signinStatus = 'succeeded';
+                console.log('User signed in:', action.payload);
                 state.user = action.payload;
             })
             .addCase(userSignin.rejected, (state, action) => {
@@ -180,6 +203,16 @@ const userSlice = createSlice({
                 state.resetPasswordStatus = 'failed';
                 state.error = action.error.message;
             })
+            .addCase(changePassword.pending, (state) => {
+                state.changePasswordStatus = 'loading';
+            })
+            .addCase(changePassword.fulfilled, (state) => {
+                state.changePasswordStatus = 'succeeded';
+            })
+            .addCase(changePassword.rejected, (state, action) => {
+                state.changePasswordStatus = 'failed';
+                state.error = action.error.message;
+            });
     },
 });
 

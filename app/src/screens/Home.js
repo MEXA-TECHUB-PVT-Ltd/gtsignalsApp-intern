@@ -72,18 +72,6 @@ const Home = ({ navigation }) => {
             <SignalCard key={signal.signal_id} signal={signal} />
           ))}
         </ScrollView>
-
-        {/* <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.scroll_view}>
-          <SignalCard buttonType={buttonType} />
-          <SignalCard />
-          <SignalCard />
-          <SignalCard buttonType={buttonType} />
-          <SignalCard />
-        </ScrollView> */}
-
-        
       </View>
     </View>
   )

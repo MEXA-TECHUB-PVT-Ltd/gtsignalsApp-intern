@@ -8,13 +8,79 @@ import AlertComponent from '../components/Alert';
 
 import { LineChart, CandleStick } from 'react-native-charts-wrapper';
 
-const SignalDetails = ({ navigation }) => {
+const SignalDetails = ({ route, navigation }) => {
+    const { signal } = route.params;
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
     const [isFavorite, setIsFavorite] = useState(false);
     const [isUserSignedIn, setIsUserSignedIn] = useState(true);
     const [isAccountCreated, setIsAccountCreated] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
+
+    const {
+        signal_id,
+        title,
+        price,
+        date,
+        time,
+        signal_status,
+        action,
+        stop_loss,
+        profit_loss,
+        result,
+        image,
+        trade_probability,
+        time_frame,
+        take_profit,
+        updated_at,
+    } = signal;
+
+    let open_price_1, open_price_2, open_price_3;
+    let take_profit_1, take_profit_2, take_profit_3;
+
+    signal.take_profit.forEach((item, index) => {
+        switch (index) {
+            case 0:
+                open_price_1 = item.open_price;
+                take_profit_1 = item.take_profit;
+                break;
+            case 1:
+                open_price_2 = item.open_price;
+                take_profit_2 = item.take_profit;
+                break;
+            case 2:
+                open_price_3 = item.open_price;
+                take_profit_3 = item.take_profit;
+                break;
+            default:
+                break;
+        }
+    });
+
+    const date_ = signal.date;
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    };
+    const _date = formatDate(date_);
+
+    const updated_AT = signal.updated_at;
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    };
+    const last_updated = formatDateTime(updated_AT);
+
+    const isBuy = action === 'BUY';
+
     
     const showAlert = (message) => {
         setAlertMessage(message);
@@ -23,15 +89,6 @@ const SignalDetails = ({ navigation }) => {
             setAlertVisible(false);
         }, 1600);
     };
-
-    // const handleFavoritePress = () => {
-    //     if (isFavorite) {
-    //         showAlert("Signal removed from wishlist");
-    //     } else {
-    //         showAlert("Signal added to wishlist");
-    //     }
-    //     setIsFavorite(!isFavorite);
-    // };
 
     const handleFavoritePress = () => {
         if (isUserSignedIn && isAccountCreated) {
@@ -85,15 +142,15 @@ const SignalDetails = ({ navigation }) => {
                         style={styles.card_view}>
                         <View style={styles.card_view1}>
                             <View style={styles.left_view}>
-                                <Text style={styles.currency_text}>NZD/USD</Text>
+                                <Text style={styles.currency_text}>{title}</Text>
                             </View>
                             <View style={styles.right_view}>
-                                <Text style={styles.price_text}>$113.22</Text>
+                                <Text style={styles.price_text}>${price}</Text>
                             </View>
                         </View>
                         <View style={styles.card_view2}>
                             <View style={styles.left_view}>
-                                <Text style={styles.date_text}>27-oct-2023, 08:20 AM</Text>
+                                <Text style={styles.date_text}>{_date}  {time}</Text>
                             </View>
                             <View style={styles.right_view}>
                                 <CustomButton
@@ -131,15 +188,15 @@ const SignalDetails = ({ navigation }) => {
                     <Text style={styles.left_text}>Action</Text>
                     <CustomButton
                         bgColor="#FFFFFF"
-                        borderColor={"#02C121"}
+                        borderColor={isBuy ? "#02C121" : "#FF0000"}
                         borderWidth={0.8}
                         borderRadius={6}
-                        txtColor={"#02C121"}
+                        txtColor={isBuy ? "#02C121" : "#FF0000"}
                         textStyle={{ fontSize: 13, fontWeight: '400', lineHeight: 15 }}
-                        // onPress={handle_buy_press}
-                        icon={"trending-up"}
+                        onPress={() => { }}
+                        icon={isBuy ? "trending-up" : "trending-down"}
                         iconSize={18}
-                        iconColor={"#02C121"}
+                        iconColor={isBuy ? "#02C121" : "#FF0000"}
                         paddingLeft={8}
                         paddingRight={5}
                         width={wp('18%')}
@@ -147,62 +204,63 @@ const SignalDetails = ({ navigation }) => {
                         flexDirection={'row'}
                         alignItems={'center'}
                         justifyContent={'space-between'}
+                        disableFeedback={true}
                     >
-                        BUY
+                        {action}
                     </CustomButton>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Status</Text>
-                    <Text style={styles.right_text}>Active</Text>
+                    <Text style={styles.right_text}>{signal_status ? signal_status : 'waiting'}</Text>
                 </View>
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Open price</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{open_price_1 ? open_price_1 : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Take profit 1</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{take_profit_1 ? take_profit_1 : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Take profit 2</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{take_profit_2 ? take_profit_2 : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Take profit 3</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{take_profit_3 ? take_profit_3 : 'waiting'}</Text>
                 </View>
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Stop loss</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{stop_loss ? stop_loss : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Profit/Loss</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}> {profit_loss ? profit_loss : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Trade Result</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{result ? result  : 'waiting'}</Text>
                 </View>
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Trade Probability</Text>
-                    <Text style={styles.right_text}>70 %</Text>
+                    <Text style={styles.right_text}> {trade_probability ? trade_probability : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Time Frame</Text>
-                    <Text style={styles.right_text}>H - 1</Text>
+                    <Text style={styles.right_text}>{time_frame ? time_frame : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view_last}>
                     <Text style={styles.left_text}>Last Update</Text>
-                    <Text style={styles.right_text}>26-0ct-2023</Text>
+                    <Text style={styles.right_text}>{last_updated ? last_updated : 'waiting'}</Text>
                 </View>
 
             </ScrollView>
@@ -356,7 +414,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     charts_view: {
-        backgroundColor: 'pink',
+        backgroundColor: 'transparent',
         opacity: 0.8,
         height: hp('36%'),
         justifyContent: 'center',
