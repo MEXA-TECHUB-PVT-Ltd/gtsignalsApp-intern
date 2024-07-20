@@ -3,10 +3,10 @@ import { StyleSheet, Text, View, StatusBar, TouchableWithoutFeedback, Keyboard }
 import Header from '../components/Header';
 import CustomButton from '../components/CustomButton';
 import CustomTextInput from '../components/CustomTextInput';
-import Alert from '../components/Alert';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import bcrypt from 'bcryptjs';
 import AlertComponent from '../components/Alert';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,41 +14,23 @@ import { changePassword, resetStatus } from '../redux/userSlice';
 
 const ChangePassword = ({ navigation }) => {
     const [focusedInput, setFocusedInput] = useState(false);
-    // const [isAlertVisible, setAlertVisible] = useState(false);
-    const [isButtonDisabled, setButtonDisabled] = useState(true);
     const [loadingKey, setLoadingKey] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertType, setAlertType] = useState('success');
     const [alertVisible, setAlertVisible] = useState(false);
+    const [isOldPasswordValid, setIsOldPasswordValid] = useState(false);
 
     const dispatch = useDispatch();
-    const changePasswordStatus = useSelector((state) => state.user.changePasswordStatus);
+    // const changePasswordStatus = useSelector((state) => state.user.changePasswordStatus);
     // const error = useSelector((state) => state.user.error);
-
     const user = useSelector((state) => state.user.user);
     // console.log('user object in store: ', user);
-
     const userId = user.data.id;
     // console.log('user id from user object in store: ', userId);
-    
     const userEmail = user.data.email;
     // console.log('user email from user object in store: ', userEmail);
-
-    const handleButtonPress = (buttonKey, callback) => {
-        setLoadingKey(buttonKey);
-        setTimeout(() => {
-            const userValidated = true;
-            if (userValidated) {
-                callback();
-            } else {
-                setLoadingKey(null);
-            }
-        }, 1600);
-    };
-
-    const handleBackPress = () => {
-        navigation.navigate('Account');
-    };
+    const storedPassword = user.data.password;
+    // console.log('user password from user object in store: ' , storedPassword);
 
     const validationSchema = Yup.object().shape({
         oldPassword: Yup.string()
@@ -65,10 +47,35 @@ const ChangePassword = ({ navigation }) => {
             .oneOf([Yup.ref('newPassword'), null], 'Passwords must match'),
     });
 
-    const handleChangePassword = async (values) => {
-        handleButtonPress('resetPassword', async () => {
+    const handleBackPress = () => {
+        navigation.navigate('Account');
+    };
+
+    const handleButtonPress = (buttonKey, callback) => {
+        setLoadingKey(buttonKey);
+        setTimeout(() => {
+            const userValidated = true;
+            if (userValidated) {
+                callback();
+            } else {
+                setLoadingKey(null);
+            }
+        }, 0);
+    };
+
+    const handleChangePassword = (values) => {
+        handleButtonPress('ChangePassword', async () => {
             try {
-                setLoadingKey('ChangePassword');
+                const isOldPasswordValid = await bcrypt.compare(values.oldPassword, storedPassword);
+                if (!isOldPasswordValid) {
+                    setLoadingKey(null);
+                    setAlertMessage('Old password is incorrect');
+                    setAlertType('error');
+                    setAlertVisible(true);
+                    setTimeout(() => setAlertVisible(false), 1500);
+                    return;
+                }
+
                 const response = await dispatch(changePassword({
                     userId: userId,
                     email: userEmail,
@@ -76,22 +83,22 @@ const ChangePassword = ({ navigation }) => {
                     newPassword: values.newPassword,
                 })).unwrap();
 
-                console.log(response);
+                // console.log(response);
                 setAlertMessage(response.msg);
                 setAlertType('success');
                 setAlertVisible(true);
                 setTimeout(() => {
                     setAlertVisible(false);
-                    // navigation.navigate('Account');
+                    navigation.navigate('Account');
                     setLoadingKey(null);
-                }, 1600);
+                }, 1500);
             } catch (error) {
                 console.log(error);
+                setLoadingKey(null);
                 setAlertMessage(error.msg);
                 setAlertType('error');
                 setAlertVisible(true);
-                setLoadingKey(null);
-                setTimeout(() => setAlertVisible(false), 1600);
+                setTimeout(() => setAlertVisible(false), 1500);
             }
         });
     };
@@ -184,7 +191,6 @@ const ChangePassword = ({ navigation }) => {
                                         onPress={handleSubmit}
                                         padding={10}
                                         marginVertical={10}
-                                        disabled={!isValid} // Disable button if form is invalid
                                     >
                                         Change
                                     </CustomButton>
@@ -194,8 +200,6 @@ const ChangePassword = ({ navigation }) => {
                     </Formik>
                 </View>
                 <AlertComponent successMessage={alertMessage} visible={alertVisible} type={alertType} />
-
-                {/* <Alert successMessage="Password changed successfully" visible={isAlertVisible} /> */}
             </View>
         </TouchableWithoutFeedback>
     );

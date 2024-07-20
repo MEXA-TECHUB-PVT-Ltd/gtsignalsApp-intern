@@ -82,7 +82,10 @@ const SignalCard = ({ signal }) => {
                 <View style={styles.card_view4}>
                     <View style={styles.left_view}>
                         <Text style={styles.profit_loss_text}>Profit </Text>
-                        <Text style={styles.net_numbers_profit}>{profit_loss}</Text>
+                        <Text style={profit_loss ? styles.net_numbers_profit : styles.waiting_text}>
+                            {profit_loss ? profit_loss : 'waiting'}
+                        </Text>
+                        {/* <Text style={styles.net_numbers_profit}>{profit_loss ? profit_loss : 'waiting'}</Text> */}
                     </View>
                     <View style={styles.right_view}>
                         <Text style={styles.profit_loss_text}>Stop loss </Text>
@@ -181,6 +184,13 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 15,
         color: '#02C121',
+        paddingRight: 5,
+    },
+    waiting_text: {
+        fontSize: 13,
+        fontWeight: '400',
+        lineHeight: 15,
+        color: '#949494',
         paddingRight: 5,
     },
     net_numbers_loss: {

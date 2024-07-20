@@ -10,31 +10,39 @@ import CustomButton from '../components/CustomButton';
 import { ScrollView } from 'react-native-gesture-handler';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { updateProfile, resetStatus } from '../redux/userSlice';
+import { resetStatus } from '../redux/userSlice';
 
 
 const Account = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [deletemodalVisible, setDeleteModalVisible] = useState(false);
 
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
-  // console.log('user object in store: ', user);
+  // console.log('user data from redux store: ', user);
 
+  // for signIn
+  // const userImage = user.data.image;
+  // // console.log('image from user object after registration in account screen: ', userImage);
+  // const userName = user.data.name;
+  // // console.log('name from user object after registration in account screen: ', userName);
+  // const userEmail = user.data.email;
+  // // console.log('email from user object after registration in account screen: ', userEmail);
   // const userId = user.data.id;
-  // console.log('user id from user object in store: ', userId);
-  const userImage = user.data.image;
-  // const userImage = '';
-  // console.log('user image from user object in store: ', userImage);
-  const userName = user.data.name;
-  // const userName = '';
-  // console.log('user name from user object in store: ', userName);
-  const userEmail = user.data.email;
-  // console.log('user email from user object in store: ', userEmail);
+  // // console.log('id from user object after registration in account screen: ', userId);
+  // // const [profileImage, setProfileImage] = useState(userImage || null);
+  // const profileImage = userImage;
 
-  // const [profileImage, setProfileImage] = useState(null);
-  const [profileImage, setProfileImage] = useState(userImage || null);
-
+  // // for registration
+  const userImage = user.user.image;
+  console.log('image from user object after registration in account screen: ', userImage);
+  const userName = user.user.name;
+  console.log('name from user object after registration in account screen: ', userName);
+  const userEmail = user.user.email;
+  console.log('email from user object after registration in account screen: ', userEmail);
+  const userId = user.user.id;
+  console.log('id from user object after registration in account screen: ', userId);
+  const profileImage = userImage;
 
   const handleEditPress = () => {
     navigation.navigate('EditProfile');
@@ -84,26 +92,16 @@ const Account = ({navigation}) => {
       <View style={styles.card_view1}>
         <View style={styles.left_view}>
           <View style={styles.profile_image_view}>
-              <View style={userImage ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
+              <View style={profileImage ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
                 <Image
-                  source={userImage ? { uri: userImage } : Images.profileicon}
-                  style={userImage ? styles.profile_image : styles.profile_icon}
+                  source={profileImage ? { uri: userImage } : Images.profileicon}
+                  style={profileImage ? styles.profile_image : styles.profile_icon}
                 />
               </View>
-            {/* <View style={styles.profile_image_round_view}>
-              <Image
-                source={Images.profileicon}
-                style={styles.profile_icon}
-              />
-            </View> */}
           </View>
           <View style={styles.name_email_view}>
-            {/* <Text style={styles.profile_name_text}>Andrew Ainsley</Text> */}
               <Text style={styles.profile_name_text}>{userName? userName : 'set name please'}</Text>
-
-            {/* <Text style={styles.profile_email_text}>andrew-ainsley@gmail.com</Text> */}
               <Text style={styles.profile_email_text}>{userEmail}</Text>
-
           </View>
         </View>
         <TouchableOpacity
@@ -127,26 +125,22 @@ const Account = ({navigation}) => {
           </View>
         </View>
         <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
         </View>
       </TouchableOpacity>
-
       <TouchableOpacity 
         onPress={() => navigation.navigate('Chat')}
         style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='chatbubble-ellipses-sharp' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Live Chat</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -157,14 +151,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='heart-sharp' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>My Wishlist</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -175,14 +167,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='lock' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Change Password</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -193,14 +183,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='mail' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Invite Friends</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -211,14 +199,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <ADIcon name='exclamationcircle' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Privacy Policy</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -229,14 +215,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='insert-drive-file' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Terms & Conditions</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -247,14 +231,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='delete' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Delete Account</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -265,15 +247,9 @@ const Account = ({navigation}) => {
             // isLoading={!!loadingKey}
             // currentLoadingKey={loadingKey}
             // loaderColor="#FFF"
-            // icon="heart"
-            // iconSize={24}
-            // iconColor="#FFFFFF"
             centerIcon="logout"
             centerIconSize={24}
             centerIconColor="#FFFFFF"
-            // endIcon="logout"
-            // endIconSize={24}
-            // endIconColor="#FFFFFF"
             bgColor="#E3B12F"
             borderRadius={100}
             alignItems='center'
@@ -286,7 +262,6 @@ const Account = ({navigation}) => {
             Logout
           </CustomButton>
       </View>
-      
       </ScrollView>
       <Modal
         animationType="slide"
@@ -380,7 +355,6 @@ const Account = ({navigation}) => {
                 Yes, Delete
               </CustomButton>
             </View>
-
           </View>
         </View>
       </Modal>

@@ -31,20 +31,31 @@ const EditProfile = ({ navigation, route }) => {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
+
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.user);
     // console.log('user object in store: ', user);
 
-    const userId = user.data.id;
-    // console.log('user id from user object in store: ', userId);
-    const userImage = user.data.image;
-    // console.log('user image from user object in store: ', userImage);
-    const userName = user.data.name;
-    // console.log('user name from user object in store: ', userName);
-    const userEmail = user.data.email;
-    // console.log('user email from user object in store: ', userEmail);
+    //for signIN
+    // const userId = user.data.id;
+    // // console.log('user id from user object in store from signIN: ', userId);
+    // const userImage = user.data.image;
+    // // console.log('user image from user object in store from signIN: ', userImage);
+    // const userName = user.data.name;
+    // // console.log('user name from user object in store from signIN: ', userName);
+    // const userEmail = user.data.email;
+    // // console.log('user email from user object in store from signIN: ', userEmail);
+    // const [profileImage, setProfileImage] = useState(userImage || null);
 
-    // const [profileImage, setProfileImage] = useState(null);
+    // for registration
+    const userImage = user.user.image;
+    console.log('image from user object after registration in account screen: ', userImage);
+    const userName = user.user.name;
+    console.log('name from user object after registration in account screen: ', userName);
+    const userEmail = user.user.email;
+    console.log('email from user object after registration in account screen: ', userEmail);
+    const userId = user.user.id;
+    console.log('id from user object after registration in account screen: ', userId);
     const [profileImage, setProfileImage] = useState(userImage || null);
 
     const handleButtonPress = (buttonKey, callback) => {
@@ -97,10 +108,11 @@ const EditProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('90%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromEdit: true, });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromEdit: true, });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -117,10 +129,11 @@ const EditProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('100%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromEdit: true });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromEdit: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -138,7 +151,7 @@ const EditProfile = ({ navigation, route }) => {
         />
     );
 
-    const handleSubmit = (values) => {
+    const handleEditProfile = (values) => {
         const userData = { id: userId, name: values.fullName, image: profileImage, email: values.email };
         // console.log('data updated from edit profile screen: ', userData);
         handleButtonPress('EditProfile', () => {
@@ -151,7 +164,7 @@ const EditProfile = ({ navigation, route }) => {
                     setAlertVisible(true);
                     setTimeout(() => {
                         setAlertVisible(false);
-                        navigation.navigate('SignIn');
+                        navigation.navigate('Account');
                         setLoadingKey(null);
                         dispatch(resetStatus());
                     }, 1600);
@@ -187,7 +200,7 @@ const EditProfile = ({ navigation, route }) => {
                 <Formik
                     initialValues={{ fullName: userName || '', email: userEmail || '' }}
                     validationSchema={validationSchema}
-                    onSubmit={handleSubmit}
+                    onSubmit={handleEditProfile}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>

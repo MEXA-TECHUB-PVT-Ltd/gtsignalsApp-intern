@@ -49,7 +49,7 @@ const SignUp = ({navigation}) => {
       } else {
         setLoadingKey(null);
       }
-    }, 500);
+    }, 250);
   };
 
   const handleSignUp = (values) => {
@@ -58,25 +58,26 @@ const SignUp = ({navigation}) => {
       dispatch(userRegister(values))
         .unwrap()
         .then((response) => {
-          console.log(response.msg);
+          // console.log(response.msg);
           // const id = response.data[0].id;
-          setAlertMessage(response.msg);
+          // setAlertMessage(response.msg);
+          setLoadingKey(null);
+          setAlertMessage('SignUp Successful!');
           setAlertType('success');
           setAlertVisible(true);
           setTimeout(() => {
             setAlertVisible(false);
             navigation.navigate('CreateProfile');
-            setLoadingKey(null);
             dispatch(resetStatus());
-          }, 1000);
+          }, 1500);
         })
         .catch((error) => {
-          console.log(error.msg);
+          // console.log(error.msg);
           setLoadingKey(null);
           setAlertMessage(error.msg);
           setAlertType('error');
           setAlertVisible(true);
-          setTimeout(() => setAlertVisible(false), 1000);
+          setTimeout(() => setAlertVisible(false), 1500);
         });
     });
   };
@@ -126,7 +127,7 @@ const SignUp = ({navigation}) => {
           <Text style={styles.create_account_txt}>Create Account</Text>
         </View>
         <Formik
-          initialValues={{ email: '', password: '', confirmPassword: '' }}
+            initialValues={{ email: 'irfan92@gmail.com', password: 'Irfan@92', confirmPassword: 'Irfan@92' }}
           validationSchema={validationSchema}
           onSubmit={(values) => handleSignUp(values)}
         >

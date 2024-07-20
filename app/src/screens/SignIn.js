@@ -150,7 +150,7 @@ const SignIn = ({ navigation }) => {
                     </View>
 
                     <Formik
-                        initialValues={{ email: '', password: '' }}
+                        initialValues={{ email: 'irfan93@gmail.com', password: 'Irfan@92' }}
                         validationSchema={validationSchema}
                         onSubmit={(values) => handleSignIn(values)}
                     >

@@ -34,9 +34,11 @@ const CreateProfile = ({ navigation, route }) => {
 
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.user);
-    console.log('user object in store: ',user);
+    // console.log('user object in store: ',user);
     const userId = user.data[0].id;
-    console.log('user id from user object in store: ', userId)
+    // console.log('user id from user object in store afer registration: ', userId);
+    const userEmail = user.data[0].email;
+    // console.log('user email from user object in store after registration: ', userEmail);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
@@ -88,10 +90,11 @@ const CreateProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('90%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromCreate: true });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromCreate: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -108,10 +111,11 @@ const CreateProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('100%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromCreate: true });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromCreate: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -129,19 +133,21 @@ const CreateProfile = ({ navigation, route }) => {
         />
     );
 
-    const handleSubmit = (values) => {
+    const handleCreateProfile = (values) => {
         const userData = { id: userId, name: values.fullName, image: profileImage };
-        handleButtonPress('UpdateProfile', () => {
+        // console.log('data being sent to store from create profile screen: ', userData);
+        handleButtonPress('CreateProfile', () => {
         dispatch(updateProfile(userData))
             .unwrap()
             .then((response) => {
                 // console.log(response);
-                setAlertMessage(response.msg);
+                // setAlertMessage(response.msg);
+                setAlertMessage('Profile Created Successfully!');
                 setAlertType('success');
                 setAlertVisible(true);
                 setTimeout(() => {
                     setAlertVisible(false);
-                    navigation.navigate('SignIn');
+                    navigation.navigate('Tab');
                     setLoadingKey(null);
                     dispatch(resetStatus());
                 }, 1600);
@@ -168,7 +174,7 @@ const CreateProfile = ({ navigation, route }) => {
                 <Formik
                     initialValues={{ fullName: '' }}
                     validationSchema={validationSchema}
-                    onSubmit={handleSubmit}
+                    onSubmit={handleCreateProfile}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>
@@ -224,7 +230,7 @@ const CreateProfile = ({ navigation, route }) => {
                             </View>
                             <View style={styles.create_profile_button_view}>
                                 <CustomButton
-                                    buttonKey="UpdateProfile"
+                                    buttonKey="CreateProfile"
                                     isLoading={!!loadingKey}
                                     currentLoadingKey={loadingKey}
                                     loaderColor="#FFF"

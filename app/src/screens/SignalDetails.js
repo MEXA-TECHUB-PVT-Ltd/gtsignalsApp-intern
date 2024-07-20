@@ -9,6 +9,7 @@ import AlertComponent from '../components/Alert';
 import { LineChart, CandleStick } from 'react-native-charts-wrapper';
 
 const SignalDetails = ({ route, navigation }) => {
+
     const { signal } = route.params;
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
@@ -57,6 +58,9 @@ const SignalDetails = ({ route, navigation }) => {
         }
     });
 
+    const firstOpenPrice = signal.take_profit.length > 0 ? signal.take_profit[0].open_price : null;
+
+
     const date_ = signal.date;
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -80,6 +84,7 @@ const SignalDetails = ({ route, navigation }) => {
     const last_updated = formatDateTime(updated_AT);
 
     const isBuy = action === 'BUY';
+    const resultText = signal.result ? "True" : "False";
 
     
     const showAlert = (message) => {
@@ -216,7 +221,24 @@ const SignalDetails = ({ route, navigation }) => {
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
-                <View style={styles.info_view}>
+
+                <View>
+                    {/* {firstOpenPrice && (
+                        
+                    )} */}
+                    <View style={styles.info_view}>
+                        <Text style={styles.left_text}>Open price</Text>
+                        <Text style={styles.right_text}>{firstOpenPrice ? firstOpenPrice : 'waiting'}</Text>
+                    </View>
+                    {signal.take_profit.map((item, index) => (
+                        <View key={item.take_profit_id} style={styles.info_view}>
+                            <Text style={styles.left_text}>Take profit {index + 1}</Text>
+                            <Text style={styles.right_text}>{item.take_profit}</Text>
+                        </View>
+                    ))}
+                </View>
+
+                {/* <View style={styles.info_view}>
                     <Text style={styles.left_text}>Open price</Text>
                     <Text style={styles.right_text}>{open_price_1 ? open_price_1 : 'waiting'}</Text>
                 </View>
@@ -231,7 +253,7 @@ const SignalDetails = ({ route, navigation }) => {
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Take profit 3</Text>
                     <Text style={styles.right_text}>{take_profit_3 ? take_profit_3 : 'waiting'}</Text>
-                </View>
+                </View> */}
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
@@ -243,10 +265,16 @@ const SignalDetails = ({ route, navigation }) => {
                     <Text style={styles.left_text}>Profit/Loss</Text>
                     <Text style={styles.right_text}> {profit_loss ? profit_loss : 'waiting'}</Text>
                 </View>
+
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Trade Result</Text>
-                    <Text style={styles.right_text}>{result ? result  : 'waiting'}</Text>
+                    <Text style={styles.right_text}>{signal.result !== null ? resultText : 'waiting'}</Text>
                 </View>
+
+                {/* <View style={styles.info_view}>
+                    <Text style={styles.left_text}>Trade Result</Text>
+                    <Text style={styles.right_text}>{result ? result  : 'waiting'}</Text>
+                </View> */}
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
