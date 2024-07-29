@@ -15,6 +15,8 @@ const Home = ({ navigation }) => {
   const buttonType = 'buy';
   const dispatch = useDispatch();
   const { signals, getAllSignalsStatus, error } = useSelector(state => state.signal);
+  // const signInData = useSelector((state) => state.user.user )
+  // console.log(signInData.email);
 
   useEffect(() => {
     dispatch(getAllSignals());
@@ -36,9 +38,8 @@ const Home = ({ navigation }) => {
     );
   }
 
-  // Check if signals is undefined or null
   if (!signals) {
-    return null; // or a loading indicator or message
+    return null;
   }
 
   return (

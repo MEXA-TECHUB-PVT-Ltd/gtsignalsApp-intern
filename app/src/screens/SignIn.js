@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, StatusBar, Platform, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, StatusBar,Alert, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -8,13 +8,13 @@ import AppLogo from '../components/AppLogo';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import CustomDivider from '../components/CustomDivider';
-import Alert from '../components/Alert';
+import AlertComponent from '../components/Alert';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { userSignin, resetStatus } from '../redux/userSlice';
 
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -60,7 +60,7 @@ const SignIn = ({ navigation }) => {
             } else {
                 setLoadingKey(null);
             }
-        }, 500);
+        }, 300);
     };
 
     const signInWithGoogle = async () => {
@@ -89,31 +89,70 @@ const SignIn = ({ navigation }) => {
     //     });
     // };
 
+
     const handleSignIn = ({ email, password }) => {
         handleButtonPress('signIn', () => {
             dispatch(userSignin({ email, password }))
                 .unwrap()
                 .then((response) => {
-                    // console.log(response);
-                    setAlertMessage(response.msg);
-                    setAlertType('success');
-                    setAlertVisible(true);
-                    setTimeout(() => {
-                        setAlertVisible(false);
-                        navigation.navigate('Tab');
+                    // Check if the account has been deleted
+                    if (response.data?.deleted_status) {
                         setLoadingKey(null);
-                    }, 1000);
+                        const deletedAt = new Date(response.data.deleted_at).toLocaleDateString();
+                        const message = `Your account was deleted on ${deletedAt}  you can recover it within 90 days.`;
+                        Alert.alert('Account Deleted', message);
+                        
+                        // setAlertMessage(message);
+                        // setAlertType('error'); // Use 'error' or another type for special cases
+                        // setAlertVisible(true);
+                    } else {
+                        // Handle successful sign-in
+                        setAlertMessage(response.msg);
+                        setAlertType('success');
+                        setAlertVisible(true);
+                        setTimeout(() => {
+                            setAlertVisible(false);
+                            navigation.navigate('Tab');
+                            setLoadingKey(null);
+                        }, 300);
+                    }
                 })
                 .catch((error) => {
-                    // console.log(error);
                     setLoadingKey(null);
-                    setAlertMessage(error.msg);
+                    // Handle errors coming from the backend
+                    setAlertMessage(error?.message || 'An unexpected error occurred.');
                     setAlertType('error');
                     setAlertVisible(true);
                     setTimeout(() => setAlertVisible(false), 1000);
                 });
         });
     };
+
+    // const handleSignIn = ({ email, password }) => {
+    //     handleButtonPress('signIn', () => {
+    //         dispatch(userSignin({ email, password }))
+    //             .unwrap()
+    //             .then((response) => {
+    //                 // console.log(response);
+    //                 setAlertMessage(response.msg);
+    //                 setAlertType('success');
+    //                 setAlertVisible(true);
+    //                 setTimeout(() => {
+    //                     setAlertVisible(false);
+    //                     navigation.navigate('Tab');
+    //                     setLoadingKey(null);
+    //                 }, 1000);
+    //             })
+    //             .catch((error) => {
+    //                 // console.log(error);
+    //                 setLoadingKey(null);
+    //                 setAlertMessage(error.msg);
+    //                 setAlertType('error');
+    //                 setAlertVisible(true);
+    //                 setTimeout(() => setAlertVisible(false), 1000);
+    //             });
+    //     });
+    // };
 
     const handleFacebook = () => {
         handleButtonPress('Facebook', () => {
@@ -134,7 +173,7 @@ const SignIn = ({ navigation }) => {
             <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
             <Background>
                 <View style={styles.container}>
-                    <Alert successMessage={alertMessage} visible={alertVisible} type={alertType} />
+                    <AlertComponent successMessage={alertMessage} visible={alertVisible} type={alertType} />
                     <View style={styles.backicon_logo_view}>
                         <TouchableOpacity
                             style={styles.icon_view}
@@ -150,7 +189,7 @@ const SignIn = ({ navigation }) => {
                     </View>
 
                     <Formik
-                        initialValues={{ email: 'irfan93@gmail.com', password: 'Irfan@92' }}
+                        initialValues={{ email: 'irfan119@gmail.com', password: 'Irfan@92' }}
                         validationSchema={validationSchema}
                         onSubmit={(values) => handleSignIn(values)}
                     >

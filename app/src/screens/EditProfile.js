@@ -33,8 +33,20 @@ const EditProfile = ({ navigation, route }) => {
     const [focusedInput, setFocusedInput] = useState(false);
 
     const dispatch = useDispatch();
+
     const user = useSelector((state) => state.user.user);
-    // console.log('user object in store: ', user);
+    console.log('user data in store in edit profile screen: ', user);
+
+    const userImage = user.image;
+    // console.log('image from user object after registration in account screen: ', userImage);
+    const userName = user.name;
+    // console.log('name from user object after registration in account screen: ', userName);
+    const userEmail = user.email;
+    // console.log('email from user object after registration in account screen: ', userEmail);
+    const userId = user.id;
+    // console.log('id from user object after registration in account screen: ', userId);
+    const [profileImage, setProfileImage] = useState(userImage || null);
+
 
     //for signIN
     // const userId = user.data.id;
@@ -48,15 +60,15 @@ const EditProfile = ({ navigation, route }) => {
     // const [profileImage, setProfileImage] = useState(userImage || null);
 
     // for registration
-    const userImage = user.user.image;
-    console.log('image from user object after registration in account screen: ', userImage);
-    const userName = user.user.name;
-    console.log('name from user object after registration in account screen: ', userName);
-    const userEmail = user.user.email;
-    console.log('email from user object after registration in account screen: ', userEmail);
-    const userId = user.user.id;
-    console.log('id from user object after registration in account screen: ', userId);
-    const [profileImage, setProfileImage] = useState(userImage || null);
+    // const userImage = user.user.image;
+    // // console.log('image from user object after registration in account screen: ', userImage);
+    // const userName = user.user.name;
+    // // console.log('name from user object after registration in account screen: ', userName);
+    // const userEmail = user.user.email;
+    // // console.log('email from user object after registration in account screen: ', userEmail);
+    // const userId = user.user.id;
+    // // console.log('id from user object after registration in account screen: ', userId);
+    // const [profileImage, setProfileImage] = useState(userImage || null);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);

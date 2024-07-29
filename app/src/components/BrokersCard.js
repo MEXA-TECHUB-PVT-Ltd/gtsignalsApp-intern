@@ -1,18 +1,17 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
 import React from 'react';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import FAIcon from 'react-native-vector-icons/FontAwesome6';
-import CustomButton from './CustomButton';
 import CustomDivider from './CustomDivider';
 import Images from '../consts/images';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
-const BrokersCard = () => {
+const BrokersCard = ({ broker }) => {
+    // console.log('broker: ', broker);
     const navigation = useNavigation();
 
     const handleChatPress = () => {
-        navigation.navigate('Chat');
+        navigation.navigate('Chat', { brokerId: broker.broker_id });
     };
 
     return (
@@ -21,19 +20,24 @@ const BrokersCard = () => {
                 <View style={styles.card_view1}>
                     <View style={styles.left_view}>
                         <View style={styles.profile_image_view}>
+                            {/* <View style={broker.image ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
+                                <Image
+                                    source={broker.image ? { uri: broker.image } : Images.profileicon}
+                                    style={broker.image ? styles.profile_image : styles.profile_icon}
+                                />
+                            </View> */}
                             <View style={styles.profile_image_round_view}>
                                 <Image
-                                    source={Images.profileicon}
+                                    source={{ uri: broker.image }}
                                     style={styles.profile_icon}
                                 />
                             </View>
                         </View>
-                        <Text style={styles.currency_text}>John Doe</Text>
-                       
+                        <Text style={styles.currency_text}>{broker.name}</Text>
                     </View>
                     <TouchableOpacity
-                    onPress={handleChatPress} 
-                    style={styles.right_view}>
+                        onPress={handleChatPress}
+                        style={styles.right_view}>
                         <Image
                             source={Images.brokerschaticon}
                             style={styles.right_icon}
@@ -46,31 +50,25 @@ const BrokersCard = () => {
                 <View style={styles.card_view4}>
                     <View style={styles.left_view}>
                         <Text style={styles.profit_loss_text}>Profit </Text>
-                        <Text style={styles.net_numbers_profit}>0.59038</Text>
+                        <Text style={styles.net_numbers_profit}>{broker.profit}</Text>
                     </View>
                     <View style={styles.right_view}>
-                        <Text style={styles.profit_loss_text}>loss </Text>
-                        <Text style={styles.net_numbers_loss}>0.59038</Text>
+                        <Text style={styles.profit_loss_text}>Loss </Text>
+                        <Text style={styles.net_numbers_loss}>{broker.loss}</Text>
                     </View>
                 </View>
             </View>
         </View>
-    )
-}
+    );
+};
 
-export default BrokersCard
+export default BrokersCard;
 
 const styles = StyleSheet.create({
     container: {
-        // position: 'absolute',
-        // top: hp('2%'),
-        // left: '50%',
-        // transform: [{ translateX: -wp('45%') }],
-        // zIndex: 1000,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'transparent',
-
     },
     card_view: {
         width: wp('88%'),
@@ -90,19 +88,26 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         justifyContent: 'space-between',
         alignItems: 'center',
-
     },
     left_view: {
         flexDirection: 'row',
         backgroundColor: 'transparent',
         justifyContent: 'flex-start',
         alignItems: 'center',
-
     },
     profile_image_view: {
         justifyContent: 'center',
         alignItems: 'center',
-        // marginVertical: 32,
+    },
+    profile_image_round_view_no_border: {
+        width: wp('14%'),
+        height: hp('7%'),
+        borderRadius: 100,
+        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+        marginRight: 10,
     },
     profile_image_round_view: {
         width: wp('14%'),
@@ -116,38 +121,10 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginRight: 10,
     },
-    profile_image_round_view_no_border: {
-        width: wp('15%'),
-        height: hp('7.5%'),
-        borderRadius: 100,
-        borderWidth: 0, // No border when the image is set
-        backgroundColor: 'transparent',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    profile_image: {
+    profile_icon: {
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
-
-    },
-    profile_icon: {
-        width: '50%',
-        height: '55%',
-        resizeMode: 'contain',
-    },
-    right_view: {
-        flexDirection: 'row',
-        backgroundColor: 'transparent',
-        alignItems: 'center',
-    },
-    right_icon: {
-        justifyContent:'center',
-        alignItems: 'center',
-        width: wp('12%'),
-        height: hp('3.5%'),
-        resizeMode: 'contain',
     },
     currency_text: {
         fontSize: 19,
@@ -155,24 +132,17 @@ const styles = StyleSheet.create({
         color: '#333333',
         lineHeight: 23,
     },
-    price_text: {
-        fontSize: 19,
-        fontWeight: '600',
-        color: '#E3B12F'
-    },
-    card_view2: {
+    right_view: {
         flexDirection: 'row',
         backgroundColor: 'transparent',
-        justifyContent: 'space-between',
         alignItems: 'center',
     },
-    date_text: {
-        fontSize: 13,
-        fontWeight: '400',
-        lineHeight: 15,
-        color: '#A0A0A0',
-        alignItems: 'center',
+    right_icon: {
         justifyContent: 'center',
+        alignItems: 'center',
+        width: wp('12%'),
+        height: hp('3.5%'),
+        resizeMode: 'contain',
     },
     card_view3: {
         height: hp('1%'),
@@ -206,4 +176,4 @@ const styles = StyleSheet.create({
         color: '#FF4921',
         paddingRight: 5,
     },
-})
+});

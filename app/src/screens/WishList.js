@@ -1,14 +1,24 @@
 import { StyleSheet, Text, View, ScrollView, StatusBar } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import SignalCardWishList from '../components/SignalCardWishList';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AlertComponent from '../components/Alert';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllWishlist } from '../redux/signalSlice';
 
 const WishList = ({ navigation }) => {
   const buttonType = 'buy';
   const [alertMessage, setAlertMessage] = useState("");
   const [isAlertVisible, setAlertVisible] = useState(false);
+
+  const dispatch = useDispatch();
+  const { signals, wishlistStatus, error } = useSelector((state) => state.signal);
+  // console.log('signals from wishlist array', signals);
+
+  useEffect(() => {
+    dispatch(getAllWishlist());
+  }, [dispatch]);
 
   const showAlert = (message) => {
     setAlertMessage(message);
@@ -29,14 +39,20 @@ const WishList = ({ navigation }) => {
       </View>
       <View style={styles.main_view}>
         <ScrollView
-        showsVerticalScrollIndicator={false} 
-        style={styles.cards_view}>
-          <SignalCardWishList buttonType={buttonType} onFavoritePress={showAlert} />
-          <SignalCardWishList onFavoritePress={showAlert} />
-          <SignalCardWishList buttonType={buttonType} onFavoritePress={showAlert} />
-          <SignalCardWishList onFavoritePress={showAlert} />
-          <SignalCardWishList buttonType={buttonType} onFavoritePress={showAlert} />
-          <SignalCardWishList buttonType={buttonType} onFavoritePress={showAlert} />
+          showsVerticalScrollIndicator={false}
+          style={styles.cards_view}>
+          {signals && signals.length > 0 ? (
+            signals.map((signal, index) => (
+              <SignalCardWishList
+                key={signal.signal_id}
+                buttonType={buttonType}
+                onFavoritePress={showAlert}
+                signal={signal}
+              />
+            ))
+          ) : (
+            <Text>No signals available</Text>
+          )}
         </ScrollView>
       </View>
     </View>

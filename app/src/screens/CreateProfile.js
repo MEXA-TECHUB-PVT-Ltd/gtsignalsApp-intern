@@ -33,11 +33,10 @@ const CreateProfile = ({ navigation, route }) => {
     const [profileImage, setProfileImage] = useState(null);
 
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.user.user);
-    // console.log('user object in store: ',user);
-    const userId = user.data[0].id;
+
+    const userId = useSelector((state) => state.user.user.id);
     // console.log('user id from user object in store afer registration: ', userId);
-    const userEmail = user.data[0].email;
+    const userEmail = useSelector((state) => state.user.user.email);
     // console.log('user email from user object in store after registration: ', userEmail);
 
     const handleButtonPress = (buttonKey, callback) => {
@@ -69,6 +68,7 @@ const CreateProfile = ({ navigation, route }) => {
     };
 
     const handleAddImage = () => {
+        Keyboard.dismiss();
         setModalVisible(true);
         setLoadingKey(null);
     };
@@ -168,7 +168,7 @@ const CreateProfile = ({ navigation, route }) => {
     };
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <TouchableWithoutFeedback>
             <Background>
                 <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
                 <Formik

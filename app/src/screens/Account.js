@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, StatusBar, Modal, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, Modal, Alert, Image, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Images from '../consts/images';
@@ -10,19 +10,31 @@ import CustomButton from '../components/CustomButton';
 import { ScrollView } from 'react-native-gesture-handler';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { resetStatus } from '../redux/userSlice';
-
+import { deleteUser, resetStatus } from '../redux/userSlice';
 
 const Account = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [deletemodalVisible, setDeleteModalVisible] = useState(false);
 
   const dispatch = useDispatch();
+
   const user = useSelector((state) => state.user.user);
-  // console.log('user data from redux store: ', user);
+  // console.log('user data from redux store in account screen: ', user);
+
+  //working for both signin and register
+  const userId = user.id;
+  // console.log('id from user object after registration in account screen: ', userId);
+  const userImage = user.image;
+  // console.log('image from user object after registration in account screen: ', userImage);
+  const userName = user.name;
+  // console.log('name from user object after registration in account screen: ', userName);
+  const userEmail = user.email;
+  // console.log('email from user object after registration in account screen: ', userEmail);
+  
+  const profileImage = userImage;
 
   // for signIn
-  // const userImage = user.data.image;
+  // const userImage = user.image;
   // // console.log('image from user object after registration in account screen: ', userImage);
   // const userName = user.data.name;
   // // console.log('name from user object after registration in account screen: ', userName);
@@ -34,15 +46,15 @@ const Account = ({navigation}) => {
   // const profileImage = userImage;
 
   // // for registration
-  const userImage = user.user.image;
-  console.log('image from user object after registration in account screen: ', userImage);
-  const userName = user.user.name;
-  console.log('name from user object after registration in account screen: ', userName);
-  const userEmail = user.user.email;
-  console.log('email from user object after registration in account screen: ', userEmail);
-  const userId = user.user.id;
-  console.log('id from user object after registration in account screen: ', userId);
-  const profileImage = userImage;
+  // const userImage = user.user.image;
+  // // console.log('image from user object after registration in account screen: ', userImage);
+  // const userName = user.user.name;
+  // // console.log('name from user object after registration in account screen: ', userName);
+  // const userEmail = user.user.email;
+  // // console.log('email from user object after registration in account screen: ', userEmail);
+  // const userId = user.user.id;
+  // // console.log('id from user object after registration in account screen: ', userId);
+  // const profileImage = userImage;
 
   const handleEditPress = () => {
     navigation.navigate('EditProfile');
@@ -57,8 +69,13 @@ const Account = ({navigation}) => {
   };
 
   const handleYesLogout = () => {
-    setModalVisible(false);
-    navigation.navigate('SignIn');
+    try {
+      dispatch(resetStatus());
+      setModalVisible(false);
+      navigation.navigate('SignIn');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const handleLogoutCancel = () => {
@@ -74,8 +91,22 @@ const Account = ({navigation}) => {
   };
 
   const handleYesDelete = () => {
-    setDeleteModalVisible(false);
-    navigation.navigate('SignUp');
+    console.log('user deleted with ID:', userId);
+    if (userId) {
+      dispatch(deleteUser(userId))
+        .unwrap()
+        .then((response) => {
+          Alert.alert('Success', response.msg);
+          dispatch(resetStatus());
+          navigation.navigate('SignUp');
+        })
+        .catch((error) => {
+          Alert.alert('Error', error?.msg);
+          console.error('Failed to delete user:', error);
+        });
+    } else {
+      console.error('User ID not found');
+    }
   };
 
   return (

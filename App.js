@@ -1,13 +1,13 @@
 
 import { SafeAreaView, StyleSheet, Text, View, Image } from 'react-native'
-import React from 'react';
+import React, {useEffect} from 'react';
 import 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { Provider } from 'react-redux';
+import { Provider, useSelector, useDispatch } from 'react-redux';
 import store from './app/src/redux/store';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useScrollToTop } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -164,47 +164,59 @@ const TabNavigator = ({ navigation }) => (
   </Tab.Navigator>
 );
 
-const MainStack = () => (
+// const AuthStack = () => {
+//   return(
+//     <Stack.Navigator>
+//       <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
+//       <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} />
+//       <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+//       <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
+//       <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
+//       <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} />
+//       <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
+//     </Stack.Navigator>
+//   )
+// }
+
+const MainStack = () => {
+  
+  return (
   <Stack.Navigator>
+      <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
+      <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} />
+      <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
+      <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
+      <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
+      <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} />
+      <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
+      <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
 
-    {/* <Stack.Screen name="BrokersCard" component={BrokersCard} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="SignalCard" component={SignalCard} options={{ headerShown: false }} /> */}
-    <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
-    {/* <Stack.Screen name="Modal" component={Modal} options={{ headerShown: false }} /> */}
-
-    {/* <Stack.Screen name="Header" component={Header} options={{ headerShown: false }} /> */}
-    {/* <Stack.Screen name="Alert" component={Alert} options={{ headerShown: false }} /> */}
-
-    <Stack.Screen name="Tab" component={TabNavigator} options={{ headerShown: false }} />
     <Stack.Screen name="SignalDetails" component={SignalDetails} options={{ headerShown: false }} />
     <Stack.Screen name="Notifications" component={Notifications} options={{ headerShown: false }} />
     <Stack.Screen name="SearchSignal" component={SearchSignal} options={{ headerShown: false }} />
     <Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }} />
     <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false }} />
-    <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} />
-    <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
-    <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
-
     <Stack.Screen name="UploadPhoto" component={UploadPhoto} options={{ headerShown: false }} />
-    <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
-    <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} />
-    <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
     <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} options={{ headerShown: false }} />
     <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ headerShown: false }} />
     <Stack.Screen name="InviteFriends" component={InviteFriends} options={{ headerShown: false }} />
     <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerShown: false }} />
     <Stack.Screen name="PremiumPlans" component={PremiumPlans} options={{ headerShown: false }} />
     <Stack.Screen name="WishList" component={WishList} options={{ headerShown: false }} />
-
   </Stack.Navigator>
 );
+};
 
 const App = () => {
+  // const user = useSelector((state) => state.user.user);
+
   return (
     <Provider store={store}>
       <SafeAreaProvider>
         <SafeAreaView style={styles.safeArea}>
           <NavigationContainer>
+            {/* {user ? <MainStack /> : <AuthStack />} */}
+            {/* <AuthStack /> */}
             <MainStack />
           </NavigationContainer>
         </SafeAreaView>
@@ -212,6 +224,26 @@ const App = () => {
     </Provider>
   )
 }
+
+// const App = () => {
+//   const user = useSelector((state) => state.user.user);
+
+//   return (
+//     <SafeAreaProvider>
+//       <SafeAreaView style={styles.safeArea}>
+//         <NavigationContainer>
+//           {user ? <MainStack /> : <AuthStack />}
+//         </NavigationContainer>
+//       </SafeAreaView>
+//     </SafeAreaProvider>
+//   );
+// };
+
+// const Root = () => (
+//   <Provider store={store}>
+//     <App />
+//   </Provider>
+// );
 
 export default App;
 

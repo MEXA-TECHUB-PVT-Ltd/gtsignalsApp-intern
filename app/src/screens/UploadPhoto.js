@@ -77,7 +77,6 @@ const UploadPhoto = ({ route, navigation }) => {
               ? navigation.navigate('CreateProfile', { imageUri })
               : navigation.navigate('EditProfile', { imageUri })
           )}
-          // onPress={() => navigation.navigate('CreateProfile', { imageUri })}
           marginVertical={10}
         >
           Add Photo

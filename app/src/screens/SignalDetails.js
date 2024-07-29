@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, AppRegistry, processColor, StatusBar, ScrollView, Button, Modal, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, StatusBar, ScrollView, Button, Modal, TouchableOpacity } from 'react-native'
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -6,17 +6,51 @@ import CustomDivider from '../components/CustomDivider';
 import CustomButton from '../components/CustomButton';
 import AlertComponent from '../components/Alert';
 
-import { LineChart, CandleStick } from 'react-native-charts-wrapper';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWishlist, removeFromWishlist, getAllWishlist } from '../redux/signalSlice';
+
+import { LineChart } from 'react-native-charts-wrapper';
 
 const SignalDetails = ({ route, navigation }) => {
-
     const { signal } = route.params;
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
-    const [isFavorite, setIsFavorite] = useState(false);
     const [isUserSignedIn, setIsUserSignedIn] = useState(true);
     const [isAccountCreated, setIsAccountCreated] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
+
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.user);
+    const user_id = user.id;
+    // const wishlist = useSelector(state => state.signal.wishlist);
+
+    // //extracting id of user in wishlist
+    // useEffect(() => {
+    //     if (wishlist.length > 0) {
+    //         // console.log('Wishlist state:', JSON.stringify(wishlist, null, 2));
+    //         // console.log('Current user_id:', user_id);
+    //         const userWishlist = wishlist.find(item => item.user.id === user_id);
+    //         if (userWishlist) {
+    //             // console.log('Wishlist for user:', userWishlist.user);
+    //             userWishlist.signals.forEach((signal, index) => {
+    //                 // console.log(`Signal ${index + 1}:`, JSON.stringify(signal, null, 2));
+    //             });
+    //         } else {
+    //             console.log('No wishlist found for the user');
+    //         }
+    //     }
+    // }, [wishlist, user_id]);
+    // console.log('wishlist user id', user_id );
+
+    useEffect(() => {
+        dispatch(getAllWishlist({ user_id }));
+    }, [dispatch, user_id]);
+    // console.log('useeffect getallwishlist user id: ', user_id);
+
+    const signals = useSelector((state => state.signal));
+    // console.log('wishlist signals: ', signals); 
+    const signalIds = signals.signals.map(signal => signal.signal_id);
+    // console.log('Signal IDs: ', signalIds);
 
     const {
         signal_id,
@@ -36,9 +70,12 @@ const SignalDetails = ({ route, navigation }) => {
         updated_at,
     } = signal;
 
+    const homeSignalId = signal_id;
+    const isFavorite = signalIds.includes(homeSignalId);
+    // console.log('isFavorite value: ', isFavorite);
+
     let open_price_1, open_price_2, open_price_3;
     let take_profit_1, take_profit_2, take_profit_3;
-
     signal.take_profit.forEach((item, index) => {
         switch (index) {
             case 0:
@@ -57,36 +94,27 @@ const SignalDetails = ({ route, navigation }) => {
                 break;
         }
     });
-
     const firstOpenPrice = signal.take_profit.length > 0 ? signal.take_profit[0].open_price : null;
-
-
     const date_ = signal.date;
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = date.getDate();
         const month = date.toLocaleString('default', { month: 'short' });
         const year = date.getFullYear();
-
         return `${day}-${month}-${year}`;
     };
     const _date = formatDate(date_);
-
     const updated_AT = signal.updated_at;
     const formatDateTime = (dateString) => {
         const date = new Date(dateString);
         const day = date.getDate();
         const month = date.toLocaleString('default', { month: 'short' });
         const year = date.getFullYear();
-
         return `${day}-${month}-${year}`;
     };
     const last_updated = formatDateTime(updated_AT);
-
     const isBuy = action === 'BUY';
     const resultText = signal.result ? "True" : "False";
-
-    
     const showAlert = (message) => {
         setAlertMessage(message);
         setAlertVisible(true);
@@ -95,14 +123,20 @@ const SignalDetails = ({ route, navigation }) => {
         }, 1600);
     };
 
-    const handleFavoritePress = () => {
+    const handleFavoritePress = async () => {
         if (isUserSignedIn && isAccountCreated) {
-            if (isFavorite) {
-                showAlert("Signal removed from wishlist");
-            } else {
-                showAlert("Signal added to wishlist");
+            try {
+                let response;
+                if (isFavorite) {
+                    response = await dispatch(removeFromWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
+                    console.log('response if signal removed', response);
+                } else {
+                    response = await dispatch(addToWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
+                    console.log('response if signal added', response);
+                }
+            } catch (error) {
+                console.error("Error while updating wishlist:", error);
             }
-            setIsFavorite(!isFavorite);
         } else {
             setModalVisible(true);
         }
@@ -223,9 +257,6 @@ const SignalDetails = ({ route, navigation }) => {
                 </View>
 
                 <View>
-                    {/* {firstOpenPrice && (
-                        
-                    )} */}
                     <View style={styles.info_view}>
                         <Text style={styles.left_text}>Open price</Text>
                         <Text style={styles.right_text}>{firstOpenPrice ? firstOpenPrice : 'waiting'}</Text>
@@ -237,23 +268,6 @@ const SignalDetails = ({ route, navigation }) => {
                         </View>
                     ))}
                 </View>
-
-                {/* <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Open price</Text>
-                    <Text style={styles.right_text}>{open_price_1 ? open_price_1 : 'waiting'}</Text>
-                </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Take profit 1</Text>
-                    <Text style={styles.right_text}>{take_profit_1 ? take_profit_1 : 'waiting'}</Text>
-                </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Take profit 2</Text>
-                    <Text style={styles.right_text}>{take_profit_2 ? take_profit_2 : 'waiting'}</Text>
-                </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Take profit 3</Text>
-                    <Text style={styles.right_text}>{take_profit_3 ? take_profit_3 : 'waiting'}</Text>
-                </View> */}
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
@@ -271,10 +285,6 @@ const SignalDetails = ({ route, navigation }) => {
                     <Text style={styles.right_text}>{signal.result !== null ? resultText : 'waiting'}</Text>
                 </View>
 
-                {/* <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Trade Result</Text>
-                    <Text style={styles.right_text}>{result ? result  : 'waiting'}</Text>
-                </View> */}
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>

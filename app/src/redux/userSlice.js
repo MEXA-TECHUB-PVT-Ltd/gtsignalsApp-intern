@@ -7,7 +7,7 @@ const updateProfileUrl = 'https://gtcaptain-be.mtechub.com/user/updateuser/userp
 const userForgetPasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/forgetpassword';
 const resetPasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/resetpassword';
 const changePasswordUrl = 'https://gtcaptain-be.mtechub.com/user/password/updatepassword';
-
+const deleteUserUrl = 'https://gtcaptain-be.mtechub.com/user/deleteuser';
 
 export const userRegister = createAsyncThunk('users/userRegister', async (userData, { rejectWithValue }) => {
     const data = {
@@ -29,20 +29,32 @@ export const userRegister = createAsyncThunk('users/userRegister', async (userDa
 });
 
 export const userSignin = createAsyncThunk('users/userSignin', async ({ email, password }, { rejectWithValue }) => {
-        try {
-            const response = await axios.post(userSigninUrl, { email, password }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            // console.log('Backend Response in userSlice File:', response.data);
-            return response.data;
-        } catch (error) {
-            // console.error('Backend Error in userSlice File:', error.response.data);
-            return rejectWithValue(error.response.data);
-        }
+    try {
+        const response = await axios.post(userSigninUrl, { email, password }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
     }
-);
+});
+
+// export const userSignin = createAsyncThunk('users/userSignin', async ({ email, password }, { rejectWithValue }) => {
+//     try {
+//         const response = await axios.post(userSigninUrl, { email, password }, {
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//         });
+//         return response.data;
+//     } catch (error) {
+//         return rejectWithValue(error.response.data);
+//     }
+// }
+// );
 
 export const updateProfile = createAsyncThunk(
     'users/updateProfile',
@@ -61,7 +73,7 @@ export const updateProfile = createAsyncThunk(
         } catch (error) {
             console.error('Error:', error);
             if (error.response) {
-                console.error('Response Data:', error.response.data);
+                // console.error('Response Data:', error.response.data);
                 return rejectWithValue(error.response.data);
             } else {
                 return rejectWithValue(error.message);
@@ -91,18 +103,16 @@ export const resetPassword = createAsyncThunk('users/resetPassword', async ({ em
             },
             timeout: 60000,
         });
-        console.log('Response:', response.data);
+        // console.log('Response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error:', error);
+        // console.error('Error:', error);
         if (error.response) {
-            console.error('Response Status:', error.response.status);
-            console.error('Response Data:', error.response.data);
-            console.error('Response Headers:', error.response.headers);
+            // console.error('Response Data:', error.response.data);
         } else if (error.request) {
-            console.error('Request Error:', error.request);
+            // console.error('Request Error:', error.request);
         } else {
-            console.error('Other Error:', error.message);
+            // console.error('Other Error:', error.message);
         }
         return rejectWithValue(error.response ? error.response.data : error.message);
     }
@@ -120,6 +130,23 @@ export const changePassword = createAsyncThunk('users/changePassword', async ({ 
         return rejectWithValue(error.response.data);
     }
 });
+
+export const deleteUser = createAsyncThunk(
+    'users/deleteUser',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axios.delete(`${deleteUserUrl}/${userId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            // console.log('Response after delete press:', response.data);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response ? error.response.data : error.message);
+        }
+    }
+);
 
 const initialState = {
     signupStatus: 'idle',
@@ -143,6 +170,7 @@ const userSlice = createSlice({
             state.resetPasswordStatus = 'idle';
             state.updateProfileStatus = 'idle';
             state.changePasswordStatus = 'idle';
+            state.deleteUserStatus = 'idle';
             state.error = null;
         },
     },
@@ -153,8 +181,8 @@ const userSlice = createSlice({
             })
             .addCase(userRegister.fulfilled, (state, action) => {
                 state.signupStatus = 'succeeded';
-                console.log('User registered:', action.payload);
-                state.user = action.payload;
+                // console.log(action.payload);
+                state.user = action.payload.data[0];
             })
             .addCase(userRegister.rejected, (state, action) => {
                 state.signupStatus = 'failed';
@@ -165,8 +193,8 @@ const userSlice = createSlice({
             })
             .addCase(userSignin.fulfilled, (state, action) => {
                 state.signinStatus = 'succeeded';
-                console.log('User signed in:', action.payload);
-                state.user = action.payload;
+                // console.log('User signed in:', action.payload.data);
+                state.user = action.payload.data;
             })
             .addCase(userSignin.rejected, (state, action) => {
                 state.signinStatus = 'failed';
@@ -187,7 +215,7 @@ const userSlice = createSlice({
             })
             .addCase(updateProfile.fulfilled, (state, action) => {
                 state.updateProfileStatus = 'succeeded';
-                state.user = { ...state.user, ...action.payload };
+                state.user = action.payload.user;
             })
             .addCase(updateProfile.rejected, (state, action) => {
                 state.updateProfileStatus = 'failed';
@@ -212,7 +240,17 @@ const userSlice = createSlice({
             .addCase(changePassword.rejected, (state, action) => {
                 state.changePasswordStatus = 'failed';
                 state.error = action.error.message;
-            });
+            })
+            .addCase(deleteUser.pending, (state) => {
+                state.deleteUserStatus = 'loading';
+            })
+            .addCase(deleteUser.fulfilled, (state) => {
+                state.deleteUserStatus = 'succeeded';
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
+                state.deleteUserStatus = 'failed';
+                state.error = action.error.message;
+            })
     },
 });
 

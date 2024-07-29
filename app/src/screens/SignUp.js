@@ -127,7 +127,7 @@ const SignUp = ({navigation}) => {
           <Text style={styles.create_account_txt}>Create Account</Text>
         </View>
         <Formik
-            initialValues={{ email: 'irfan92@gmail.com', password: 'Irfan@92', confirmPassword: 'Irfan@92' }}
+            initialValues={{ email: 'irfan121@gmail.com', password: 'Irfan@92', confirmPassword: 'Irfan@92' }}
           validationSchema={validationSchema}
           onSubmit={(values) => handleSignUp(values)}
         >
