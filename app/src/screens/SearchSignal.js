@@ -48,8 +48,17 @@ const SearchSignal = ({ navigation }) => {
 
     const renderItem = ({ item }) => {
         // console.log("Rendering Item:", item); // Add this log
-        return <SignalCard signal={item} />;
+        return (
+            <TouchableOpacity onPress={() => navigation.navigate('SignalDetails', { signal: item })}>
+                <SignalCard signal={item} />
+            </TouchableOpacity>
+        );
     };
+
+    // const renderItem = ({ item }) => {
+    //     // console.log("Rendering Item:", item); // Add this log
+    //     return <SignalCard signal={item} />;
+    // };
 
     return (
         <View style={styles.container}>

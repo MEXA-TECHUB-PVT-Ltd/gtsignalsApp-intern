@@ -3,6 +3,7 @@ import adminReducer from './adminSlice';
 import userReducer from './userSlice';
 import signalReducer from './signalSlice';
 import brokerReducer from './brokerSlice';
+import appShareReducer from './appShareSlice';
 
 const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
         user: userReducer,
         signal: signalReducer,
         brokers: brokerReducer,
+        appShare: appShareReducer,
     },
 });
 

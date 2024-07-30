@@ -70,7 +70,10 @@ const Home = ({ navigation }) => {
         showsVerticalScrollIndicator={false} 
         style={styles.scroll_view}>
           {signals.map(signal => (
-            <SignalCard key={signal.signal_id} signal={signal} />
+            <SignalCard 
+            key={signal.signal_id} 
+            signal={signal} 
+            />
           ))}
         </ScrollView>
       </View>

@@ -5,7 +5,7 @@ import SignalCardWishList from '../components/SignalCardWishList';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AlertComponent from '../components/Alert';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllWishlist } from '../redux/signalSlice';
+import { getSignalsByUserId } from '../redux/signalSlice';
 
 const WishList = ({ navigation }) => {
   const buttonType = 'buy';
@@ -13,11 +13,12 @@ const WishList = ({ navigation }) => {
   const [isAlertVisible, setAlertVisible] = useState(false);
 
   const dispatch = useDispatch();
-  const { signals, wishlistStatus, error } = useSelector((state) => state.signal);
-  // console.log('signals from wishlist array', signals);
+  const { userSignals, userSignalsStatus } = useSelector((state) => state.signal);
+  const user = useSelector((state) => state.user.user);
+  const userId = user.id;
 
   useEffect(() => {
-    dispatch(getAllWishlist());
+    dispatch(getSignalsByUserId(userId));
   }, [dispatch]);
 
   const showAlert = (message) => {
@@ -41,8 +42,8 @@ const WishList = ({ navigation }) => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={styles.cards_view}>
-          {signals && signals.length > 0 ? (
-            signals.map((signal, index) => (
+          {userSignals.length > 0 ? (
+            userSignals.map((signal, index) => (
               <SignalCardWishList
                 key={signal.signal_id}
                 buttonType={buttonType}

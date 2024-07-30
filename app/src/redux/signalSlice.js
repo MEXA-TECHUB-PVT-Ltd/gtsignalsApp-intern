@@ -2,11 +2,13 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 // Endpoint URL
-const getAllSignalsUrl = 'https://gtcaptain-be.mtechub.com/signal/getallsignals?page=1&limit=10';
+const getAllSignalsUrl = 'https://gtcaptain-be.mtechub.com/signal/getallsignals?page=1&limit=100';
 const searchSignalByNameUrl = 'https://gtcaptain-be.mtechub.com/signal/search_signal_byname';
 const addToWishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/createwishlist';
-const removeFromWishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/deletewishlist/signal_id';
+const removeFromWishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/removesignalbyuserID';
 const getallwishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/getallwishlist';
+const getSignalByUserIdUrl = 'https://gtcaptain-be.mtechub.com/wishlist/getSignalsByUserId';
+const checkSaveItemUrl = 'https://gtcaptain-be.mtechub.com/wishlist/check_save_item';
 
 export const getAllSignals = createAsyncThunk('signal/getAllSignals', async (_, { rejectWithValue }) => {
     try {
@@ -87,14 +89,44 @@ export const getAllWishlist = createAsyncThunk('wishlist/getAllWishlist', async 
     }
 });
 
+export const getSignalsByUserId = createAsyncThunk('signal/getSignalsByUserId', async (userId, { rejectWithValue }) => {
+    try {
+        const response = await axios.get(`${getSignalByUserIdUrl}/${userId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data.signals;
+    } catch (error) {
+        return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+});
+
+export const checkSaveItem = createAsyncThunk('wishlist/checkSaveItem', async ({ user_id, signal_id }, { rejectWithValue }) => {
+    try {
+        const response = await axios.post(checkSaveItemUrl, { user_id, signal_id }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+});
+
 // Initial State
 const initialState = {
     signals: [],
     searchSignals: [],
     wishlist: [],
+    userSignals: [],
+    checkSaveItemStatus: 'idle',
+    checkSaveItemResult: null,
     getAllSignalsStatus: 'idle',
     searchStatus: 'idle',
     wishlistStatus: 'idle',
+    userSignalsStatus: 'idle',
     error: null,
 };
 
@@ -107,6 +139,9 @@ const signalSlice = createSlice({
             state.getAllSignalsStatus = 'idle';
             state.searchStatus = 'idle';
             state.wishlistStatus = 'idle';
+            state.userSignalsStatus = 'idle';
+            state.checkSaveItemStatus = 'idle';
+            state.checkSaveItemResult = null;
             state.error = null;
         },
         clearSearchSignals(state) {
@@ -169,6 +204,28 @@ const signalSlice = createSlice({
             })
             .addCase(getAllWishlist.rejected, (state, action) => {
                 state.wishlistStatus = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(getSignalsByUserId.pending, (state) => {
+                state.userSignalsStatus = 'loading';
+            })
+            .addCase(getSignalsByUserId.fulfilled, (state, action) => {
+                state.userSignalsStatus = 'succeeded';
+                state.userSignals = action.payload;
+            })
+            .addCase(getSignalsByUserId.rejected, (state, action) => {
+                state.userSignalsStatus = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(checkSaveItem.pending, (state) => {
+                state.checkSaveItemStatus = 'loading';
+            })
+            .addCase(checkSaveItem.fulfilled, (state, action) => {
+                state.checkSaveItemStatus = 'succeeded';
+                state.checkSaveItemResult = action.payload;
+            })
+            .addCase(checkSaveItem.rejected, (state, action) => {
+                state.checkSaveItemStatus = 'failed';
                 state.error = action.error.message;
             })
     },

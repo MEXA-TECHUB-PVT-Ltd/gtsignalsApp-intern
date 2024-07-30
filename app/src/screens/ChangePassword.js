@@ -25,11 +25,11 @@ const ChangePassword = ({ navigation }) => {
     // const error = useSelector((state) => state.user.error);
     const user = useSelector((state) => state.user.user);
     // console.log('user object in store: ', user);
-    const userId = user.data.id;
-    // console.log('user id from user object in store: ', userId);
-    const userEmail = user.data.email;
+    const userId = user.id;
+    console.log('user id from user object in store: ', userId);
+    const userEmail = user.email;
     // console.log('user email from user object in store: ', userEmail);
-    const storedPassword = user.data.password;
+    const storedPassword = user.password;
     // console.log('user password from user object in store: ' , storedPassword);
 
     const validationSchema = Yup.object().shape({

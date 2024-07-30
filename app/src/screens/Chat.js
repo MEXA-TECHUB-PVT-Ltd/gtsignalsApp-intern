@@ -10,7 +10,8 @@ import io from 'socket.io-client';
 const SOCKET_URL = 'http://192.168.18.120:4000/';
 
 const Chat = ({ navigation, route }) => {
-    const { brokerId } = route.params;
+    // const { brokerId } = route.params;
+    const brokerId = 5;
     const adminId = 1;
     const [messages, setMessages] = useState([]);
     const [showEmojiKeyboard, setShowEmojiKeyboard] = useState(false);
@@ -27,7 +28,7 @@ const Chat = ({ navigation, route }) => {
             socket.current.emit(isUser ? 'user_connect' : 'admin_connect', brokerId);
 
             socket.current.on('initial_messages', (initialMessages) => {
-                console.log('Initial Messages:', initialMessages);
+                // console.log('Initial Messages:', initialMessages);
 
                 const formattedMessages = initialMessages.map(msg => ({
                     _id: msg.id,
@@ -77,6 +78,7 @@ const Chat = ({ navigation, route }) => {
         const messagesWithId = messages.map(msg => ({
             ...msg,
             _id: new Date().getTime(),
+            createdAt: new Date(),
             user: {
                 _id: isUser ? brokerId : adminId,
                 name: isUser ? 'User' : 'Admin',
@@ -110,7 +112,24 @@ const Chat = ({ navigation, route }) => {
         setInputText(prevText => prevText + emoji);
     };
 
+    const formatTimestamp = (date) => {
+        // Add 5 hours to the date
+        const adjustedDate = new Date(date.getTime() + 5 * 60 * 60 * 1000);
+
+        // Get hours and minutes in 24-hour format
+        const hours = adjustedDate.getUTCHours();
+        const minutes = adjustedDate.getUTCMinutes();
+        const formattedHours = hours.toString().padStart(2, '0'); // Ensure hours are two digits
+        const formattedMinutes = minutes.toString().padStart(2, '0'); // Ensure minutes are two digits
+
+        // Return formatted time in 24-hour format
+        return `${formattedHours}:${formattedMinutes}`;
+    };
+
     const renderMessage = (props) => {
+        const { currentMessage } = props;
+        const formattedTime = formatTimestamp(new Date(currentMessage.createdAt));
+        
         if (props.currentMessage.user._id === adminId) {
             return (
                 <View style={{
@@ -124,7 +143,7 @@ const Chat = ({ navigation, route }) => {
                 }}>
                     <Text style={{ color: '#FFFFFF', fontSize: 12, lineHeight: 16, fontWeight: '400' }}>{props.currentMessage.text}</Text>
                     <Text style={{ fontSize: 10, color: '#FFFFFF', marginTop: 5, alignSelf: 'flex-end' }}>
-                        {/* {timestamp} */}
+                        {formattedTime}
                     </Text>
                 </View>
             );
@@ -144,8 +163,8 @@ const Chat = ({ navigation, route }) => {
                     marginBottom: 10,
                 }}>
                     <Text style={{ color: '#676767' }}>{props.currentMessage.text}</Text>
-                    <Text style={{ fontSize: 10, color: '#FFFFFF', marginTop: 5, alignSelf: 'flex-end' }}>
-                        {props.currentMessage.createdAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                    <Text style={{ fontSize: 10, color: '#929292', marginTop: 5, alignSelf: 'flex-end' }}>
+                        {formattedTime}
                     </Text>
 
                 </View>
@@ -239,7 +258,8 @@ const styles = StyleSheet.create({
     backicon_view: {
         backgroundColor: 'transparent',
         marginTop: hp('2%'),
-        marginHorizontal: 10,
+        // marginHorizontal: 10,
+        marginVertical: 10,
     },
     icon_view: {
         alignSelf: 'flex-start',

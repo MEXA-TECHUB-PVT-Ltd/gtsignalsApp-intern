@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, StatusBar, ScrollView, Button, Modal, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Header from '../components/Header';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import CustomDivider from '../components/CustomDivider';
@@ -7,51 +7,12 @@ import CustomButton from '../components/CustomButton';
 import AlertComponent from '../components/Alert';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { addToWishlist, removeFromWishlist, getAllWishlist } from '../redux/signalSlice';
+import { addToWishlist, removeFromWishlist, getAllWishlist, checkSaveItem } from '../redux/signalSlice';
 
 import { LineChart } from 'react-native-charts-wrapper';
 
 const SignalDetails = ({ route, navigation }) => {
     const { signal } = route.params;
-    const [isAlertVisible, setAlertVisible] = useState(false);
-    const [alertMessage, setAlertMessage] = useState("");
-    const [isUserSignedIn, setIsUserSignedIn] = useState(true);
-    const [isAccountCreated, setIsAccountCreated] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
-
-    const dispatch = useDispatch();
-    const user = useSelector((state) => state.user.user);
-    const user_id = user.id;
-    // const wishlist = useSelector(state => state.signal.wishlist);
-
-    // //extracting id of user in wishlist
-    // useEffect(() => {
-    //     if (wishlist.length > 0) {
-    //         // console.log('Wishlist state:', JSON.stringify(wishlist, null, 2));
-    //         // console.log('Current user_id:', user_id);
-    //         const userWishlist = wishlist.find(item => item.user.id === user_id);
-    //         if (userWishlist) {
-    //             // console.log('Wishlist for user:', userWishlist.user);
-    //             userWishlist.signals.forEach((signal, index) => {
-    //                 // console.log(`Signal ${index + 1}:`, JSON.stringify(signal, null, 2));
-    //             });
-    //         } else {
-    //             console.log('No wishlist found for the user');
-    //         }
-    //     }
-    // }, [wishlist, user_id]);
-    // console.log('wishlist user id', user_id );
-
-    useEffect(() => {
-        dispatch(getAllWishlist({ user_id }));
-    }, [dispatch, user_id]);
-    // console.log('useeffect getallwishlist user id: ', user_id);
-
-    const signals = useSelector((state => state.signal));
-    // console.log('wishlist signals: ', signals); 
-    const signalIds = signals.signals.map(signal => signal.signal_id);
-    // console.log('Signal IDs: ', signalIds);
-
     const {
         signal_id,
         title,
@@ -69,9 +30,45 @@ const SignalDetails = ({ route, navigation }) => {
         take_profit,
         updated_at,
     } = signal;
+    const [isAlertVisible, setAlertVisible] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [isUserSignedIn, setIsUserSignedIn] = useState(true);
+    const [isAccountCreated, setIsAccountCreated] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [inWishlist, setInWishlist] = useState(null);
 
-    const homeSignalId = signal_id;
-    const isFavorite = signalIds.includes(homeSignalId);
+    const dispatch = useDispatch();
+    const { checkSaveItemStatus, checkSaveItemResult, error } = useSelector((state) => state.signal);
+    const user = useSelector((state) => state.user.user);
+    const user_id = user.id;
+
+    useEffect(() => {
+        dispatch(checkSaveItem({ user_id: user_id, signal_id: signal_id }));
+    }, [dispatch, user_id, signal_id]);
+
+    useEffect(() => {
+        if (checkSaveItemStatus === 'succeeded') {
+            setInWishlist(checkSaveItemResult.save_status);
+            console.log(`Signal value in user wishlist is:`, checkSaveItemResult.save_status);
+        } else if (checkSaveItemStatus === 'failed') {
+            console.log(`Error: ${error}`);
+        } else if (checkSaveItemStatus === 'loading') {
+            console.log('Loading...');
+        }
+    }, [checkSaveItemStatus, checkSaveItemResult, error]);
+
+    // useEffect(() => {
+    //     dispatch(getAllWishlist({ user_id }));
+    // }, [dispatch, user_id]);
+    // console.log('useeffect getallwishlist user id: ', user_id);
+
+    // const signals = useSelector((state => state.signal));
+    // console.log('wishlist signals: ', signals); 
+    // const signalIds = signals.signals.map(signal => signal.signal_id);
+    // console.log('Signal IDs: ', signalIds);
+
+    // const homeSignalId = signal_id;
+    // const isFavorite = signalIds.includes(homeSignalId);
     // console.log('isFavorite value: ', isFavorite);
 
     let open_price_1, open_price_2, open_price_3;
@@ -123,16 +120,16 @@ const SignalDetails = ({ route, navigation }) => {
         }, 1600);
     };
 
-    const handleFavoritePress = async () => {
+    const addOrRemoveFromWishlist = async () => {
         if (isUserSignedIn && isAccountCreated) {
             try {
                 let response;
-                if (isFavorite) {
+                if (inWishlist) {
                     response = await dispatch(removeFromWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
-                    console.log('response if signal removed', response);
+                    console.log('Backend response for removeFromWishlist : ', response.msg);
                 } else {
                     response = await dispatch(addToWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
-                    console.log('response if signal added', response);
+                    console.log('Backend response for addToWishlist : ', response.msg);
                 }
             } catch (error) {
                 console.error("Error while updating wishlist:", error);
@@ -166,10 +163,10 @@ const SignalDetails = ({ route, navigation }) => {
                     headerText="Signal Details"
                     onPress={() => navigation.goBack()}
                     rightIcon={{
-                        name: isFavorite ? 'heart' : 'heart-outline',
+                        name: inWishlist ? 'heart' : 'heart-outline',
                         size: 22,
-                        color: isFavorite ? '#E3B12F' : '#333333',
-                        onPress: handleFavoritePress
+                        color: inWishlist ? '#E3B12F' : '#333333',
+                        onPress: addOrRemoveFromWishlist
                     }}
                 />
             </View>

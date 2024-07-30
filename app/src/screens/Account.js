@@ -33,29 +33,6 @@ const Account = ({navigation}) => {
   
   const profileImage = userImage;
 
-  // for signIn
-  // const userImage = user.image;
-  // // console.log('image from user object after registration in account screen: ', userImage);
-  // const userName = user.data.name;
-  // // console.log('name from user object after registration in account screen: ', userName);
-  // const userEmail = user.data.email;
-  // // console.log('email from user object after registration in account screen: ', userEmail);
-  // const userId = user.data.id;
-  // // console.log('id from user object after registration in account screen: ', userId);
-  // // const [profileImage, setProfileImage] = useState(userImage || null);
-  // const profileImage = userImage;
-
-  // // for registration
-  // const userImage = user.user.image;
-  // // console.log('image from user object after registration in account screen: ', userImage);
-  // const userName = user.user.name;
-  // // console.log('name from user object after registration in account screen: ', userName);
-  // const userEmail = user.user.email;
-  // // console.log('email from user object after registration in account screen: ', userEmail);
-  // const userId = user.user.id;
-  // // console.log('id from user object after registration in account screen: ', userId);
-  // const profileImage = userImage;
-
   const handleEditPress = () => {
     navigation.navigate('EditProfile');
   };
