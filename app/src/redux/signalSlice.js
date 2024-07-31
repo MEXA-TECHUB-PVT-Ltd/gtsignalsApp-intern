@@ -63,7 +63,7 @@ export const removeFromWishlist = createAsyncThunk(
                 removeFromWishlistUrl,
                 { headers: { 'Content-Type': 'application/json' }, data: { user_id, signal_id } }
             );
-            console.log('Signal removed from wishlist:', response.data);
+            // console.log('Signal removed from wishlist:', response.data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);

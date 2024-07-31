@@ -7,13 +7,17 @@ import CustomDivider from './CustomDivider';
 import AlertComponent from './Alert';
 import { useNavigation } from '@react-navigation/native';
 
-const SignalCardWishList = ({ buttonType, onFavoritePress, signal }) => {
-    const { signal_id, title, price, date, time, action, stop_loss, profit_loss, take_profit } = signal;
-    // console.log('signals in signalcardwishlist: ', signal);
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFromWishlist } from '../redux/signalSlice';
 
+const SignalCardWishList = ({ onWishlistUpdate, signal, showAlert }) => {
+    const { signal_id, title, price, date, time, action, stop_loss, profit_loss, take_profit } = signal;
     const isBuy = action === 'BUY';
-    const [isWishListed, setIsWishListed] = useState(true);
+    // const [isWishListed, setIsWishListed] = useState(true);
     const navigation = useNavigation();
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.user);
+    const user_id = user.id;
 
     const date_ = signal.date;
     const formatDate = (dateString) => {
@@ -33,20 +37,25 @@ const SignalCardWishList = ({ buttonType, onFavoritePress, signal }) => {
         return `${day}-${month}-${year}`;
     };
 
-    const handleBuyPress = () => {
-        navigation.navigate('SignalDetails');
+    const handleRemovePress = async () => {
+        try {
+            const response = await dispatch(removeFromWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
+            // console.log('Backend response for removeFromWishlist:', response.msg);
+            onWishlistUpdate();
+            showAlert("Signal removed successfully!");
+        } catch (error) {
+            console.error("Error while removing from wishlist:", error);
+        }
     };
 
-    const handleFavoritePress = () => {
-        const message = isWishListed ? "Signal removed from wishlist" : "Signal added to wishlist";
-        onFavoritePress(message);
-        setIsWishListed(!isWishListed);
+    const handleDetailsPress = () => {
+        navigation.navigate('SignalDetails', { signal });
     };
 
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                onPress={() => navigation.navigate('SignalDetails')}
+                onPress={handleDetailsPress}
                 style={styles.card_view}>
                 <View style={styles.card_view1}>
                     <View style={styles.left_view}>
@@ -75,11 +84,11 @@ const SignalCardWishList = ({ buttonType, onFavoritePress, signal }) => {
                         </CustomButton>
                     </View>
                     <View style={styles.right_view}>
-                        <TouchableOpacity onPress={handleFavoritePress}>
+                        <TouchableOpacity onPress={handleRemovePress}>
                             <FAIcon
-                                name={isWishListed ? 'heart' : 'heart-o'}
+                                name={'heart'}
                                 size={22}
-                                color={isWishListed ? '#E3B12F' : '#A0A0A0'}
+                                color={'#E3B12F'}
                             />
                         </TouchableOpacity>
                     </View>

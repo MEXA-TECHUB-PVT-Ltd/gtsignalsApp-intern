@@ -68,7 +68,8 @@ const SignIn = ({ navigation }) => {
             await GoogleSignin.hasPlayServices();
             await GoogleSignin.signOut();
             const userInfo = await GoogleSignin.signIn();
-            console.log(userInfo);
+            // console.log(userInfo);
+            navigation.navigate('Tab');
             setLoadingKey(null);
         } catch (error) {
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -127,32 +128,6 @@ const SignIn = ({ navigation }) => {
                 });
         });
     };
-
-    // const handleSignIn = ({ email, password }) => {
-    //     handleButtonPress('signIn', () => {
-    //         dispatch(userSignin({ email, password }))
-    //             .unwrap()
-    //             .then((response) => {
-    //                 // console.log(response);
-    //                 setAlertMessage(response.msg);
-    //                 setAlertType('success');
-    //                 setAlertVisible(true);
-    //                 setTimeout(() => {
-    //                     setAlertVisible(false);
-    //                     navigation.navigate('Tab');
-    //                     setLoadingKey(null);
-    //                 }, 1000);
-    //             })
-    //             .catch((error) => {
-    //                 // console.log(error);
-    //                 setLoadingKey(null);
-    //                 setAlertMessage(error.msg);
-    //                 setAlertType('error');
-    //                 setAlertVisible(true);
-    //                 setTimeout(() => setAlertVisible(false), 1000);
-    //             });
-    //     });
-    // };
 
     const handleFacebook = () => {
         handleButtonPress('Facebook', () => {
@@ -405,11 +380,13 @@ const styles = StyleSheet.create({
         paddingTop: StatusBar.currentHeight,
     },
     backicon_logo_view: {
+        flex: 1,
         flexDirection: 'row',
         backgroundColor: 'transparent',
         marginBottom: 32,
     },
     icon_view: {
+        position: 'absolute',
         alignSelf: 'flex-start',
         backgroundColor: 'transparent'
     },
@@ -418,11 +395,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'transparent',
-        marginLeft: -22,
+        // marginLeft: -22,
     },
     text_view: {
         alignItems: 'flex-start',
-        marginVertical: 20,
+        marginVertical: 20.5,
     },
     create_account_txt: {
         fontSize: 23,

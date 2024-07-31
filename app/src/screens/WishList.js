@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, ScrollView, StatusBar } from 'react-native';
 import React, { useState, useEffect } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 import Header from '../components/Header';
 import SignalCardWishList from '../components/SignalCardWishList';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -13,20 +14,28 @@ const WishList = ({ navigation }) => {
   const [isAlertVisible, setAlertVisible] = useState(false);
 
   const dispatch = useDispatch();
+  const isFocused = useIsFocused();
   const { userSignals, userSignalsStatus } = useSelector((state) => state.signal);
   const user = useSelector((state) => state.user.user);
   const userId = user.id;
 
   useEffect(() => {
+    if (isFocused) {
+      dispatch(getSignalsByUserId(userId));
+    }
+  }, [dispatch, isFocused, userId]);
+
+  const handleWishlistUpdate = () => {
     dispatch(getSignalsByUserId(userId));
-  }, [dispatch]);
+  };
 
   const showAlert = (message) => {
     setAlertMessage(message);
     setAlertVisible(true);
     setTimeout(() => {
       setAlertVisible(false);
-    }, 1600);
+      setAlertMessage(null);
+    }, 1400);
   };
 
   return (
@@ -43,12 +52,12 @@ const WishList = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           style={styles.cards_view}>
           {userSignals.length > 0 ? (
-            userSignals.map((signal, index) => (
+            userSignals.map((signal) => (
               <SignalCardWishList
                 key={signal.signal_id}
-                buttonType={buttonType}
-                onFavoritePress={showAlert}
                 signal={signal}
+                showAlert={showAlert}
+                onWishlistUpdate={handleWishlistUpdate}
               />
             ))
           ) : (
@@ -70,7 +79,7 @@ const styles = StyleSheet.create({
   },
   header_view: {
     marginTop: hp('3%'),
-    marginHorizontal: wp('3%'),
+    marginHorizontal: wp('1.2%'),
   },
   main_view: {
     flex: 1,

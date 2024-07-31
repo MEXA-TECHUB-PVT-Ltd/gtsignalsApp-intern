@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWishlist, removeFromWishlist, getAllWishlist, checkSaveItem } from '../redux/signalSlice';
 
 import { LineChart } from 'react-native-charts-wrapper';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 const SignalDetails = ({ route, navigation }) => {
     const { signal } = route.params;
@@ -49,49 +50,50 @@ const SignalDetails = ({ route, navigation }) => {
     useEffect(() => {
         if (checkSaveItemStatus === 'succeeded') {
             setInWishlist(checkSaveItemResult.save_status);
-            console.log(`Signal value in user wishlist is:`, checkSaveItemResult.save_status);
+            // console.log(`Signal value in user wishlist is:`, checkSaveItemResult.save_status);
         } else if (checkSaveItemStatus === 'failed') {
             console.log(`Error: ${error}`);
         } else if (checkSaveItemStatus === 'loading') {
-            console.log('Loading...');
+            // console.log('Loading...');
         }
     }, [checkSaveItemStatus, checkSaveItemResult, error]);
 
-    // useEffect(() => {
-    //     dispatch(getAllWishlist({ user_id }));
-    // }, [dispatch, user_id]);
-    // console.log('useeffect getallwishlist user id: ', user_id);
+    let open_price_1 = null, open_price_2 = null, open_price_3 = null;
+    let take_profit_1 = null, take_profit_2 = null, take_profit_3 = null;
 
-    // const signals = useSelector((state => state.signal));
-    // console.log('wishlist signals: ', signals); 
-    // const signalIds = signals.signals.map(signal => signal.signal_id);
-    // console.log('Signal IDs: ', signalIds);
+    if (signal && Array.isArray(signal.take_profit)) {
+        signal.take_profit.forEach((item, index) => {
+            switch (index) {
+                case 0:
+                    open_price_1 = item.open_price || null;
+                    take_profit_1 = item.take_profit || null;
+                    break;
+                case 1:
+                    open_price_2 = item.open_price || null;
+                    take_profit_2 = item.take_profit || null;
+                    break;
+                case 2:
+                    open_price_3 = item.open_price || null;
+                    take_profit_3 = item.take_profit || null;
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
 
-    // const homeSignalId = signal_id;
-    // const isFavorite = signalIds.includes(homeSignalId);
-    // console.log('isFavorite value: ', isFavorite);
+    // const firstOpenPrice = signal.take_profit.length > 0 ? signal.take_profit[0].open_price : null;
+    const firstOpenPrice = signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 0
+        ? signal.take_profit[0].open_price
+        : null;
 
-    let open_price_1, open_price_2, open_price_3;
-    let take_profit_1, take_profit_2, take_profit_3;
-    signal.take_profit.forEach((item, index) => {
-        switch (index) {
-            case 0:
-                open_price_1 = item.open_price;
-                take_profit_1 = item.take_profit;
-                break;
-            case 1:
-                open_price_2 = item.open_price;
-                take_profit_2 = item.take_profit;
-                break;
-            case 2:
-                open_price_3 = item.open_price;
-                take_profit_3 = item.take_profit;
-                break;
-            default:
-                break;
-        }
-    });
-    const firstOpenPrice = signal.take_profit.length > 0 ? signal.take_profit[0].open_price : null;
+    const secondOpenPrice = signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 1
+        ? signal.take_profit[1].open_price
+        : null;
+
+    const thirdOpenPrice = signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 2
+        ? signal.take_profit[2].open_price
+        : null;
     const date_ = signal.date;
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -112,26 +114,39 @@ const SignalDetails = ({ route, navigation }) => {
     const last_updated = formatDateTime(updated_AT);
     const isBuy = action === 'BUY';
     const resultText = signal.result ? "True" : "False";
+
+    const copySignalDetails = () => {
+        const details = `Signal Details:\nTitle: ${signal.title}\nPrice: ${signal.price}\nAction: ${signal.action}`;
+        Clipboard.setString(details);
+        console.log('signal details copied : ', details);
+        showAlert("Signal copied successfully");
+    };
+    
     const showAlert = (message) => {
         setAlertMessage(message);
         setAlertVisible(true);
         setTimeout(() => {
             setAlertVisible(false);
-        }, 1600);
+        }, 1000);
     };
 
     const addOrRemoveFromWishlist = async () => {
         if (isUserSignedIn && isAccountCreated) {
             try {
+                setInWishlist(!inWishlist);
                 let response;
                 if (inWishlist) {
                     response = await dispatch(removeFromWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
-                    console.log('Backend response for removeFromWishlist : ', response.msg);
+                    showAlert("Signal removed successfully!");
+                    // console.log('Backend response for removeFromWishlist : ', response.msg);
                 } else {
                     response = await dispatch(addToWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
-                    console.log('Backend response for addToWishlist : ', response.msg);
+                    showAlert("Signal added successfully!");
+                    // console.log('Backend response for addToWishlist : ', response.msg);
                 }
+                
             } catch (error) {
+                setInWishlist(inWishlist);
                 console.error("Error while updating wishlist:", error);
             }
         } else {
@@ -194,7 +209,7 @@ const SignalDetails = ({ route, navigation }) => {
                                     borderRadius={4}
                                     txtColor="#FFFFFF"
                                     textStyle={{ fontSize: 11, fontWeight: '500', lineHeight: 15 }}
-                                    onPress={() => showAlert("Signal copied successfully")}
+                                    onPress={copySignalDetails}
                                     icon="copy-outline"
                                     iconSize={12}
                                     iconColor={"#FFFFFF"}
@@ -258,12 +273,22 @@ const SignalDetails = ({ route, navigation }) => {
                         <Text style={styles.left_text}>Open price</Text>
                         <Text style={styles.right_text}>{firstOpenPrice ? firstOpenPrice : 'waiting'}</Text>
                     </View>
-                    {signal.take_profit.map((item, index) => (
+                    {signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 0 ? (
+                        signal.take_profit.map((item, index) => (
+                            <View key={item.take_profit_id} style={styles.info_view}>
+                                <Text style={styles.left_text}>Take profit {index + 1}</Text>
+                                <Text style={styles.right_text}>{item.take_profit}</Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text>No take profit data available</Text>
+                    )}
+                    {/* {signal.take_profit.map((item, index) => (
                         <View key={item.take_profit_id} style={styles.info_view}>
                             <Text style={styles.left_text}>Take profit {index + 1}</Text>
                             <Text style={styles.right_text}>{item.take_profit}</Text>
                         </View>
-                    ))}
+                    ))} */}
                 </View>
                 <View style={styles.divider_view}>
                     <CustomDivider />

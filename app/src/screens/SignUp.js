@@ -350,17 +350,18 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   icon_view: {
+    position: 'absolute',
     alignSelf: 'flex-start',
     backgroundColor: 'transparent',
-    paddingRight: 10,
-    paddingBottom: 10,
+    // paddingRight: 10,
+    // paddingBottom: 10,
   },
   logo_view: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
-    marginLeft: -22,
+    // marginLeft: -22,
   },
   text_view: {
     alignItems: 'flex-start',
@@ -375,7 +376,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   create_button_view: {
-    marginVertical: 20,
+    marginVertical: 20.5,
   },
   divider_view: {
     flexDirection: 'row',

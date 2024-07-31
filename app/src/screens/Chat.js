@@ -9,6 +9,7 @@ import io from 'socket.io-client';
 
 const SOCKET_URL = 'http://192.168.18.120:4000/';
 
+
 const Chat = ({ navigation, route }) => {
     // const { brokerId } = route.params;
     const brokerId = 5;

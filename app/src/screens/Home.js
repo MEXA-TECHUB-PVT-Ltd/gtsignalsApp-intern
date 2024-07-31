@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, ImageBackground, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useNavigation, useNavigationState, useRoute } from '@react-navigation/native';
+import { StyleSheet, FlatList, Text, View, ImageBackground, StatusBar, BackHandler, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SlIcons from 'react-native-vector-icons/SimpleLineIcons';
@@ -25,7 +26,7 @@ const Home = ({ navigation }) => {
   if (getAllSignalsStatus === 'loading') {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color="gray" />
+        <ActivityIndicator size='large' color="gold" />
       </View>
     );
   }
@@ -41,6 +42,7 @@ const Home = ({ navigation }) => {
   if (!signals) {
     return null;
   }
+
 
   return (
     <View style={styles.container}>

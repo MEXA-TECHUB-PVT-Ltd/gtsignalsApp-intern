@@ -7,7 +7,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import store from './app/src/redux/store';
 
-import { NavigationContainer, useScrollToTop } from '@react-navigation/native';
+import { NavigationContainer, useNavigationState, useScrollToTop } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -164,20 +164,6 @@ const TabNavigator = ({ navigation }) => (
   </Tab.Navigator>
 );
 
-// const AuthStack = () => {
-//   return(
-//     <Stack.Navigator>
-//       <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
-//       <Stack.Screen name="SignIn" component={SignIn} options={{ headerShown: false }} />
-//       <Stack.Screen name="SignUp" component={SignUp} options={{ headerShown: false }} />
-//       <Stack.Screen name="CreateProfile" component={CreateProfile} options={{ headerShown: false }} />
-//       <Stack.Screen name="ForgetPassword" component={ForgetPassword} options={{ headerShown: false }} />
-//       <Stack.Screen name="OTP" component={OTP} options={{ headerShown: false }} />
-//       <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
-//     </Stack.Navigator>
-//   )
-// }
-
 const MainStack = () => {
   
   return (
@@ -208,15 +194,11 @@ const MainStack = () => {
 };
 
 const App = () => {
-  // const user = useSelector((state) => state.user.user);
-
   return (
     <Provider store={store}>
       <SafeAreaProvider>
         <SafeAreaView style={styles.safeArea}>
           <NavigationContainer>
-            {/* {user ? <MainStack /> : <AuthStack />} */}
-            {/* <AuthStack /> */}
             <MainStack />
           </NavigationContainer>
         </SafeAreaView>
@@ -225,31 +207,10 @@ const App = () => {
   )
 }
 
-// const App = () => {
-//   const user = useSelector((state) => state.user.user);
-
-//   return (
-//     <SafeAreaProvider>
-//       <SafeAreaView style={styles.safeArea}>
-//         <NavigationContainer>
-//           {user ? <MainStack /> : <AuthStack />}
-//         </NavigationContainer>
-//       </SafeAreaView>
-//     </SafeAreaProvider>
-//   );
-// };
-
-// const Root = () => (
-//   <Provider store={store}>
-//     <App />
-//   </Provider>
-// );
-
 export default App;
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // backgroundColor: '#fff',
   },
 })
