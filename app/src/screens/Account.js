@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View, StatusBar, Modal, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, Modal, Alert, Image, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Images from '../consts/images';
 import ADIcon from 'react-native-vector-icons/AntDesign';
 import IIcon from 'react-native-vector-icons/Ionicons';
@@ -9,10 +10,27 @@ import CustomDivider from '../components/CustomDivider';
 import CustomButton from '../components/CustomButton';
 import { ScrollView } from 'react-native-gesture-handler';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteUser, resetStatus, logout } from '../redux/userSlice';
+import { store, persistor } from '../redux/store';
+import { unauthenticate } from '../redux/authSlice';
+
 const Account = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [deletemodalVisible, setDeleteModalVisible] = useState(false);
 
+  const dispatch = useDispatch();
+
+  const user = useSelector((state) => state.user.user);
+  // console.log('user details stored in redux : ', user);
+  const userId = user.id;
+  // console.log('userId from user in store: ', userId);
+  const userImage = user.image;
+  const userName = user.name;
+  const userEmail = user.email;  
+  const profileImage = userImage;
+
+ 
 
   const handleEditPress = () => {
     navigation.navigate('EditProfile');
@@ -26,10 +44,43 @@ const Account = ({navigation}) => {
     setModalVisible(true);
   };
 
-  const handleYesLogout = () => {
-    setModalVisible(false);
-    navigation.navigate('SignIn');
+  const handleYesLogout = async () => {
+    try {
+      // console.log(' state before logout:', store.getState());
+
+      // const keysBeforePurge = await AsyncStorage.getAllKeys();
+      // console.log('AsyncStorage keys before purge in logout:', keysBeforePurge);
+
+      await persistor.purge();
+
+      // const keys = await AsyncStorage.getAllKeys();
+      // console.log('AsyncStorage keys after purge in logout:', keys);
+
+      dispatch(logout());
+      // console.log(' state after logout:', store.getState());
+      dispatch(unauthenticate());
+      setModalVisible(false);
+      setTimeout(() => {
+        navigation.navigate('SignIn');
+      }, 0);
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
+
+  // const handleYesLogout = async () => {
+  //   try {
+  //     dispatch(logout());
+  //     // Purge persisted state
+  //     await persistor.purge();
+      
+  //     // dispatch(resetStatus());
+  //     setModalVisible(false);
+  //     navigation.navigate('SignIn');
+  //   } catch (error) {
+  //     console.error('Error during logout:', error);
+  //   }
+  // };
 
   const handleLogoutCancel = () => {
     setModalVisible(false);
@@ -43,10 +94,50 @@ const Account = ({navigation}) => {
     setDeleteModalVisible(false);
   };
 
-  const handleYesDelete = () => {
-    setDeleteModalVisible(false);
-    navigation.navigate('SignUp');
+  const handleYesDelete = async () => {
+    if (userId) {
+      try {
+        const response = await dispatch(deleteUser(userId)).unwrap();
+
+        Alert.alert('Success', response.msg);
+
+        dispatch(resetStatus());
+        dispatch(unauthenticate());
+
+        const keysBeforePurge = await AsyncStorage.getAllKeys();
+        console.log('AsyncStorage keys before purge:', keysBeforePurge);
+
+        await persistor.purge();
+
+        const keys = await AsyncStorage.getAllKeys();
+        console.log('AsyncStorage keys after purge:', keys);
+        navigation.navigate('SignUp');
+      } catch (error) {
+        Alert.alert('Error', error?.msg || 'Failed to delete user');
+        console.error('Failed to delete user:', error);
+      }
+    } else {
+      console.error('User ID not found');
+    }
   };
+
+  // const handleYesDelete = () => {
+  //   if (userId) {
+  //     dispatch(deleteUser(userId))
+  //       .unwrap()
+  //       .then((response) => {
+  //         Alert.alert('Success', response.msg);
+  //         dispatch(resetStatus());
+  //         navigation.navigate('SignUp');
+  //       })
+  //       .catch((error) => {
+  //         Alert.alert('Error', error?.msg);
+  //         console.error('Failed to delete user:', error);
+  //       });
+  //   } else {
+  //     console.error('User ID not found');
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -62,16 +153,16 @@ const Account = ({navigation}) => {
       <View style={styles.card_view1}>
         <View style={styles.left_view}>
           <View style={styles.profile_image_view}>
-            <View style={styles.profile_image_round_view}>
-              <Image
-                source={Images.profileicon}
-                style={styles.profile_icon}
-              />
-            </View>
+              <View style={profileImage ? styles.profile_image_round_view_no_border : styles.profile_image_round_view}>
+                <Image
+                  source={profileImage ? { uri: userImage } : Images.profileicon}
+                  style={profileImage ? styles.profile_image : styles.profile_icon}
+                />
+              </View>
           </View>
           <View style={styles.name_email_view}>
-            <Text style={styles.profile_name_text}>Andrew Ainsley</Text>
-            <Text style={styles.profile_email_text}>andrew-ainsley@gmail.com</Text>
+              <Text style={styles.profile_name_text}>{userName? userName : 'set name please'}</Text>
+              <Text style={styles.profile_email_text}>{userEmail}</Text>
           </View>
         </View>
         <TouchableOpacity
@@ -95,26 +186,22 @@ const Account = ({navigation}) => {
           </View>
         </View>
         <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
         </View>
       </TouchableOpacity>
-
       <TouchableOpacity 
         onPress={() => navigation.navigate('Chat')}
         style={styles.links_view}>
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='chatbubble-ellipses-sharp' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Live Chat</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -125,14 +212,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='heart-sharp' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>My Wishlist</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -143,14 +228,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='lock' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Change Password</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -161,14 +244,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <IIcon name='mail' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Invite Friends</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -179,14 +260,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <ADIcon name='exclamationcircle' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Privacy Policy</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -197,14 +276,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='insert-drive-file' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Terms & Conditions</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -215,14 +292,12 @@ const Account = ({navigation}) => {
         <View style={styles.links_left_view}>
           <View style={styles.links_profile_image_view}>
             <MIIcon name='delete' size={20} color="#E3B12F" />
-
           </View>
           <View style={styles.links_name_view}>
             <Text style={styles.links_profile_name_text}>Delete Account</Text>
           </View>
         </View>
           <View
-          // onPress={handleChatPress}
           style={styles.right_view}>
           <MIIcon name='arrow-forward-ios' size={14} color="#000" />
           </View>
@@ -233,15 +308,9 @@ const Account = ({navigation}) => {
             // isLoading={!!loadingKey}
             // currentLoadingKey={loadingKey}
             // loaderColor="#FFF"
-            // icon="heart"
-            // iconSize={24}
-            // iconColor="#FFFFFF"
             centerIcon="logout"
             centerIconSize={24}
             centerIconColor="#FFFFFF"
-            // endIcon="logout"
-            // endIconSize={24}
-            // endIconColor="#FFFFFF"
             bgColor="#E3B12F"
             borderRadius={100}
             alignItems='center'
@@ -254,7 +323,6 @@ const Account = ({navigation}) => {
             Logout
           </CustomButton>
       </View>
-      
       </ScrollView>
       <Modal
         animationType="slide"
@@ -348,7 +416,6 @@ const Account = ({navigation}) => {
                 Yes, Delete
               </CustomButton>
             </View>
-
           </View>
         </View>
       </Modal>
@@ -416,20 +483,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   profile_image_round_view_no_border: {
-    width: wp('20%'),
-    height: hp('10.5%'),
+    width: wp('17%'),
+    height: hp('8.5%'),
     borderRadius: 100,
     borderWidth: 0,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+    marginRight: 10,
+
   },
   profile_image: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-
   },
   profile_icon: {
     width: '46%',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, StatusBar, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, Image, Alert, ScrollView, StatusBar, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Background from '../components/Background';
 import Header from '../components/Header';
 import CustomButton from '../components/CustomButton';
@@ -12,33 +12,44 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { useFocusEffect } from '@react-navigation/native';
-import AlertComponent from '../components/Alert';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import CustomAlert from '../components/Alert';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile, resetStatus, login } from '../redux/userSlice';
+import { authenticate } from '../redux/authSlice';
 
 const validationSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
 });
 
 const CreateProfile = ({ navigation, route }) => {
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [loadingKey, setLoadingKey] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [isAlertVisible, setAlertVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
-    const [loadingKey, setLoadingKey] = useState(null);
+
+    const dispatch = useDispatch();
+
+    const userId = useSelector((state) => state.user.user.id);
+    console.log('user id from user object in store afer registration: ', userId);
+    const userEmail = useSelector((state) => state.user.user.email);
+    console.log('user email from user object in store after registration: ', userEmail);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
-        // Simulate an API call for button action
         setTimeout(() => {
-            // Assuming user validation
-            const userValidated = true; // Replace with actual validation logic
+            const userValidated = true;
             if (userValidated) {
                 callback();
             } else {
                 setLoadingKey(null);
             }
-        }, 2000);
+        }, 300);
     };
 
     useFocusEffect(
@@ -58,6 +69,7 @@ const CreateProfile = ({ navigation, route }) => {
     };
 
     const handleAddImage = () => {
+        Keyboard.dismiss();
         setModalVisible(true);
         setLoadingKey(null);
     };
@@ -79,10 +91,11 @@ const CreateProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('90%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromCreate: true });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromCreate: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -99,10 +112,11 @@ const CreateProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('100%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromCreate: true });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromCreate: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -120,23 +134,51 @@ const CreateProfile = ({ navigation, route }) => {
         />
     );
 
+    const handleCreateProfile = (values) => {
+        const userData = { id: userId, name: values.fullName, image: profileImage };
+        // console.log('data being sent to store from create profile screen: ', userData);
+        handleButtonPress('CreateProfile', () => {
+        dispatch(updateProfile(userData))
+            .unwrap()
+            .then((response) => {
+                console.log(' full response in create profile : ',response);
+                // setAlertMessage(response.msg);
+                dispatch(login(response));
+                dispatch(authenticate());
+                console.log('user data dispatched using login in create profile : ', response);
+                setAlertMessage('Profile Created Successfully!');
+                setAlertType('success');
+                setAlertVisible(true);
+                setTimeout(() => {
+                    setAlertVisible(false);
+                    navigation.navigate('Tab');
+                    setLoadingKey(null);
+                    dispatch(resetStatus());
+                }, 1600);
+            })
+            .catch((error) => {
+                console.log(error);
+                // console.log(error.msg)
+                setLoadingKey(null);
+                setAlertMessage(error.msg);
+                setAlertType('error');
+                setAlertVisible(true);
+                setTimeout(() => {
+                    setAlertVisible(false);
+                    setLoadingKey(null);
+                }, 1600);
+            });
+        });
+    };
+
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <TouchableWithoutFeedback>
             <Background>
                 <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
                 <Formik
                     initialValues={{ fullName: '' }}
                     validationSchema={validationSchema}
-                    onSubmit={(values, actions) => {
-                        actions.validateForm().then(() => {
-                            actions.setSubmitting(false);
-                            setAlertVisible(true);
-                            setTimeout(() => {
-                                setAlertVisible(false);
-                                navigation.navigate('SignIn');
-                            }, 1600);
-                        });
-                    }}
+                    onSubmit={handleCreateProfile}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>
@@ -192,6 +234,10 @@ const CreateProfile = ({ navigation, route }) => {
                             </View>
                             <View style={styles.create_profile_button_view}>
                                 <CustomButton
+                                    buttonKey="CreateProfile"
+                                    isLoading={!!loadingKey}
+                                    currentLoadingKey={loadingKey}
+                                    loaderColor="#FFF"
                                     bgColor="#E3B12F"
                                     borderRadius={100}
                                     alignItems='center'
@@ -204,9 +250,7 @@ const CreateProfile = ({ navigation, route }) => {
                                     Create Profile
                                 </CustomButton>
                             </View>
-                            <AlertComponent
-                                successMessage="Profile created successfully"
-                                visible={isAlertVisible} />
+                            <CustomAlert successMessage={alertMessage} visible={alertVisible} type={alertType} />
                         </View>
                     )}
                 </Formik>

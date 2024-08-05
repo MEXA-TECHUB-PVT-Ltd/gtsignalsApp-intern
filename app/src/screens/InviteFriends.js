@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image, StatusBar } from 'react-native'
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, StatusBar, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Images from '../consts/images';
 import CustomButton from '../components/CustomButton';
@@ -8,10 +8,21 @@ import Alert from '../components/Alert';
 import IIcon from 'react-native-vector-icons/Ionicons';
 import Modal from '../components/Modal';
 
+import Clipboard from '@react-native-clipboard/clipboard';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchShareLink } from '../redux/appShareSlice';
+import Share from 'react-native-share';
+
 
 const InviteFriends = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [isAlertVisible, setAlertVisible] = useState(false);
+    const dispatch = useDispatch();
+    const shareLink = useSelector(state => state.appShare.link);
+
+    useEffect(() => {
+        dispatch(fetchShareLink());
+    }, [dispatch]);
 
     const firstRowOptions = [
         { icon: Images.whatsappicon, label: 'Whatsapp' },
@@ -33,15 +44,117 @@ const InviteFriends = ({ navigation }) => {
     };
 
     const handleCopyLink = () => {
-        setAlertVisible(true);
-        setTimeout(() => {
-            setAlertVisible(false);
-        }, 2000);
+        if (shareLink) {
+            Clipboard.setString(shareLink);
+            console.log('link copied to share : ', shareLink);
+            setAlertVisible(true);
+            setTimeout(() => {
+                setAlertVisible(false);
+            }, 2000);
+        } else {
+            console.log('No link available to copy');
+        }
     };
 
-    const handleShare = () => {
-        setModalVisible(true);
+    // const handleShare = () => {
+    //     setModalVisible(true);
+    // };
+
+    const handleShare = async () => {
+        if (shareLink) {
+            const shareOptions = {
+                title: 'Share via',
+                message: 'Gt-Signals',
+                url: shareLink,
+                failOnCancel: false,
+            };
+
+            try {
+                await Share.open(shareOptions);
+            } catch (error) {
+                console.error('Error sharing link:', error);
+            }
+        } else {
+            console.log('No share link available');
+        }
     };
+
+    // const handleIconPress = async (platform) => {
+    //     if (shareLink) {
+    //         const shareOptions = {
+    //             title: 'Share via',
+    //             message: 'Check out this link!',
+    //             url: shareLink,
+    //             failOnCancel: false,
+    //         };
+
+    //         console.log(`Icon pressed: ${platform}`); // Log the platform pressed
+
+    //         try {
+    //             switch (platform) {
+    //                 case 'WhatsApp':
+    //                     console.log('Sharing via WhatsApp');
+    //                     await Linking.openURL(`whatsapp://send?text=${shareLink}`);
+    //                     break;
+    //                 case 'Facebook':
+    //                     console.log('Sharing via Facebook');
+    //                     await Share.shareSingle({
+    //                         ...shareOptions,
+    //                         social: Share.Social.FACEBOOK
+    //                     });
+    //                     break;
+    //                 case 'Threads':
+    //                     console.log('Sharing via Threads');
+    //                     await Linking.openURL(`twitter://post?message=${shareLink}`);
+    //                     break;
+    //                 case 'Instagram':
+    //                     console.log('Sharing via Instagram');
+    //                     await Linking.openURL(`instagram://share?url=${shareLink}`);
+    //                     break;
+    //                 case 'Gmail':
+    //                     console.log('Sharing via Gmail');
+    //                     await Linking.openURL(`mailto:?subject=Check this out&body=${shareLink}`);
+    //                     break;
+    //                 case 'Telegram':
+    //                     console.log('Sharing via Telegram');
+    //                     await Share.shareSingle({
+    //                         ...shareOptions,
+    //                         social: Share.Social.TELEGRAM
+    //                     });
+    //                     break;
+    //                 case 'LinkedIn':
+    //                     console.log('Sharing via LinkedIn');
+    //                     await Share.shareSingle({
+    //                         ...shareOptions,
+    //                         social: Share.Social.LINKEDIN
+    //                     });
+    //                     break;
+    //                 case 'Others':
+    //                     console.log('Sharing to other apps');
+    //                     await Share.open(shareOptions);
+    //                     break;
+    //                 default:
+    //                     console.log(`${platform} icon pressed, but no functionality implemented`);
+    //                     return;
+    //             }
+    //             setModalVisible(false);
+    //         } catch (error) {
+    //             console.error(`Error sharing link via ${platform}:`, error);
+    //             if (['WhatsApp', 'Instagram', 'Threads'].includes(platform)) {
+    //                 console.log(`Handling app not found for ${platform}`);
+    //                 if (Platform.OS === 'android') {
+    //                     const packageName = platform === 'WhatsApp' ? 'com.whatsapp' : platform === 'Instagram' ? 'com.instagram.android' : 'com.twitter.android';
+    //                     Linking.openURL(`market://details?id=${packageName}`);
+    //                 } else {
+    //                     const appStoreId = platform === 'WhatsApp' ? '310633997' : platform === 'Instagram' ? '389801252' : '333903271';
+    //                     Linking.openURL(`https://apps.apple.com/app/id${appStoreId}`);
+    //                 }
+    //             }
+    //         }
+    //     } else {
+    //         console.log('No share link available');
+    //     }
+    // };
 
     return (
         <View style={styles.container}>
@@ -116,28 +229,31 @@ const InviteFriends = ({ navigation }) => {
                     <View style={styles.modalWrapper}>
                         <View style={styles.row_view}>
                             {firstRowOptions.map((option, index) => (
-                                <View key={option.label} style={styles.icon_text_view}>
-                                    <View style={styles.icon_backgrounnd}>
+                                <TouchableOpacity 
+                                key={option.label} 
+                                style={styles.icon_text_view} 
+                                onPress={() => handleIconPress(option.label)}>
+                                    <View style={styles.icon_background}>
                                         <Image
                                             source={option.icon}
                                             style={styles.image}
                                         />
                                     </View>
                                     <Text style={styles.text}>{option.label}</Text>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                         <View style={styles.row_view}>
                             {secondRowOptions.map((option, index) => (
-                                <View key={index} style={styles.icon_text_view}>
-                                    <View style={styles.icon_backgrounnd}>
+                                <TouchableOpacity key={option.label} style={styles.icon_text_view} onPress={() => handleIconPress(option.label)}>
+                                    <View style={styles.icon_background}>
                                         <Image
                                             source={option.icon}
                                             style={styles.image}
                                         />
                                     </View>
                                     <Text style={styles.text}>{option.label}</Text>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     </View>
@@ -217,7 +333,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    icon_backgrounnd: {
+    icon_background: {
         width: wp('12%'),
         height: wp('12%'),
         backgroundColor: '#f5f5f5',
@@ -228,7 +344,6 @@ const styles = StyleSheet.create({
     image: {
         width: wp('7%'),
         height: wp('7%'),
-        // borderRadius: 50,
         resizeMode: 'contain',
     },
     text: {
@@ -257,4 +372,4 @@ const styles = StyleSheet.create({
         minHeight: hp('22%'),
         maxHeight: hp('95%'),
     },
-})
+});

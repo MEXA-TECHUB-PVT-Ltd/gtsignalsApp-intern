@@ -7,29 +7,59 @@ import CustomDivider from './CustomDivider';
 import AlertComponent from './Alert';
 import { useNavigation } from '@react-navigation/native';
 
-const SignalCardWishList = ({ buttonType, onFavoritePress }) => {
-    const isBuy = buttonType === 'buy';
-    const [isWishListed, setIsWishListed] = useState(true);
+import { useDispatch, useSelector } from 'react-redux';
+import { removeFromWishlist } from '../redux/signalSlice';
+
+const SignalCardWishList = ({ onWishlistUpdate, signal, showAlert }) => {
+    const { signal_id, title, price, date, time, action, stop_loss, profit_loss, take_profit } = signal;
+    const isBuy = action === 'BUY';
+    // const [isWishListed, setIsWishListed] = useState(true);
     const navigation = useNavigation();
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.user);
+    const user_id = user.id;
 
-    // const handleBuyPress = () => {
-    //     navigation.navigate('SignalDetails');
-    // };
+    const date_ = signal.date;
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+    const _date = formatDate(date_);
+    const updated_AT = signal.updated_at;
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
 
-    const handleFavoritePress = () => {
-        const message = isWishListed ? "Signal removed from wishlist" : "Signal added to wishlist";
-        onFavoritePress(message);
-        setIsWishListed(!isWishListed);
+    const handleRemovePress = async () => {
+        try {
+            const response = await dispatch(removeFromWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
+            // console.log('Backend response for removeFromWishlist:', response.msg);
+            onWishlistUpdate();
+            showAlert("Signal removed successfully!");
+        } catch (error) {
+            console.error("Error while removing from wishlist:", error);
+        }
+    };
+
+    const handleDetailsPress = () => {
+        navigation.navigate('SignalDetails', { signal });
     };
 
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                onPress={() => navigation.navigate('SignalDetails')}
+                onPress={handleDetailsPress}
                 style={styles.card_view}>
                 <View style={styles.card_view1}>
                     <View style={styles.left_view}>
-                        <Text style={styles.currency_text}>NZD/USD</Text>
+                        <Text style={styles.currency_text}>{title}</Text>
                         <CustomButton
                             bgColor="#FFFFFF"
                             borderColor={isBuy ? "#02C121" : "#FF0000"}
@@ -37,7 +67,7 @@ const SignalCardWishList = ({ buttonType, onFavoritePress }) => {
                             borderRadius={6}
                             txtColor={isBuy ? "#02C121" : "#FF0000"}
                             textStyle={{ fontSize: 13, fontWeight: '400', lineHeight: 15 }}
-                            // onPress={handleBuyPress}
+                            onPress={() => { }}
                             icon={isBuy ? "trending-up" : "trending-down"}
                             iconSize={18}
                             iconColor={isBuy ? "#02C121" : "#FF0000"}
@@ -50,25 +80,25 @@ const SignalCardWishList = ({ buttonType, onFavoritePress }) => {
                             justifyContent={'space-between'}
                             disableFeedback={true}
                         >
-                            {isBuy ? "BUY" : "SELL"}
+                            {action}
                         </CustomButton>
                     </View>
                     <View style={styles.right_view}>
-                        <TouchableOpacity onPress={handleFavoritePress}>
+                        <TouchableOpacity onPress={handleRemovePress}>
                             <FAIcon
-                                name={isWishListed ? 'heart' : 'heart-o'}
+                                name={'heart'}
                                 size={22}
-                                color={isWishListed ? '#E3B12F' : '#A0A0A0'}
+                                color={'#E3B12F'}
                             />
                         </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.card_view2}>
                     <View style={styles.left_view}>
-                        <Text style={styles.date_text}>27-oct-2023, 08:20 AM</Text>
+                        <Text style={styles.date_text}>{_date}, {time}</Text>
                     </View>
                     <View style={styles.right_view}>
-                        <Text style={styles.price_text}>$113.22</Text>
+                        <Text style={styles.price_text}>{price}</Text>
                     </View>
                 </View>
                 <View style={styles.card_view3}>
@@ -77,11 +107,13 @@ const SignalCardWishList = ({ buttonType, onFavoritePress }) => {
                 <View style={styles.card_view4}>
                     <View style={styles.left_view}>
                         <Text style={styles.profit_loss_text}>Profit </Text>
-                        <Text style={styles.net_numbers_profit}>0.59038</Text>
+                        <Text style={profit_loss ? styles.net_numbers_profit : styles.waiting_text}>
+                            {profit_loss ? profit_loss : 'waiting'}
+                        </Text>
                     </View>
                     <View style={styles.right_view}>
                         <Text style={styles.profit_loss_text}>Stop loss </Text>
-                        <Text style={styles.net_numbers_loss}>0.59038</Text>
+                        <Text style={styles.net_numbers_loss}>{stop_loss}</Text>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -175,6 +207,13 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 15,
         color: '#02C121',
+        paddingRight: 5,
+    },
+    waiting_text: {
+        fontSize: 13,
+        fontWeight: '400',
+        lineHeight: 15,
+        color: '#949494',
         paddingRight: 5,
     },
     net_numbers_loss: {

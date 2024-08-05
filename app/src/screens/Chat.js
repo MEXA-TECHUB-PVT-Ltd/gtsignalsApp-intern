@@ -1,99 +1,108 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, TextInput, Text, StatusBar } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, TextInput, Text, StatusBar, Button, ActivityIndicator } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import AppLogo from '../components/AppLogo';
 import EmojiPicker from 'rn-emoji-keyboard';
+import io from 'socket.io-client';
 
-const Chat = ({ navigation }) => {
+const SOCKET_URL = 'http://192.168.18.120:4000/';
+
+
+const Chat = ({ navigation, route }) => {
+    // const { brokerId } = route.params;
+    const brokerId = 5;
+    const adminId = 1;
     const [messages, setMessages] = useState([]);
     const [showEmojiKeyboard, setShowEmojiKeyboard] = useState(false);
     const [inputText, setInputText] = useState('');
-
-    const keywordResponses = {
-        a: "Welcome to GT_Signals app. Hope you would like it.",
-        bitcoin: "The current price of Bitcoin is $35,000.",
-        ethereum: "Ethereum is trading at $2,500.",
-        buy: "Buying opportunities are observed in the current market.",
-        sell: "Selling pressures are evident in the market.",
-        bullish: "The market sentiment is bullish.",
-        bearish: "The market sentiment is bearish.",
-        support: "Key support levels are at $30,000.",
-        resistance: "Key resistance levels are at $40,000.",
-        breakout: "A breakout is anticipated above $35,000.",
-        trend: "The current trend is upward.",
-        volume: "Trading volume has increased by 20%.",
-        indicator: "The RSI indicator shows oversold conditions.",
-        strategy: "Consider using a breakout strategy for short-term gains.",
-        risk: "Manage your risk carefully during volatile market conditions.",
-        news: "Recent news suggests bullish sentiment in the market.",
-    };
+    const [isConnected, setIsConnected] = useState(false);
+    const [isUser, setIsUser] = useState(true); //true pe user false pe admin
+    const socket = React.useRef(null);
 
     useEffect(() => {
-        //you can set any custom message here to be shown auto when screen renders first tiem
-        // Initialize with an empty array to start with no messages
-        setMessages([]);
-    }, []);
+        socket.current = io(SOCKET_URL);
 
-    const handleSend = () => {
-        if (inputText.trim().length > 0) {
-            const newMessage = {
-                _id: messages.length + 1,
-                text: inputText.trim(),
+        socket.current.on('connect', () => {
+            setIsConnected(true);
+            socket.current.emit(isUser ? 'user_connect' : 'admin_connect', brokerId);
+
+            socket.current.on('initial_messages', (initialMessages) => {
+                // console.log('Initial Messages:', initialMessages);
+
+                const formattedMessages = initialMessages.map(msg => ({
+                    _id: msg.id,
+                    text: msg.message,
+                    createdAt: new Date(msg.timestamp),
+                    user: {
+                        _id: msg.sender_type === 'user' ? brokerId : adminId,
+                        name: msg.sender_type === 'user' ? 'User' : 'Admin',
+                    },
+                }));
+                setMessages(formattedMessages.reverse());
+            });
+        });
+
+        socket.current.on('message_from_user', (data) => {
+            const incomingMessage = {
+                _id: new Date().getTime(),
+                text: data.message,
                 createdAt: new Date(),
                 user: {
-                    _id: 1,
+                    _id: brokerId,
                     name: 'User',
                 },
             };
-            setMessages(previousMessages =>
-                GiftedChat.append(previousMessages, newMessage)
-            );
-            generateBotResponse(newMessage.text.trim());
-            setInputText('');
-        }
-    };
+            setMessages(previousMessages => GiftedChat.append(previousMessages, incomingMessage));
+        });
 
-    const generateBotResponse = useCallback((userMessage) => {
-        const userWords = userMessage.toLowerCase().split(/\s+/);
-        let responseText = "";
+        socket.current.on('message_from_admin', (message) => {
+            const incomingMessage = {
+                _id: new Date().getTime(),
+                text: message,
+                createdAt: new Date(),
+                user: {
+                    _id: adminId,
+                    name: 'Admin',
+                },
+            };
+            setMessages(previousMessages => GiftedChat.append(previousMessages, incomingMessage));
+        });
 
-        for (let i = 0; i < userWords.length; i++) {
-            const compoundWord = userWords.slice(i).join('');
-            if (keywordResponses[compoundWord]) {
-                responseText = keywordResponses[compoundWord];
-                break;
+        return () => {
+            socket.current.disconnect();
+        };
+    }, [isUser, brokerId]);
+
+    const handleSend = useCallback((messages = []) => {
+        const messagesWithId = messages.map(msg => ({
+            ...msg,
+            _id: new Date().getTime(),
+            createdAt: new Date(),
+            user: {
+                _id: isUser ? brokerId : adminId,
+                name: isUser ? 'User' : 'Admin',
             }
-        }
+        }));
+        setMessages(previousMessages => GiftedChat.append(previousMessages, messagesWithId));
+        const message = messagesWithId[0].text;
 
-        if (!responseText) {
-            userWords.forEach(word => {
-                if (keywordResponses[word]) {
-                    responseText = keywordResponses[word];
-                    return;
-                }
-            });
+        if (isUser) {
+            socket.current.emit('user_message', message);
+        } else {
+            socket.current.emit('admin_message', { userId: adminId, message });
         }
+        setInputText('');
+    }, [isUser, brokerId]);
 
-        if (responseText) {
-            setTimeout(() => {
-                const botResponse = {
-                    _id: messages.length + 2,
-                    text: responseText,
-                    createdAt: new Date(),
-                    user: {
-                        _id: 2,
-                        name: 'Support Bot',
-                    },
-                };
-                setMessages(previousMessages =>
-                    GiftedChat.append(previousMessages, botResponse)
-                );
-            }, 1000);
-        }
-    }, [keywordResponses, messages]);
+    if (!isConnected) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="gold" />
+            </View>
+        );
+    }
 
     const toggleKeyboard = () => {
         setShowEmojiKeyboard(!showEmojiKeyboard);
@@ -104,8 +113,25 @@ const Chat = ({ navigation }) => {
         setInputText(prevText => prevText + emoji);
     };
 
+    const formatTimestamp = (date) => {
+        // Add 5 hours to the date
+        const adjustedDate = new Date(date.getTime() + 5 * 60 * 60 * 1000);
+
+        // Get hours and minutes in 24-hour format
+        const hours = adjustedDate.getUTCHours();
+        const minutes = adjustedDate.getUTCMinutes();
+        const formattedHours = hours.toString().padStart(2, '0'); // Ensure hours are two digits
+        const formattedMinutes = minutes.toString().padStart(2, '0'); // Ensure minutes are two digits
+
+        // Return formatted time in 24-hour format
+        return `${formattedHours}:${formattedMinutes}`;
+    };
+
     const renderMessage = (props) => {
-        if (props.currentMessage.user._id === 2) {
+        const { currentMessage } = props;
+        const formattedTime = formatTimestamp(new Date(currentMessage.createdAt));
+        
+        if (props.currentMessage.user._id === adminId) {
             return (
                 <View style={{
                     backgroundColor: '#E3B12F',
@@ -118,38 +144,33 @@ const Chat = ({ navigation }) => {
                 }}>
                     <Text style={{ color: '#FFFFFF', fontSize: 12, lineHeight: 16, fontWeight: '400' }}>{props.currentMessage.text}</Text>
                     <Text style={{ fontSize: 10, color: '#FFFFFF', marginTop: 5, alignSelf: 'flex-end' }}>
-                        {props.currentMessage.createdAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                        {formattedTime}
                     </Text>
                 </View>
             );
+        } else {
+            return (
+                <View style={{
+                    width: 'auto',
+                    maxWidth: wp('72%'),
+                    alignSelf: 'flex-end',
+                    backgroundColor: 'transparent',
+                    borderTopLeftRadius: 10,
+                    borderBottomLeftRadius: 10,
+                    borderBottomRightRadius: 10,
+                    borderWidth: 1,
+                    borderColor: '#e8e8e8',
+                    padding: 10,
+                    marginBottom: 10,
+                }}>
+                    <Text style={{ color: '#676767' }}>{props.currentMessage.text}</Text>
+                    <Text style={{ fontSize: 10, color: '#929292', marginTop: 5, alignSelf: 'flex-end' }}>
+                        {formattedTime}
+                    </Text>
+
+                </View>
+            );
         }
-
-        return (
-            <View style={{
-                width: 'auto',
-                maxWidth: wp('72%'),
-                alignSelf: 'flex-end',
-                backgroundColor: 'transparent',
-                borderTopLeftRadius: 10,
-                borderBottomLeftRadius: 10,
-                borderBottomRightRadius: 10,
-                borderWidth: 1,
-                borderColor: '#e8e8e8',
-                padding: 10,
-                marginBottom: 10,
-            }}>
-                <Text style={{ color: '#676767' }}>{props.currentMessage.text}</Text>
-                <Text style={{ fontSize: 10, color: '#929292', marginTop: 5, alignSelf: 'flex-end' }}>
-                    {props.currentMessage.createdAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                </Text>
-            </View>
-        );
-    };
-
-    const renderMessageText = (props) => {
-        return (
-            <Text style={{ color: '#676767' }}>{props.currentMessage.text}</Text>
-        );
     };
 
     const renderInputToolbar = props => (
@@ -172,7 +193,7 @@ const Chat = ({ navigation }) => {
                     onChangeText={setInputText}
                 />
             </View>
-            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+            <TouchableOpacity style={styles.sendButton} onPress={() => handleSend([{ text: inputText }])}>
                 <FAIcon name="send" size={20} color="#FFFFFF" />
             </TouchableOpacity>
         </View>
@@ -188,23 +209,30 @@ const Chat = ({ navigation }) => {
                     <Icon name="arrow-back-ios" size={22} color="#333333" />
                 </TouchableOpacity>
             </View>
-            <View style={styles.logo_view}>
-                <AppLogo />
-            </View>
-            <View style={styles.lets_talk_view}>
-                <Text style={styles.lets_talk_text}>Let's Talk!</Text>
-            </View>
+
+            {/* <Button title={`Switch to ${isUser ? 'Admin' : 'User'}`} onPress={toggleUserAdmin} /> */}
 
             <GiftedChat
                 messages={messages}
-                onSend={newMessages => handleSend(newMessages)}
+                onSend={messages => handleSend(messages)}
                 renderInputToolbar={renderInputToolbar}
                 renderMessage={renderMessage}
-                renderMessageText={renderMessageText}
+                user={{
+                    _id: brokerId, // User/Admin ID
+                    // name: isUser ? 'User' : 'Admin',
+                }}
+            />
+
+
+            {/* <GiftedChat
+                messages={messages}
+                onSend={handleSend}
+                renderInputToolbar={renderInputToolbar}
+                renderMessage={renderMessage}
                 user={{
                     _id: 1,
                 }}
-            />
+            /> */}
 
             {showEmojiKeyboard && (
                 <EmojiPicker
@@ -213,7 +241,6 @@ const Chat = ({ navigation }) => {
                     onClose={() => setShowEmojiKeyboard(false)}
                     categoryPosition="top"
                     allowMultipleSelections
-                    
                 />
             )}
         </View>
@@ -232,29 +259,12 @@ const styles = StyleSheet.create({
     backicon_view: {
         backgroundColor: 'transparent',
         marginTop: hp('2%'),
-        marginHorizontal: 10,
+        // marginHorizontal: 10,
+        marginVertical: 10,
     },
     icon_view: {
         alignSelf: 'flex-start',
         backgroundColor: 'transparent',
-    },
-    logo_view: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'transparent',
-    },
-    lets_talk_view: {
-        marginVertical: hp('2%'),
-        justifyContent: 'center',
-        alignItems: 'center',
-
-    },
-    lets_talk_text: {
-        fontSize: 25,
-        fontWeight: '500',
-        lineHeight: 29,
-        color: '#333333',
-        marginBottom: 10,
     },
     textinput_container: {
         flexDirection: 'row',

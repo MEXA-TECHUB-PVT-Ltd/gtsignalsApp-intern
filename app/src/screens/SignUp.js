@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, StatusBar, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -8,9 +9,14 @@ import AppLogo from '../components/AppLogo';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import CustomDivider from '../components/CustomDivider';
-import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import Alert from '../components/Alert';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
+
+import { saveAuthToken } from '../utils/auth';
+
+import { useDispatch, useSelector } from 'react-redux';
+import {userRegister, resetStatus} from '../redux/userSlice';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -28,35 +34,52 @@ const validationSchema = Yup.object().shape({
 });
 
 const SignUp = ({navigation}) => {
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('');
+
   const [loadingKey, setLoadingKey] = useState(null);
   const [focusedInput, setFocusedInput] = useState(false);
+  const dispatch = useDispatch();
 
   const handleButtonPress = (buttonKey, callback) => {
     setLoadingKey(buttonKey);
-    // Simulate an API call for button action
     setTimeout(() => {
-      // Assuming user validation
-      const userValidated = true; // Replace with actual validation logic
+      const userValidated = true;
       if (userValidated) {
         callback();
       } else {
         setLoadingKey(null);
       }
-    }, 1000);
+    }, 250);
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = (values) => {
     handleButtonPress('SignUp', () => {
-      navigation.navigate('CreateProfile');
-      setLoadingKey(null);
-      // resetForm();
+      dispatch(userRegister(values))
+        .unwrap()
+        .then((response) => {
+          setLoadingKey(null);
+          setAlertMessage('SignUp Successful!');
+          setAlertType('success');
+          setAlertVisible(true);
+          // const { id, email } = response.data[0];
+          setTimeout(() => {
+            setAlertVisible(false);
+            navigation.navigate('CreateProfile');
+            // navigation.navigate('CreateProfile', { id, email });
+            dispatch(resetStatus());
+          }, 1500);
+        })
+        .catch((error) => {
+          setLoadingKey(null);
+          setAlertMessage(error.msg);
+          setAlertType('error');
+          setAlertVisible(true);
+          setTimeout(() => setAlertVisible(false), 1500);
+        });
     });
   };
-
-  // const handleSignUp = (values, { resetForm }) => {
-  //   navigation.navigate('CreateProfile');
-  //   resetForm();
-  // };
 
   const handleGoogle = () => {
     handleButtonPress('Google', () => {
@@ -84,9 +107,11 @@ const SignUp = ({navigation}) => {
   return (
     <ScrollView 
     showsVerticalScrollIndicator={false}
-    style={{ flex: 1 }}>
+    style={styles.scroll_view}>
+      <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
       <Background>
-        <StatusBar backgroundColor="transparent" translucent={true} barStyle="dark-content" />
+        <View style={styles.container}>
+        <Alert successMessage={alertMessage} visible={alertVisible} type={alertType} />
         <View style={styles.backicon_logo_view}>
           <TouchableOpacity
             style={styles.icon_view}
@@ -101,7 +126,7 @@ const SignUp = ({navigation}) => {
           <Text style={styles.create_account_txt}>Create Account</Text>
         </View>
         <Formik
-          initialValues={{ email: '', password: '', confirmPassword: '' }}
+            initialValues={{ email: 'irfan121@gmail.com', password: 'Irfan@92', confirmPassword: 'Irfan@92' }}
           validationSchema={validationSchema}
           onSubmit={(values) => handleSignUp(values)}
         >
@@ -302,6 +327,7 @@ const SignUp = ({navigation}) => {
             <Text style={styles.sign_in_txt}>Sign In</Text>
           </TouchableOpacity>
         </View>
+        </View>
       </Background>
     </ScrollView>
   );
@@ -310,23 +336,31 @@ const SignUp = ({navigation}) => {
 export default SignUp;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: StatusBar.currentHeight,
+  },
+  scroll_view: {
+    flex: 1,
+  },
   backicon_logo_view: {
     flexDirection: 'row',
     backgroundColor: 'transparent',
-    marginVertical: 30,
+    marginBottom: 32,
   },
   icon_view: {
+    position: 'absolute',
     alignSelf: 'flex-start',
     backgroundColor: 'transparent',
-    paddingRight: 10,
-    paddingBottom: 10,
+    // paddingRight: 10,
+    // paddingBottom: 10,
   },
   logo_view: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
-    marginLeft: -22,
+    // marginLeft: -22,
   },
   text_view: {
     alignItems: 'flex-start',
@@ -341,7 +375,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   create_button_view: {
-    marginVertical: 20,
+    marginVertical: 20.5,
   },
   divider_view: {
     flexDirection: 'row',

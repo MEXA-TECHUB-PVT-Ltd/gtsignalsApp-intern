@@ -9,6 +9,9 @@ import CustomButton from '../components/CustomButton';
 import Background from '../components/Background';
 import AlertComponent from '../components/Alert';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { resetPassword, resetStatus } from '../redux/userSlice';
+
 const validationSchema = Yup.object().shape({
     password: Yup.string()
         .required('Password is required')
@@ -21,17 +24,23 @@ const validationSchema = Yup.object().shape({
         .required('Confirm Password is required'),
 });
 
-const ResetPassword = ({ navigation }) => {
+const ResetPassword = ({ navigation, route }) => {
+
+    const { email } = route.params || {};
+    // console.log(email);
+
     const [loadingKey, setLoadingKey] = useState(null);
-    const [isAlertVisible, setAlertVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('success');
+    const [alertVisible, setAlertVisible] = useState(false);
+    const dispatch = useDispatch();
+    const resetPasswordStatus = useSelector(state => state.user.resetPasswordStatus);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
-        // Simulate an API call for button action
         setTimeout(() => {
-            // Assuming user validation
-            const userValidated = true; // Replace with actual validation logic
+            const userValidated = true;
             if (userValidated) {
                 callback();
             } else {
@@ -40,14 +49,34 @@ const ResetPassword = ({ navigation }) => {
         }, 1000);
     };
 
-    const handleReset = () => {
-        handleButtonPress('Reset', () => {
-            setLoadingKey(null);
-            setAlertVisible(true);
-            setTimeout(() => {
-                setAlertVisible(false);
-                navigation.navigate('SignIn');
-            }, 2000);
+    const handleResetPassword = (values) => {
+        handleButtonPress('resetPassword', async () => {
+            try {
+                setLoadingKey('Reset Password');
+                const actionResult = await dispatch(resetPassword({
+                    email: email,
+                    password: values.password
+                })).unwrap();
+
+                console.log(actionResult);
+                setAlertMessage(actionResult.msg);
+                setAlertType('success');
+                setAlertVisible(true);
+                setTimeout(() => {
+                    setAlertVisible(false);
+                    navigation.navigate('SignIn');
+                    dispatch(resetStatus());
+                    setLoadingKey(null);
+                }, 1600);
+
+            } catch (error) {
+                console.error(error);
+                setAlertMessage(error.msg);
+                setAlertType('error');
+                setAlertVisible(true);
+                setLoadingKey(null);
+                setTimeout(() => setAlertVisible(false), 1600);
+            }
         });
     };
 
@@ -72,7 +101,7 @@ const ResetPassword = ({ navigation }) => {
                     <Formik
                         initialValues={{ password: '', confirmPassword: '' }}
                         validationSchema={validationSchema}
-                        onSubmit={(values) => handleReset(values)}
+                        onSubmit={(values) => handleResetPassword(values)}
                     >
                         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                             <View style={styles.inputContainer}>
@@ -134,10 +163,9 @@ const ResetPassword = ({ navigation }) => {
                             </View>
                         )}
                     </Formik>
-                    <AlertComponent successMessage="Password reset successfully" visible={isAlertVisible} />
+                    <AlertComponent successMessage={alertMessage} visible={alertVisible} type={alertType} />
 
                 </View>
-
             </Background>
         </TouchableWithoutFeedback>
     );

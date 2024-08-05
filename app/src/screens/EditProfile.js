@@ -13,6 +13,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import AlertComponent from '../components/Alert';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import CustomAlert from '../components/Alert';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile, resetStatus } from '../redux/userSlice';
 
 const validationSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
@@ -20,10 +24,64 @@ const validationSchema = Yup.object().shape({
 });
 
 const EditProfile = ({ navigation, route }) => {
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [loadingKey, setLoadingKey] = useState(null);
+
     const [modalVisible, setModalVisible] = useState(false);
-    const [isAlertVisible, setAlertVisible] = useState(false);
     const [focusedInput, setFocusedInput] = useState(false);
-    const [profileImage, setProfileImage] = useState(null);
+
+    const dispatch = useDispatch();
+
+    const user = useSelector((state) => state.user.user);
+    console.log('user data in store in edit profile screen: ', user);
+
+    const userImage = user.image;
+    // console.log('image from user object after registration in account screen: ', userImage);
+    const userName = user.name;
+    // console.log('name from user object after registration in account screen: ', userName);
+    const userEmail = user.email;
+    // console.log('email from user object after registration in account screen: ', userEmail);
+    const userId = user.id;
+    // console.log('id from user object after registration in account screen: ', userId);
+    const [profileImage, setProfileImage] = useState(userImage || null);
+
+
+    //for signIN
+    // const userId = user.data.id;
+    // // console.log('user id from user object in store from signIN: ', userId);
+    // const userImage = user.data.image;
+    // // console.log('user image from user object in store from signIN: ', userImage);
+    // const userName = user.data.name;
+    // // console.log('user name from user object in store from signIN: ', userName);
+    // const userEmail = user.data.email;
+    // // console.log('user email from user object in store from signIN: ', userEmail);
+    // const [profileImage, setProfileImage] = useState(userImage || null);
+
+    // for registration
+    // const userImage = user.user.image;
+    // // console.log('image from user object after registration in account screen: ', userImage);
+    // const userName = user.user.name;
+    // // console.log('name from user object after registration in account screen: ', userName);
+    // const userEmail = user.user.email;
+    // // console.log('email from user object after registration in account screen: ', userEmail);
+    // const userId = user.user.id;
+    // // console.log('id from user object after registration in account screen: ', userId);
+    // const [profileImage, setProfileImage] = useState(userImage || null);
+
+    const handleButtonPress = (buttonKey, callback) => {
+        setLoadingKey(buttonKey);
+        setTimeout(() => {
+            const userValidated = true;
+            if (userValidated) {
+                callback();
+            } else {
+                setLoadingKey(null);
+            }
+        }, 300);
+    };
+
 
     useFocusEffect(
         React.useCallback(() => {
@@ -62,10 +120,11 @@ const EditProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('90%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromEdit: true, });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: true, fromEdit: true, });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -82,10 +141,11 @@ const EditProfile = ({ navigation, route }) => {
                 width: wp('100%'),
                 height: hp('100%'),
                 cropping: true,
-                cropperCircleOverlay: true,
+                // cropperCircleOverlay: true,
             }).then(image => {
                 setModalVisible(false);
-                navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromEdit: true });
+                setProfileImage(image.path);
+                // navigation.navigate('UploadPhoto', { imageUri: image.path, fromCamera: false, fromEdit: true });
             }).catch(error => {
                 console.log(error);
                 setModalVisible(false);
@@ -103,6 +163,39 @@ const EditProfile = ({ navigation, route }) => {
         />
     );
 
+    const handleEditProfile = (values) => {
+        const userData = { id: userId, name: values.fullName, image: profileImage, email: values.email };
+        // console.log('data updated from edit profile screen: ', userData);
+        handleButtonPress('EditProfile', () => {
+            dispatch(updateProfile(userData))
+                .unwrap()
+                .then((response) => {
+                    // console.log(response);
+                    setAlertMessage(response.msg);
+                    setAlertType('success');
+                    setAlertVisible(true);
+                    setTimeout(() => {
+                        setAlertVisible(false);
+                        navigation.navigate('Account');
+                        setLoadingKey(null);
+                        dispatch(resetStatus());
+                    }, 1600);
+                })
+                .catch((error) => {
+                    // console.log(error);
+                    console.log(error.msg)
+                    setLoadingKey(null);
+                    setAlertMessage(error.msg);
+                    setAlertType('error');
+                    setAlertVisible(true);
+                    setTimeout(() => {
+                        setAlertVisible(false);
+                        setLoadingKey(null);
+                    }, 1600);
+                });
+        });
+    };
+
     return (
         <View style={styles.main_container}>
             <StatusBar backgroundColor="white" barStyle="dark-content" />
@@ -117,21 +210,9 @@ const EditProfile = ({ navigation, route }) => {
             showsVerticalScrollIndicator={false}
             style={{ flex: 1 }}>
                 <Formik
-                    initialValues={{ fullName: '', email: '' }}
+                    initialValues={{ fullName: userName || '', email: userEmail || '' }}
                     validationSchema={validationSchema}
-                    onSubmit={(values, actions) => {
-                        actions.validateForm().then(() => {
-                            if (!values.fullName) {
-                                actions.setSubmitting(false);
-                                return;
-                            }
-                            setAlertVisible(true);
-                            setTimeout(() => {
-                                setAlertVisible(false);
-                                navigation.navigate('Account');
-                            }, 1600);
-                        });
-                    }}
+                    onSubmit={handleEditProfile}
                 >
                     {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
                         <View style={styles.container}>
@@ -203,6 +284,10 @@ const EditProfile = ({ navigation, route }) => {
                             </View>
                             <View style={styles.create_profile_button_view}>
                                 <CustomButton
+                                    buttonKey="EditProfile"
+                                    isLoading={!!loadingKey}
+                                    currentLoadingKey={loadingKey}
+                                    loaderColor="#FFF"
                                     bgColor="#E3B12F"
                                     borderRadius={100}
                                     alignItems='center'
@@ -215,7 +300,6 @@ const EditProfile = ({ navigation, route }) => {
                                     Edit
                                 </CustomButton>
                             </View>
-                           
                         </View>
                     )}
                 </Formik>
@@ -242,10 +326,9 @@ const EditProfile = ({ navigation, route }) => {
                     secondTextStyle={{ fontSize: 22, fontWeight: '400', color: '#333333', lineHeight: 30, }}
                 />
             </ScrollView>
-            <AlertComponent
-                successMessage="Profile edited successfully"
-                visible={isAlertVisible}
-            />
+            {/* <AlertComponent successMessage="Profile edited successfully" visible={isAlertVisible} /> */}
+            <CustomAlert successMessage={alertMessage} visible={alertVisible} type={alertType} />
+
         </View>
     );
 };

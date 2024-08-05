@@ -1,10 +1,36 @@
-import { StyleSheet, Text, View, StatusBar,ScrollView } from 'react-native';
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, StatusBar, ScrollView, FlatList, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import SignalCard from '../components/SignalCard';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchBrokers, incrementPage } from '../redux/brokerSlice';
 import BrokersCard from '../components/BrokersCard';
+import AlertComponent from '../components/Alert';
 
-const Brokers = () => {
+const Brokers = (navigation) => {
+  const dispatch = useDispatch();
+  const { brokers, status, page, limit } = useSelector((state) => state.brokers);
+
+  useEffect(() => {
+    dispatch(fetchBrokers({ page, limit }));
+  }, [dispatch, page, limit]);
+
+  const loadMoreBrokers = () => {
+    if (status !== 'loading') {
+      dispatch(incrementPage());
+      dispatch(fetchBrokers({ page: page + 1, limit }));
+    }
+  };
+
+  const renderItem = ({ item }) => (
+    <BrokersCard broker={item} navigation={navigation} />
+  );
+
+  const renderFooter = () => {
+    if (status === 'loading') {
+      return <ActivityIndicator size="large" color="gold" />;
+    }
+    return null;
+  };
 
   return (
     <View style={styles.container}>
@@ -12,20 +38,17 @@ const Brokers = () => {
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>Brokers</Text>
       </View>
-
-      <View style={styles.main_view}>
-        <ScrollView 
-        showsVerticalScrollIndicator={false}
-        style={styles.scroll_view}>
-          <BrokersCard />
-          <BrokersCard />
-          <BrokersCard />
-          <BrokersCard />
-          <BrokersCard />
-          
-        </ScrollView>
+      <View style={styles.mainView}>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={brokers}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.broker_id.toString()}
+          onEndReached={loadMoreBrokers}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={renderFooter}
+        />
       </View>
-
     </View>
   );
 };
@@ -37,13 +60,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   headerContainer: {
     height: hp('6.5%'),
     marginTop: 30,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
-    
   },
   headerText: {
     color: 'black',
@@ -53,14 +85,30 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textAlign: 'center',
   },
-  main_view: {
+  mainView: {
     flex: 1,
     backgroundColor: 'transparent',
     alignItems: 'center',
   },
-  scroll_view: {
-    // width: wp('88%'),
+  scrollView: {
     backgroundColor: '#FFFFFF',
     marginTop: 12,
+    width: wp('100%'),
+  },
+  scrollView: {
+    backgroundColor: '#FFFFFF',
+    marginTop: 12,
+    width: wp('100%'),
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: hp('80%'),
+  },
+  noDataText: {
+    fontSize: 18,
+    color: '#666666',
+    textAlign: 'center',
   },
 });

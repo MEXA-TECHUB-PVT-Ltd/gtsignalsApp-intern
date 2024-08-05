@@ -1,46 +1,154 @@
-import { StyleSheet, Text, View, AppRegistry, processColor, StatusBar, ScrollView, Button, Modal, TouchableOpacity } from 'react-native'
-import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, StatusBar, ScrollView, Button, Modal, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Header from '../components/Header';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import CustomDivider from '../components/CustomDivider';
 import CustomButton from '../components/CustomButton';
 import AlertComponent from '../components/Alert';
 
-import { LineChart, CandleStick } from 'react-native-charts-wrapper';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWishlist, removeFromWishlist, getAllWishlist, checkSaveItem } from '../redux/signalSlice';
 
-const SignalDetails = ({ navigation }) => {
+import { LineChart } from 'react-native-charts-wrapper';
+import Clipboard from '@react-native-clipboard/clipboard';
+
+const SignalDetails = ({ route, navigation }) => {
+    const { signal } = route.params;
+    const {
+        signal_id,
+        title,
+        price,
+        date,
+        time,
+        signal_status,
+        action,
+        stop_loss,
+        profit_loss,
+        result,
+        image,
+        trade_probability,
+        time_frame,
+        take_profit,
+        updated_at,
+    } = signal;
     const [isAlertVisible, setAlertVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
-    const [isFavorite, setIsFavorite] = useState(false);
     const [isUserSignedIn, setIsUserSignedIn] = useState(true);
     const [isAccountCreated, setIsAccountCreated] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
+    const [inWishlist, setInWishlist] = useState(null);
+
+    const dispatch = useDispatch();
+    const { checkSaveItemStatus, checkSaveItemResult, error } = useSelector((state) => state.signal);
+    const user = useSelector((state) => state.user.user);
+    const user_id = user.id;
+
+    useEffect(() => {
+        dispatch(checkSaveItem({ user_id: user_id, signal_id: signal_id }));
+    }, [dispatch, user_id, signal_id]);
+
+    useEffect(() => {
+        if (checkSaveItemStatus === 'succeeded') {
+            setInWishlist(checkSaveItemResult.save_status);
+            // console.log(`Signal value in user wishlist is:`, checkSaveItemResult.save_status);
+        } else if (checkSaveItemStatus === 'failed') {
+            console.log(`Error: ${error}`);
+        } else if (checkSaveItemStatus === 'loading') {
+            // console.log('Loading...');
+        }
+    }, [checkSaveItemStatus, checkSaveItemResult, error]);
+
+    let open_price_1 = null, open_price_2 = null, open_price_3 = null;
+    let take_profit_1 = null, take_profit_2 = null, take_profit_3 = null;
+
+    if (signal && Array.isArray(signal.take_profit)) {
+        signal.take_profit.forEach((item, index) => {
+            switch (index) {
+                case 0:
+                    open_price_1 = item.open_price || null;
+                    take_profit_1 = item.take_profit || null;
+                    break;
+                case 1:
+                    open_price_2 = item.open_price || null;
+                    take_profit_2 = item.take_profit || null;
+                    break;
+                case 2:
+                    open_price_3 = item.open_price || null;
+                    take_profit_3 = item.take_profit || null;
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+    // const firstOpenPrice = signal.take_profit.length > 0 ? signal.take_profit[0].open_price : null;
+    const firstOpenPrice = signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 0
+        ? signal.take_profit[0].open_price
+        : null;
+
+    const secondOpenPrice = signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 1
+        ? signal.take_profit[1].open_price
+        : null;
+
+    const thirdOpenPrice = signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 2
+        ? signal.take_profit[2].open_price
+        : null;
+    const date_ = signal.date;
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+    const _date = formatDate(date_);
+    const updated_AT = signal.updated_at;
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+    const last_updated = formatDateTime(updated_AT);
+    const isBuy = action === 'BUY';
+    const resultText = signal.result ? "True" : "False";
+
+    const copySignalDetails = () => {
+        const details = `Signal Details:\nTitle: ${signal.title}\nPrice: ${signal.price}\nAction: ${signal.action}`;
+        Clipboard.setString(details);
+        console.log('signal details copied : ', details);
+        showAlert("Signal copied successfully");
+    };
     
     const showAlert = (message) => {
         setAlertMessage(message);
         setAlertVisible(true);
         setTimeout(() => {
             setAlertVisible(false);
-        }, 1600);
+        }, 1000);
     };
 
-    // const handleFavoritePress = () => {
-    //     if (isFavorite) {
-    //         showAlert("Signal removed from wishlist");
-    //     } else {
-    //         showAlert("Signal added to wishlist");
-    //     }
-    //     setIsFavorite(!isFavorite);
-    // };
-
-    const handleFavoritePress = () => {
+    const addOrRemoveFromWishlist = async () => {
         if (isUserSignedIn && isAccountCreated) {
-            if (isFavorite) {
-                showAlert("Signal removed from wishlist");
-            } else {
-                showAlert("Signal added to wishlist");
+            try {
+                setInWishlist(!inWishlist);
+                let response;
+                if (inWishlist) {
+                    response = await dispatch(removeFromWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
+                    showAlert("Signal removed successfully!");
+                    // console.log('Backend response for removeFromWishlist : ', response.msg);
+                } else {
+                    response = await dispatch(addToWishlist({ user_id, signal_id: signal.signal_id })).unwrap();
+                    showAlert("Signal added successfully!");
+                    // console.log('Backend response for addToWishlist : ', response.msg);
+                }
+                
+            } catch (error) {
+                setInWishlist(inWishlist);
+                console.error("Error while updating wishlist:", error);
             }
-            setIsFavorite(!isFavorite);
         } else {
             setModalVisible(true);
         }
@@ -70,10 +178,10 @@ const SignalDetails = ({ navigation }) => {
                     headerText="Signal Details"
                     onPress={() => navigation.goBack()}
                     rightIcon={{
-                        name: isFavorite ? 'heart' : 'heart-outline',
+                        name: inWishlist ? 'heart' : 'heart-outline',
                         size: 22,
-                        color: isFavorite ? '#E3B12F' : '#333333',
-                        onPress: handleFavoritePress
+                        color: inWishlist ? '#E3B12F' : '#333333',
+                        onPress: addOrRemoveFromWishlist
                     }}
                 />
             </View>
@@ -85,15 +193,15 @@ const SignalDetails = ({ navigation }) => {
                         style={styles.card_view}>
                         <View style={styles.card_view1}>
                             <View style={styles.left_view}>
-                                <Text style={styles.currency_text}>NZD/USD</Text>
+                                <Text style={styles.currency_text}>{title}</Text>
                             </View>
                             <View style={styles.right_view}>
-                                <Text style={styles.price_text}>$113.22</Text>
+                                <Text style={styles.price_text}>${price}</Text>
                             </View>
                         </View>
                         <View style={styles.card_view2}>
                             <View style={styles.left_view}>
-                                <Text style={styles.date_text}>27-oct-2023, 08:20 AM</Text>
+                                <Text style={styles.date_text}>{_date}  {time}</Text>
                             </View>
                             <View style={styles.right_view}>
                                 <CustomButton
@@ -101,7 +209,7 @@ const SignalDetails = ({ navigation }) => {
                                     borderRadius={4}
                                     txtColor="#FFFFFF"
                                     textStyle={{ fontSize: 11, fontWeight: '500', lineHeight: 15 }}
-                                    onPress={() => showAlert("Signal copied successfully")}
+                                    onPress={copySignalDetails}
                                     icon="copy-outline"
                                     iconSize={12}
                                     iconColor={"#FFFFFF"}
@@ -131,15 +239,15 @@ const SignalDetails = ({ navigation }) => {
                     <Text style={styles.left_text}>Action</Text>
                     <CustomButton
                         bgColor="#FFFFFF"
-                        borderColor={"#02C121"}
+                        borderColor={isBuy ? "#02C121" : "#FF0000"}
                         borderWidth={0.8}
                         borderRadius={6}
-                        txtColor={"#02C121"}
+                        txtColor={isBuy ? "#02C121" : "#FF0000"}
                         textStyle={{ fontSize: 13, fontWeight: '400', lineHeight: 15 }}
-                        // onPress={handle_buy_press}
-                        icon={"trending-up"}
+                        onPress={() => { }}
+                        icon={isBuy ? "trending-up" : "trending-down"}
                         iconSize={18}
-                        iconColor={"#02C121"}
+                        iconColor={isBuy ? "#02C121" : "#FF0000"}
                         paddingLeft={8}
                         paddingRight={5}
                         width={wp('18%')}
@@ -147,62 +255,72 @@ const SignalDetails = ({ navigation }) => {
                         flexDirection={'row'}
                         alignItems={'center'}
                         justifyContent={'space-between'}
+                        disableFeedback={true}
                     >
-                        BUY
+                        {action}
                     </CustomButton>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Status</Text>
-                    <Text style={styles.right_text}>Active</Text>
+                    <Text style={styles.right_text}>{signal_status ? signal_status : 'waiting'}</Text>
                 </View>
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Open price</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
-                </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Take profit 1</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
-                </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Take profit 2</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
-                </View>
-                <View style={styles.info_view}>
-                    <Text style={styles.left_text}>Take profit 3</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+
+                <View>
+                    <View style={styles.info_view}>
+                        <Text style={styles.left_text}>Open price</Text>
+                        <Text style={styles.right_text}>{firstOpenPrice ? firstOpenPrice : 'waiting'}</Text>
+                    </View>
+                    {signal && Array.isArray(signal.take_profit) && signal.take_profit.length > 0 ? (
+                        signal.take_profit.map((item, index) => (
+                            <View key={item.take_profit_id} style={styles.info_view}>
+                                <Text style={styles.left_text}>Take profit {index + 1}</Text>
+                                <Text style={styles.right_text}>{item.take_profit}</Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text>No take profit data available</Text>
+                    )}
+                    {/* {signal.take_profit.map((item, index) => (
+                        <View key={item.take_profit_id} style={styles.info_view}>
+                            <Text style={styles.left_text}>Take profit {index + 1}</Text>
+                            <Text style={styles.right_text}>{item.take_profit}</Text>
+                        </View>
+                    ))} */}
                 </View>
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Stop loss</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{stop_loss ? stop_loss : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Profit/Loss</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}> {profit_loss ? profit_loss : 'waiting'}</Text>
                 </View>
+
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Trade Result</Text>
-                    <Text style={styles.right_text}>1.67890</Text>
+                    <Text style={styles.right_text}>{signal.result !== null ? resultText : 'waiting'}</Text>
                 </View>
+
                 <View style={styles.divider_view}>
                     <CustomDivider />
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Trade Probability</Text>
-                    <Text style={styles.right_text}>70 %</Text>
+                    <Text style={styles.right_text}> {trade_probability ? trade_probability : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view}>
                     <Text style={styles.left_text}>Time Frame</Text>
-                    <Text style={styles.right_text}>H - 1</Text>
+                    <Text style={styles.right_text}>{time_frame ? time_frame : 'waiting'}</Text>
                 </View>
                 <View style={styles.info_view_last}>
                     <Text style={styles.left_text}>Last Update</Text>
-                    <Text style={styles.right_text}>26-0ct-2023</Text>
+                    <Text style={styles.right_text}>{last_updated ? last_updated : 'waiting'}</Text>
                 </View>
 
             </ScrollView>
@@ -356,7 +474,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     charts_view: {
-        backgroundColor: 'pink',
+        backgroundColor: 'transparent',
         opacity: 0.8,
         height: hp('36%'),
         justifyContent: 'center',
