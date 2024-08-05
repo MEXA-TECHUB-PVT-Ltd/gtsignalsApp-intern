@@ -103,16 +103,11 @@ export const resetPassword = createAsyncThunk('users/resetPassword', async ({ em
             },
             timeout: 60000,
         });
-        // console.log('Response:', response.data);
         return response.data;
     } catch (error) {
-        // console.error('Error:', error);
         if (error.response) {
-            // console.error('Response Data:', error.response.data);
         } else if (error.request) {
-            // console.error('Request Error:', error.request);
         } else {
-            // console.error('Other Error:', error.message);
         }
         return rejectWithValue(error.response ? error.response.data : error.message);
     }
@@ -140,7 +135,6 @@ export const deleteUser = createAsyncThunk(
                     'Content-Type': 'application/json',
                 },
             });
-            // console.log('Response after delete press:', response.data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response ? error.response.data : error.message);
@@ -155,7 +149,9 @@ const initialState = {
     resetPasswordStatus: 'idle',
     updateProfileStatus: 'idle',
     changePasswordStatus: 'idle',
+    deleteUserStatus: 'idle',
     user: null,
+    isAuthenticated: false,
     error: null,
 };
 
@@ -173,6 +169,17 @@ const userSlice = createSlice({
             state.deleteUserStatus = 'idle';
             state.error = null;
         },
+        login: (state, action) => {
+            // state.user = action.payload;
+            // state.user = action.payload.user;
+            state.user = action.payload.user || action.payload; 
+            state.isAuthenticated = true;
+        },
+        logout(state) {
+            // state.user = null;
+            // state.user = initialState.user;
+            state.isAuthenticated = false;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -182,7 +189,9 @@ const userSlice = createSlice({
             .addCase(userRegister.fulfilled, (state, action) => {
                 state.signupStatus = 'succeeded';
                 // console.log(action.payload);
+                // console.log('Payload data of userRegister :', action.payload.data[0]);
                 state.user = action.payload.data[0];
+                // state.isAuthenticated = true;
             })
             .addCase(userRegister.rejected, (state, action) => {
                 state.signupStatus = 'failed';
@@ -193,8 +202,8 @@ const userSlice = createSlice({
             })
             .addCase(userSignin.fulfilled, (state, action) => {
                 state.signinStatus = 'succeeded';
-                // console.log('User signed in:', action.payload.data);
                 state.user = action.payload.data;
+                state.isAuthenticated = true;
             })
             .addCase(userSignin.rejected, (state, action) => {
                 state.signinStatus = 'failed';
@@ -246,6 +255,8 @@ const userSlice = createSlice({
             })
             .addCase(deleteUser.fulfilled, (state) => {
                 state.deleteUserStatus = 'succeeded';
+                state.isAuthenticated = false;
+                // state.user = null;
             })
             .addCase(deleteUser.rejected, (state, action) => {
                 state.deleteUserStatus = 'failed';
@@ -254,5 +265,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { resetStatus } = userSlice.actions;
+export const { resetStatus, login, logout } = userSlice.actions;
 export default userSlice.reducer;

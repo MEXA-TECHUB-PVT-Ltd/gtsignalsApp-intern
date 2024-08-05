@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, StatusBar, Modal, Alert, Image, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Images from '../consts/images';
 import ADIcon from 'react-native-vector-icons/AntDesign';
 import IIcon from 'react-native-vector-icons/Ionicons';
@@ -10,7 +11,9 @@ import CustomButton from '../components/CustomButton';
 import { ScrollView } from 'react-native-gesture-handler';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteUser, resetStatus } from '../redux/userSlice';
+import { deleteUser, resetStatus, logout } from '../redux/userSlice';
+import { store, persistor } from '../redux/store';
+import { unauthenticate } from '../redux/authSlice';
 
 const Account = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,19 +22,15 @@ const Account = ({navigation}) => {
   const dispatch = useDispatch();
 
   const user = useSelector((state) => state.user.user);
-  // console.log('user data from redux store in account screen: ', user);
-
-  //working for both signin and register
+  // console.log('user details stored in redux : ', user);
   const userId = user.id;
-  // console.log('id from user object after registration in account screen: ', userId);
+  // console.log('userId from user in store: ', userId);
   const userImage = user.image;
-  // console.log('image from user object after registration in account screen: ', userImage);
   const userName = user.name;
-  // console.log('name from user object after registration in account screen: ', userName);
-  const userEmail = user.email;
-  // console.log('email from user object after registration in account screen: ', userEmail);
-  
+  const userEmail = user.email;  
   const profileImage = userImage;
+
+ 
 
   const handleEditPress = () => {
     navigation.navigate('EditProfile');
@@ -45,15 +44,43 @@ const Account = ({navigation}) => {
     setModalVisible(true);
   };
 
-  const handleYesLogout = () => {
+  const handleYesLogout = async () => {
     try {
-      dispatch(resetStatus());
+      // console.log(' state before logout:', store.getState());
+
+      // const keysBeforePurge = await AsyncStorage.getAllKeys();
+      // console.log('AsyncStorage keys before purge in logout:', keysBeforePurge);
+
+      await persistor.purge();
+
+      // const keys = await AsyncStorage.getAllKeys();
+      // console.log('AsyncStorage keys after purge in logout:', keys);
+
+      dispatch(logout());
+      // console.log(' state after logout:', store.getState());
+      dispatch(unauthenticate());
       setModalVisible(false);
-      navigation.navigate('SignIn');
+      setTimeout(() => {
+        navigation.navigate('SignIn');
+      }, 0);
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
+
+  // const handleYesLogout = async () => {
+  //   try {
+  //     dispatch(logout());
+  //     // Purge persisted state
+  //     await persistor.purge();
+      
+  //     // dispatch(resetStatus());
+  //     setModalVisible(false);
+  //     navigation.navigate('SignIn');
+  //   } catch (error) {
+  //     console.error('Error during logout:', error);
+  //   }
+  // };
 
   const handleLogoutCancel = () => {
     setModalVisible(false);
@@ -67,24 +94,50 @@ const Account = ({navigation}) => {
     setDeleteModalVisible(false);
   };
 
-  const handleYesDelete = () => {
-    console.log('user deleted with ID:', userId);
+  const handleYesDelete = async () => {
     if (userId) {
-      dispatch(deleteUser(userId))
-        .unwrap()
-        .then((response) => {
-          Alert.alert('Success', response.msg);
-          dispatch(resetStatus());
-          navigation.navigate('SignUp');
-        })
-        .catch((error) => {
-          Alert.alert('Error', error?.msg);
-          console.error('Failed to delete user:', error);
-        });
+      try {
+        const response = await dispatch(deleteUser(userId)).unwrap();
+
+        Alert.alert('Success', response.msg);
+
+        dispatch(resetStatus());
+        dispatch(unauthenticate());
+
+        const keysBeforePurge = await AsyncStorage.getAllKeys();
+        console.log('AsyncStorage keys before purge:', keysBeforePurge);
+
+        await persistor.purge();
+
+        const keys = await AsyncStorage.getAllKeys();
+        console.log('AsyncStorage keys after purge:', keys);
+        navigation.navigate('SignUp');
+      } catch (error) {
+        Alert.alert('Error', error?.msg || 'Failed to delete user');
+        console.error('Failed to delete user:', error);
+      }
     } else {
       console.error('User ID not found');
     }
   };
+
+  // const handleYesDelete = () => {
+  //   if (userId) {
+  //     dispatch(deleteUser(userId))
+  //       .unwrap()
+  //       .then((response) => {
+  //         Alert.alert('Success', response.msg);
+  //         dispatch(resetStatus());
+  //         navigation.navigate('SignUp');
+  //       })
+  //       .catch((error) => {
+  //         Alert.alert('Error', error?.msg);
+  //         console.error('Failed to delete user:', error);
+  //       });
+  //   } else {
+  //     console.error('User ID not found');
+  //   }
+  // };
 
   return (
     <View style={styles.container}>

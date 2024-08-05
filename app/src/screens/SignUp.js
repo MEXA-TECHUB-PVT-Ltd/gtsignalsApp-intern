@@ -13,6 +13,8 @@ import Alert from '../components/Alert';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
 
+import { saveAuthToken } from '../utils/auth';
+
 import { useDispatch, useSelector } from 'react-redux';
 import {userRegister, resetStatus} from '../redux/userSlice';
 
@@ -53,26 +55,23 @@ const SignUp = ({navigation}) => {
   };
 
   const handleSignUp = (values) => {
-    // console.log(values)
     handleButtonPress('SignUp', () => {
       dispatch(userRegister(values))
         .unwrap()
         .then((response) => {
-          // console.log(response.msg);
-          // const id = response.data[0].id;
-          // setAlertMessage(response.msg);
           setLoadingKey(null);
           setAlertMessage('SignUp Successful!');
           setAlertType('success');
           setAlertVisible(true);
+          // const { id, email } = response.data[0];
           setTimeout(() => {
             setAlertVisible(false);
             navigation.navigate('CreateProfile');
+            // navigation.navigate('CreateProfile', { id, email });
             dispatch(resetStatus());
           }, 1500);
         })
         .catch((error) => {
-          // console.log(error.msg);
           setLoadingKey(null);
           setAlertMessage(error.msg);
           setAlertType('error');

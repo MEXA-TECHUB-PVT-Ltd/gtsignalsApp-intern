@@ -2,7 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 // Endpoint URL
-const getAllSignalsUrl = 'https://gtcaptain-be.mtechub.com/signal/getallsignals?page=1&limit=100';
+// const getAllSignalsUrl = 'https://gtcaptain-be.mtechub.com/signal/getallsignals?page=1&limit=100';
+const getAllSignalsUrl = 'https://gtcaptain-be.mtechub.com/signal/getallsignals';
+
 const searchSignalByNameUrl = 'https://gtcaptain-be.mtechub.com/signal/search_signal_byname';
 const addToWishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/createwishlist';
 const removeFromWishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/removesignalbyuserID';
@@ -10,18 +12,26 @@ const getallwishlistUrl = 'https://gtcaptain-be.mtechub.com/wishlist/getallwishl
 const getSignalByUserIdUrl = 'https://gtcaptain-be.mtechub.com/wishlist/getSignalsByUserId';
 const checkSaveItemUrl = 'https://gtcaptain-be.mtechub.com/wishlist/check_save_item';
 
-export const getAllSignals = createAsyncThunk('signal/getAllSignals', async (_, { rejectWithValue }) => {
-    try {
-        const response = await axios.get(getAllSignalsUrl, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+// export const getAllSignals = createAsyncThunk('signal/getAllSignals', async (_, { rejectWithValue }) => {
+//     try {
+//         const response = await axios.get(getAllSignalsUrl, {
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//         });
+//         return response.data.data;
+//     } catch (error) {
+//         return rejectWithValue(error.response.data);
+//     }
+// });
+
+export const getAllSignals = createAsyncThunk(
+    'signals/fetchSignals',
+    async ({ page, limit }) => {
+        const response = await axios.get(`${getAllSignalsUrl}?page=${page}&limit=${limit}`);
         return response.data.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data);
     }
-});
+);
 
 export const searchSignalByName = createAsyncThunk('signal/searchSignalByName', async (name, { rejectWithValue }) => {
     try {
@@ -118,16 +128,19 @@ export const checkSaveItem = createAsyncThunk('wishlist/checkSaveItem', async ({
 // Initial State
 const initialState = {
     signals: [],
+    status: 'idle',
+    page: 1,
+    limit: 8,
     searchSignals: [],
     wishlist: [],
     userSignals: [],
     checkSaveItemStatus: 'idle',
     checkSaveItemResult: null,
-    getAllSignalsStatus: 'idle',
     searchStatus: 'idle',
     wishlistStatus: 'idle',
     userSignalsStatus: 'idle',
     error: null,
+   
 };
 
 // Slice
@@ -136,7 +149,7 @@ const signalSlice = createSlice({
     initialState,
     reducers: {
         resetSignalStatus(state) {
-            state.getAllSignalsStatus = 'idle';
+            state.status = 'idle';
             state.searchStatus = 'idle';
             state.wishlistStatus = 'idle';
             state.userSignalsStatus = 'idle';
@@ -147,20 +160,40 @@ const signalSlice = createSlice({
         clearSearchSignals(state) {
             state.searchSignals = [];
         },
+        incrementPage: (state) => {
+            state.page += 1;
+        },
     },
     extraReducers: (builder) => {
         builder
+            // .addCase(getAllSignals.pending, (state) => {
+            //     state.getAllSignalsStatus = 'loading';
+            // })
+            // .addCase(getAllSignals.fulfilled, (state, action) => {
+            //     state.getAllSignalsStatus = 'succeeded';
+            //     state.signals = action.payload;
+            // })
+            // .addCase(getAllSignals.rejected, (state, action) => {
+            //     state.getAllSignalsStatus = 'failed';
+            //     state.error = action.error.message;
+            // })
+
             .addCase(getAllSignals.pending, (state) => {
-                state.getAllSignalsStatus = 'loading';
+                state.status = 'loading';
             })
             .addCase(getAllSignals.fulfilled, (state, action) => {
-                state.getAllSignalsStatus = 'succeeded';
-                state.signals = action.payload;
+                state.status = 'succeeded';
+                // Avoid duplicating signals
+                const newSignals = action.payload.filter(
+                    (newSignal) => !state.signals.some((signal) => signal.signal_id === newSignal.signal_id)
+                );
+                state.signals = [...state.signals, ...newSignals];
             })
             .addCase(getAllSignals.rejected, (state, action) => {
-                state.getAllSignalsStatus = 'failed';
+                state.status = 'failed';
                 state.error = action.error.message;
             })
+
             .addCase(searchSignalByName.pending, (state) => {
                 state.searchStatus = 'loading';
             })
@@ -231,5 +264,5 @@ const signalSlice = createSlice({
     },
 });
 
-export const { resetSignalStatus, clearSearchSignals } = signalSlice.actions;
+export const { resetSignalStatus, clearSearchSignals, incrementPage } = signalSlice.actions;
 export default signalSlice.reducer;

@@ -10,38 +10,29 @@ import { ScrollView } from 'react-native-gesture-handler';
 import AlertComponent from '../components/Alert';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { getAllSignals, resetSignalStatus } from '../redux/signalSlice';
+import { getAllSignals, incrementPage } from '../redux/signalSlice';
 
 const Home = ({ navigation }) => {
   const buttonType = 'buy';
   const dispatch = useDispatch();
-  const { signals, getAllSignalsStatus, error } = useSelector(state => state.signal);
-  // const signInData = useSelector((state) => state.user.user )
-  // console.log(signInData.email);
+  const { signals, status, page, limit } = useSelector(state => state.signal);
 
   useEffect(() => {
-    dispatch(getAllSignals());
-  }, [dispatch]);
+    dispatch(getAllSignals({ page, limit }));
+  }, [dispatch, page, limit]);
 
-  if (getAllSignalsStatus === 'loading') {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color="gold" />
-      </View>
-    );
-  }
+  const loadMoreSignals = () => {
+    if (status !== 'loading') {
+      dispatch(incrementPage());
+    }
+  };
 
-  if (getAllSignalsStatus === 'failed') {
-    return (
-      <View style={styles.errorContainer}>
-        <AlertComponent message={error} />
-      </View>
-    );
-  }
-
-  if (!signals) {
+  const renderFooter = () => {
+    if (status === 'loading') {
+      return <ActivityIndicator size="large" color="gold" />;
+    }
     return null;
-  }
+  };
 
 
   return (
@@ -67,17 +58,16 @@ const Home = ({ navigation }) => {
         </ImageBackground>
       </View>
       <View style={styles.main_view}>
-
-        <ScrollView
-        showsVerticalScrollIndicator={false} 
-        style={styles.scroll_view}>
-          {signals.map(signal => (
-            <SignalCard 
-            key={signal.signal_id} 
-            signal={signal} 
-            />
-          ))}
-        </ScrollView>
+        <FlatList
+          style={styles.flatlist_view}
+          showsVerticalScrollIndicator={false}
+          data={signals}
+          renderItem={({ item }) => <SignalCard signal={item} navigation={navigation} />}
+          keyExtractor={(item) => item.signal_id.toString()}
+          onEndReached={loadMoreSignals}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={renderFooter}
+        />
       </View>
     </View>
   )
@@ -135,9 +125,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center', 
   },
-  scroll_view: {
-    // width: wp('88%'),
+  // scroll_view: {
+  //   // width: wp('88%'),
+  //   backgroundColor: 'white',
+  //   marginTop: 16,
+  // },
+  flatlist_view: {
     backgroundColor: 'white',
     marginTop: 16,
-  },
+  }
 });

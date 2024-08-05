@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, FlatList, StatusBar } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import Header from '../components/Header';
@@ -38,6 +38,15 @@ const WishList = ({ navigation }) => {
     }, 1400);
   };
 
+  const renderItem = ({ item }) => (
+    <SignalCardWishList
+      key={item.signal_id}
+      signal={item}
+      showAlert={showAlert}
+      onWishlistUpdate={handleWishlistUpdate}
+    />
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="white" translucent={true} barStyle="dark-content" />
@@ -48,22 +57,18 @@ const WishList = ({ navigation }) => {
           headerText="Wish List" />
       </View>
       <View style={styles.main_view}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={styles.cards_view}>
-          {userSignals.length > 0 ? (
-            userSignals.map((signal) => (
-              <SignalCardWishList
-                key={signal.signal_id}
-                signal={signal}
-                showAlert={showAlert}
-                onWishlistUpdate={handleWishlistUpdate}
-              />
-            ))
-          ) : (
-            <Text>No signals available</Text>
-          )}
-        </ScrollView>
+        {userSignals.length > 0 ? (
+          <FlatList
+            style={styles.flatlist_view}
+            data={userSignals}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.signal_id.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.cards_view}
+          />
+        ) : (
+          <Text>No signals available</Text>
+        )}
       </View>
     </View>
   )
@@ -86,7 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
   },
-  cards_view: {
+  flatlist_view: {
     backgroundColor: 'transparent',
     marginTop: 16,
   },

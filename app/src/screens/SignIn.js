@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, StatusBar,Alert, Platform, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -14,8 +15,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../consts/images';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
+import { saveAuthToken, getAuthToken } from '../utils/auth';
+
 import { useDispatch, useSelector } from 'react-redux';
-import { userSignin, resetStatus } from '../redux/userSlice';
+import { userSignin, resetStatus, login } from '../redux/userSlice';
+import { authenticate } from '../redux/authSlice';
 
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
@@ -84,48 +88,86 @@ const SignIn = ({ navigation }) => {
             console.error(error);
         }
     };
-    // const handleGoogle = () => {
-    //     handleButtonPress('Google', () => {
-    //         setLoadingKey(null);
+
+    // const handleSignIn = ({ email, password }) => {
+    //     handleButtonPress('signIn', async () => {
+    //         try {
+    //             const response = await dispatch(userSignin({ email, password })).unwrap();
+
+    //             if (response.data?.deleted_status) {
+    //                 setLoadingKey(null);
+    //                 const deletedAt = new Date(response.data.deleted_at).toLocaleDateString();
+    //                 const message = `Your account was deleted on ${deletedAt}. You can recover it within 90 days.`;
+    //                 Alert.alert('Account Deleted', message);
+    //             } else {
+    //                 // Dispatch login action to update the Redux store
+    //                 // console.log('Dispatching login data:', response.data);
+    //                 const user = {
+    //                     id: response.data.id,
+    //                     email: response.data.email,
+    //                     name: response.data.name,
+    //                     image: response.data.image,
+    //                 };
+    //                 // console.log('data being saved in persist storage : ', user);
+    //                 dispatch(login(user));
+
+    //                 setAlertMessage(response.msg);
+    //                 setAlertType('success');
+    //                 setAlertVisible(true);
+    //                 setTimeout(() => {
+    //                     setAlertVisible(false);
+    //                     navigation.navigate('Tab');
+    //                     setLoadingKey(null);
+    //                 }, 300);
+                    
+    //             }
+    //         } catch (error) {
+    //             setLoadingKey(null);
+    //             setAlertMessage(error?.message || 'An unexpected error occurred.');
+    //             setAlertType('error');
+    //             setAlertVisible(true);
+    //             setTimeout(() => setAlertVisible(false), 1000);
+    //         }
     //     });
     // };
 
-
     const handleSignIn = ({ email, password }) => {
-        handleButtonPress('signIn', () => {
-            dispatch(userSignin({ email, password }))
-                .unwrap()
-                .then((response) => {
-                    // Check if the account has been deleted
-                    if (response.data?.deleted_status) {
-                        setLoadingKey(null);
-                        const deletedAt = new Date(response.data.deleted_at).toLocaleDateString();
-                        const message = `Your account was deleted on ${deletedAt}  you can recover it within 90 days.`;
-                        Alert.alert('Account Deleted', message);
-                        
-                        // setAlertMessage(message);
-                        // setAlertType('error'); // Use 'error' or another type for special cases
-                        // setAlertVisible(true);
-                    } else {
-                        // Handle successful sign-in
-                        setAlertMessage(response.msg);
-                        setAlertType('success');
-                        setAlertVisible(true);
-                        setTimeout(() => {
-                            setAlertVisible(false);
-                            navigation.navigate('Tab');
-                            setLoadingKey(null);
-                        }, 300);
-                    }
-                })
-                .catch((error) => {
+        handleButtonPress('signIn', async () => {
+            try {
+                const response = await dispatch(userSignin({ email, password })).unwrap();
+
+                if (response.data?.deleted_status) {
                     setLoadingKey(null);
-                    // Handle errors coming from the backend
-                    setAlertMessage(error?.message || 'An unexpected error occurred.');
-                    setAlertType('error');
+                    const deletedAt = new Date(response.data.deleted_at).toLocaleDateString();
+                    const message = `Your account was deleted on ${deletedAt}. You can recover it within 90 days.`;
+                    Alert.alert('Account Deleted', message);
+                } else {
+                    // Dispatch login action to update the Redux store
+                    const user = {
+                        id: response.data.id,
+                        email: response.data.email,
+                        name: response.data.name,
+                        image: response.data.image,
+                    };
+                    dispatch(login(user));
+                    dispatch(authenticate());
+
+                    setAlertMessage(response.msg);
+                    setAlertType('success');
                     setAlertVisible(true);
-                    setTimeout(() => setAlertVisible(false), 1000);
-                });
+                    setTimeout(() => {
+                        setAlertVisible(false);
+                        navigation.navigate('Tab');  // Navigate to Tab screen only if account is not deleted
+                        setLoadingKey(null);
+                    }, 300);
+                }
+            } catch (error) {
+                setLoadingKey(null);
+                setAlertMessage(error?.message || 'An unexpected error occurred.');
+                setAlertType('error');
+                setAlertVisible(true);
+                setTimeout(() => setAlertVisible(false), 1000);
+            }
         });
     };
 

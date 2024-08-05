@@ -17,7 +17,8 @@ import * as Yup from 'yup';
 import CustomAlert from '../components/Alert';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { updateProfile, resetStatus } from '../redux/userSlice';
+import { updateProfile, resetStatus, login } from '../redux/userSlice';
+import { authenticate } from '../redux/authSlice';
 
 const validationSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
@@ -35,9 +36,9 @@ const CreateProfile = ({ navigation, route }) => {
     const dispatch = useDispatch();
 
     const userId = useSelector((state) => state.user.user.id);
-    // console.log('user id from user object in store afer registration: ', userId);
+    console.log('user id from user object in store afer registration: ', userId);
     const userEmail = useSelector((state) => state.user.user.email);
-    // console.log('user email from user object in store after registration: ', userEmail);
+    console.log('user email from user object in store after registration: ', userEmail);
 
     const handleButtonPress = (buttonKey, callback) => {
         setLoadingKey(buttonKey);
@@ -140,8 +141,11 @@ const CreateProfile = ({ navigation, route }) => {
         dispatch(updateProfile(userData))
             .unwrap()
             .then((response) => {
-                // console.log(response);
+                console.log(' full response in create profile : ',response);
                 // setAlertMessage(response.msg);
+                dispatch(login(response));
+                dispatch(authenticate());
+                console.log('user data dispatched using login in create profile : ', response);
                 setAlertMessage('Profile Created Successfully!');
                 setAlertType('success');
                 setAlertVisible(true);

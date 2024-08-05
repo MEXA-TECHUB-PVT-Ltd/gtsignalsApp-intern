@@ -1,46 +1,36 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, ScrollView, FlatList, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBrokers } from '../redux/brokerSlice';
+import { fetchBrokers, incrementPage } from '../redux/brokerSlice';
 import BrokersCard from '../components/BrokersCard';
 import AlertComponent from '../components/Alert';
 
-const Brokers = () => {
+const Brokers = (navigation) => {
   const dispatch = useDispatch();
-  const brokers = useSelector(state => state.brokers.brokers);
-  // console.log('All brokders: ', brokers);
-  const brokerIds = brokers.map(broker => broker.broker_id);
-  // console.log("Broker IDs:", brokerIds);
-  
-  const status = useSelector(state => state.brokers.status);
-  const error = useSelector(state => state.brokers.error);
+  const { brokers, status, page, limit } = useSelector((state) => state.brokers);
 
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchBrokers());
+    dispatch(fetchBrokers({ page, limit }));
+  }, [dispatch, page, limit]);
+
+  const loadMoreBrokers = () => {
+    if (status !== 'loading') {
+      dispatch(incrementPage());
+      dispatch(fetchBrokers({ page: page + 1, limit }));
     }
-  }, [dispatch, status]);
+  };
 
-  if (status === 'loading') {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color='gray' />
-      </View>
-    );
-  }
+  const renderItem = ({ item }) => (
+    <BrokersCard broker={item} navigation={navigation} />
+  );
 
-  if (status === 'failed') {
-    return (
-      <View style={styles.errorContainer}>
-        <AlertComponent message={error} />
-      </View>
-    );
-  }
-
-  if (!brokers) {
+  const renderFooter = () => {
+    if (status === 'loading') {
+      return <ActivityIndicator size="large" color="gold" />;
+    }
     return null;
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -49,23 +39,15 @@ const Brokers = () => {
         <Text style={styles.headerText}>Brokers</Text>
       </View>
       <View style={styles.mainView}>
-        <ScrollView
+        <FlatList
           showsVerticalScrollIndicator={false}
-          style={styles.scrollView}
-        >
-          {brokers.length > 0 ? (
-            brokers.map(broker => (
-              <BrokersCard
-                key={broker.broker_id}
-                broker={broker}
-              />
-            ))
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No Brokers Available</Text>
-            </View>
-          )}
-        </ScrollView>
+          data={brokers}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.broker_id.toString()}
+          onEndReached={loadMoreBrokers}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={renderFooter}
+        />
       </View>
     </View>
   );
